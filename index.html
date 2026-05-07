@@ -681,8 +681,9 @@ function renderSchedule() {
           + '<div><label class="lbl">장소</label><input id="el-' + ek + '" value="' + (act.location || '') + '" placeholder="한라산 국립공원" autocomplete="off"></div>'
           + '<div><label class="lbl">메모</label><input id="em-' + ek + '" value="' + (act.note || '') + '" placeholder="준비물, 예약번호..." autocomplete="off"></div>'
           + '<div style="display:flex;gap:8px;justify-content:flex-end">'
-          + '<button class="bg" onclick="cancelEditAct(\'' + ek + '\')">취소</button>'
-          + '<button class="bp" style="width:auto;padding:12px 20px" onclick="saveEditAct(\'' + day.id + '\',\'' + act.id + '\',\'' + ek + '\')">저장</button>'
+              + '<button class="bd" onclick="removeAct(\'' + day.id + '\',\'' + act.id + '\')" style="margin-right:auto"><i class="ti ti-trash"></i> 삭제</button>'
+              + '<button class="bg" onclick="cancelEditAct(\'' + ek + '\')" style="">취소</button>'
+              + '<button class="bp" style="width:auto;padding:12px 20px" onclick="saveEditAct(\'' + day.id + '\',\'' + act.id + '\',\'' + ek + '\')" style="">저장</button>'
           + '</div></div></div>';
       } else {
         h += '<div class="act-row" data-act-id="' + act.id + '">'
@@ -694,7 +695,6 @@ function renderSchedule() {
           + (act.note ? '<p style="font-size:12px;color:var(--muted);margin-top:2px">' + act.note + '</p>' : '')
           + '</div>'
           + '<button class="bt" onclick="startEditAct(\'' + ek + '\')" style="color:var(--muted);padding:4px 6px"><i class="ti ti-pencil" style="font-size:15px"></i></button>'
-          + '<button class="bd" onclick="removeAct(\'' + day.id + '\',\'' + act.id + '\')"><i class="ti ti-x"></i></button>'
           + '</div>';
       }
     });
