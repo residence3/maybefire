@@ -215,6 +215,24 @@ function fbKey(k) { return k.replace(/:/g, '_'); }
 function lsGet(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } }
 function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 
+// Firebase는 배열을 객체로 저장 → 다시 배열로 복원
+function fixArrays(obj) {
+  if (obj === null || obj === undefined) return obj;
+  if (Array.isArray(obj)) return obj.map(fixArrays);
+  if (typeof obj !== 'object') return obj;
+  // 숫자 키만 있으면 배열로 변환
+  const keys = Object.keys(obj);
+  const isArr = keys.length > 0 && keys.every(k => /^\d+$/.test(k));
+  if (isArr) {
+    const arr = [];
+    keys.forEach(k => arr[parseInt(k)] = fixArrays(obj[k]));
+    return arr;
+  }
+  const result = {};
+  keys.forEach(k => result[k] = fixArrays(obj[k]));
+  return result;
+}
+
 async function dbGetFresh(k) {
   MEM.delete(k);
   return dbGet(k);
@@ -225,8 +243,9 @@ async function dbGet(k) {
   const ls = lsGet(k); if (ls !== null) { MEM.set(k, JSON.stringify(ls)); return ls; }
   try {
     const r = await fetch(FB + '/' + fbKey(k) + '.json');
-    const val = await r.json();
-    if (val !== null && val !== undefined) {
+    const raw = await r.json();
+    if (raw !== null && raw !== undefined) {
+      const val = fixArrays(raw);
       MEM.set(k, JSON.stringify(val));
       lsSet(k, val);
       return val;
@@ -1120,7 +1139,8 @@ function startSync(code) {
     if (openDayForm || openActForms.size > 0 || EF.open) return;
     try {
       const r = await fetch(FB + '/trip_' + code + '.json');
-      const t = await r.json();
+      const raw = await r.json();
+      const t = fixArrays(raw);
       if (t && JSON.stringify(t) !== JSON.stringify(S.trip)) {
         S.trip = t;
         MEM.set('trip:' + code, JSON.stringify(t));
