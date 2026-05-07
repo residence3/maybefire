@@ -236,32 +236,37 @@ function fixArrays(obj) {
   return result;
 }
 
+async function getToken() {
+  try { if (auth.currentUser) return await auth.currentUser.getIdToken(); } catch(e) {}
+  return null;
+}
+
 async function dbGet(k) {
   try {
-    const r = await fetch(FB + '/' + fbKey(k) + '.json');
-    const raw = await r.json();
+    var token = await getToken();
+    var url = FB + '/' + fbKey(k) + '.json' + (token ? '?auth=' + token : '');
+    var r = await fetch(url);
+    if (!r.ok) { console.warn('dbGet failed', r.status, k); return null; }
+    var raw = await r.json();
     return raw !== null ? fixArrays(raw) : null;
-  } catch(e) { return null; }
+  } catch(e) { console.warn('dbGet error', e); return null; }
 }
 
 async function dbSet(k, v) {
   try {
-    await fetch(FB + '/' + fbKey(k) + '.json', {
-      method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(v)
-    });
+    var token = await getToken();
+    var url = FB + '/' + fbKey(k) + '.json' + (token ? '?auth=' + token : '');
+    var r = await fetch(url, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(v) });
+    if (!r.ok) console.warn('dbSet failed', r.status, k);
   } catch(e) { showToast('저장 실패. 인터넷 연결을 확인해주세요 📶'); }
 }
 
 async function dbPatch(k, v) {
   try {
-    await fetch(FB + '/' + fbKey(k) + '.json', {
-      method: 'PATCH',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(v)
-    });
-  } catch(e) {}
+    var token = await getToken();
+    var url = FB + '/' + fbKey(k) + '.json' + (token ? '?auth=' + token : '');
+    await fetch(url, { method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(v) });
+  } catch(e) { console.warn('dbPatch error', e); }
 }
 
 // ── 상태 ──
@@ -431,7 +436,8 @@ async function enterTrip(code) {
       go('nick');
     }
   } catch(e) {
-    showToast('오류가 발생했어요: ' + (e.message || e));
+    showToast('입장 실패: ' + (e.message || String(e)));
+    console.error('enterTrip error', e);
   }
 }
 
