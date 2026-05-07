@@ -621,7 +621,7 @@ function renderTrip() {
 }
 function renderTabSafe(n) {
   if (n === 'schedule') renderSchedule();
-  else if (n === 'expenses') renderExpenses();
+  else if (n === 'expenses') { if (!EF.open) renderExpenses(); } // 폼 열려있으면 스킵
   else if (n === 'settle') renderSettle();
   else if (n === 'settings') renderSettings();
 }
@@ -638,11 +638,15 @@ function startSync(code) {
   stopSync();
   syncTimer = setInterval(async function() {
     if (!code) return;
+    // 어떤 폼이든 열려있거나 입력 중이면 완전 스킵
+    if (EF.open || openDayForm || openActForms.size > 0) return;
     var f = document.activeElement;
     if (f && (f.tagName === 'INPUT' || f.tagName === 'TEXTAREA')) return;
-    if (openDayForm || openActForms.size > 0 || EF.open) return;
     var t = await dbGet('trip:' + code);
-    if (t && JSON.stringify(t) !== JSON.stringify(S.trip)) { S.trip = normalizeTripData(t); renderTrip(); }
+    if (t && JSON.stringify(t) !== JSON.stringify(S.trip)) {
+      S.trip = normalizeTripData(t);
+      renderTrip();
+    }
   }, 5000);
 }
 function stopSync() { if (syncTimer) { clearInterval(syncTimer); syncTimer = null; } }
@@ -822,8 +826,11 @@ var CURRENCIES = [
 ];
 
 function renderExpenses() {
-  var f = document.activeElement;
-  if (EF.open && f && (f.tagName === 'INPUT' || f.tagName === 'TEXTAREA')) return;
+  // 폼 열려있고 포커스 있으면 스킵 (타이핑 중 사라지는 버그 방지)
+  if (EF.open) {
+    var f = document.activeElement;
+    if (f && (f.tagName === 'INPUT' || f.tagName === 'TEXTAREA')) return;
+  }
   var el = document.getElementById('tab-expenses');
   var exps = (S.trip && S.trip.expenses) ? S.trip.expenses : [];
   var nicks = getNicks();
@@ -1120,6 +1127,12 @@ function calcSettle(exps, nicks) {
 
 function renderSettle() {
   var el = document.getElementById('tab-settle');
+  if (!el) return;
+  if (!S.trip) {
+    el.innerHTML = '<div class="card"><div class="empty"><i class="ti ti-alert-circle"></i><p>여행 데이터를 불러오는 중이에요</p></div></div>';
+    return;
+  }
+  try {
   var nicks = getNicks();
   var exps = (S.trip && S.trip.expenses) ? S.trip.expenses : [];
   var checked = (S.trip && S.trip.settleChecked) ? S.trip.settleChecked : {};
@@ -1189,6 +1202,10 @@ function renderSettle() {
   });
 
   el.innerHTML = h;
+  } catch(err) {
+    el.innerHTML = '<div class="card"><div class="empty"><i class="ti ti-alert-circle" style="color:var(--no)"></i><p style="color:var(--no)">오류: ' + err.message + '</p></div></div>';
+    console.error('renderSettle error:', err);
+  }
 }
 
 async function toggleSettle(key) {
