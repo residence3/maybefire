@@ -1099,20 +1099,57 @@ function renderSettle() {
 // ══════════════════════════════
 // 설정 탭
 // ══════════════════════════════
+var editingName = false;
+var editingDate = false;
+
 function renderSettings() {
   var el = document.getElementById('tab-settings');
   if (!el) return;
   var members = getMembers();
   var isCreator = S.trip && S.trip.createdBy && S.user && S.trip.createdBy === S.user.uid;
+  var creatorUid = S.trip && S.trip.createdBy;
   var h = '';
 
-  if (isCreator) {
-    h += '<div class="card" style="margin-bottom:16px">'
-      + '<p style="font-size:15px;font-weight:900;margin-bottom:14px"><i class="ti ti-crown" style="color:var(--A);margin-right:6px"></i>여행 설정</p>'
-      + '<div class="col">'
-      + '<div><label class="lbl">여행 이름</label>'
-      + '<input id="set-name" value="' + (S.trip.name || '') + '" maxlength="10" autocomplete="off" placeholder="여행 이름"></div>'
-      + '<div><label class="lbl">여행 날짜</label>'
+  // 멤버 목록
+  h += '<h3 style="font-size:17px;font-weight:900;margin-bottom:14px">멤버 ' + members.length + '명</h3>';
+  members.forEach(function(m) {
+    var nick = typeof m === 'object' ? m.nickname : m;
+    var mUid = typeof m === 'object' ? m.uid : null;
+    var isHost = creatorUid && mUid && mUid === creatorUid;
+    h += '<div class="card" style="display:flex;align-items:center;gap:12px">'
+      + '<div class="av">' + nick[0].toUpperCase() + '</div>'
+      + '<div style="flex:1;min-width:0"><p style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:6px">'
+      + nick
+      + (nick === S.me ? ' <span style="font-size:12px;color:var(--A);font-weight:700">나</span>' : '')
+      + (isHost ? ' <span title="방장" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#1DA1F2;border-radius:50%;flex-shrink:0"><i class="ti ti-check" style="font-size:10px;color:#fff;font-weight:900"></i></span>' : '')
+      + '</p></div></div>';
+  });
+
+  // 방 정보
+  h += '<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">방 정보</h3>';
+  h += '<div class="card">';
+
+  // 여행 이름
+  if (editingName) {
+    h += '<div class="col" style="margin-bottom:14px">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between"><label class="lbl" style="margin:0">여행 이름</label>'
+      + '<button class="bt" style="font-size:12px;color:var(--no)" onclick="editingName=false;renderSettings()">취소</button></div>'
+      + '<input id="set-name" value="' + (S.trip.name || '') + '" maxlength="10" autocomplete="off" placeholder="여행 이름">'
+      + '<button class="bp" style="padding:10px" onclick="saveName()">저장</button>'
+      + '</div>';
+  } else {
+    h += '<div class="bw" style="padding:4px 0;margin-bottom:12px">'
+      + '<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 이름</p>'
+      + '<p style="font-size:16px;font-weight:900">' + (S.trip.name || '') + '</p></div>'
+      + (isCreator ? '<button class="bt" onclick="editingName=true;renderSettings()"><i class="ti ti-pencil" style="font-size:16px"></i></button>' : '')
+      + '</div>';
+  }
+
+  // 여행 날짜
+  if (editingDate) {
+    h += '<div class="col" style="padding-top:12px;border-top:1px solid var(--border)">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between"><label class="lbl" style="margin:0">여행 날짜</label>'
+      + '<button class="bt" style="font-size:12px;color:var(--no)" onclick="editingDate=false;renderSettings()">취소</button></div>'
       + '<div class="date-range"><div class="date-range-row">'
       + '<div><div style="font-size:11px;font-weight:700;color:var(--muted);padding:8px 12px 0">시작일</div>'
       + '<input id="set-start" type="date" value="' + (S.trip.startDate || '') + '" onchange="updateSettingNights()"></div>'
@@ -1120,28 +1157,100 @@ function renderSettings() {
       + '<div><div style="font-size:11px;font-weight:700;color:var(--muted);padding:8px 12px 0">종료일</div>'
       + '<input id="set-end" type="date" value="' + (S.trip.endDate || '') + '" onchange="updateSettingNights()"></div>'
       + '</div></div>'
-      + '<p id="set-nights" style="font-size:13px;color:var(--A);text-align:right;margin-top:6px"></p>'
-      + '<button class="bp" onclick="saveSettings()">저장하기</button>'
-      + '</div></div>';
+      + '<p id="set-nights" style="font-size:13px;color:var(--A);text-align:right"></p>'
+      + '<button class="bp" style="padding:10px" onclick="saveDate()">저장</button>'
+      + '</div>';
+  } else {
+    var d = S.trip.startDate ? (S.trip.endDate ? S.trip.startDate + ' ~ ' + S.trip.endDate : S.trip.startDate) : '날짜 미정';
+    h += '<div class="bw" style="padding-top:12px;border-top:1px solid var(--border)">'
+      + '<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 날짜</p>'
+      + '<p style="font-size:15px;font-weight:700">' + d + '</p></div>'
+      + (isCreator ? '<button class="bt" onclick="editingDate=true;renderSettings()"><i class="ti ti-pencil" style="font-size:16px"></i></button>' : '')
+      + '</div>';
+  }
+  h += '</div>';
+
+  // 위험 구역 (방장만)
+  if (isCreator) {
+    h += '<div class="card" style="border-color:var(--no);margin-top:10px">'
+      + '<p style="font-size:15px;font-weight:900;margin-bottom:8px;color:var(--no)"><i class="ti ti-alert-triangle" style="margin-right:6px"></i>위험 구역</p>'
+      + '<p style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6">여행을 삭제하면 모든 일정, 비용 데이터가 영구적으로 사라져요.</p>'
+      + '<button onclick="deleteTrip()" style="width:100%;padding:13px;background:transparent;border:1.5px solid var(--no);border-radius:var(--r);color:var(--no);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="ti ti-trash"></i>여행 삭제하기</button>'
+      + '</div>';
   }
 
-  h += '<h3 style="font-size:17px;font-weight:900;margin-bottom:14px">멤버 ' + members.length + '명</h3>';
-  members.forEach(function(m) {
-    var nick = typeof m === 'object' ? m.nickname : m;
-    h += '<div class="card" style="display:flex;align-items:center;gap:12px">'
-      + '<div class="av">' + nick[0].toUpperCase() + '</div>'
-      + '<div style="flex:1;min-width:0"><p style="font-weight:700;font-size:15px">' + nick
-      + (nick === S.me ? ' <span style="font-size:12px;color:var(--A);font-weight:700">나</span>' : '')
-      + '</p></div></div>';
-  });
   h += '<div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border)">'
     + '<button class="bg" style="width:100%" onclick="goHome()"><i class="ti ti-home"></i>홈으로 돌아가기</button>'
     + '</div>';
+
   el.innerHTML = h;
   updateSettingNights();
 }
 
+function updateSettingNights() {
+  var s = (document.getElementById('set-start') || {}).value;
+  var e = (document.getElementById('set-end') || {}).value;
+  var badge = document.getElementById('set-nights');
+  if (!badge) return;
+  if (s && e && new Date(e) >= new Date(s)) {
+    var nights = Math.round((new Date(e) - new Date(s)) / 86400000);
+    badge.textContent = nights === 0 ? '당일치기' : (nights + '박 ' + (nights+1) + '일');
+  } else { badge.textContent = ''; }
+}
+
+async function saveName() {
+  var name = (document.getElementById('set-name') || {}).value;
+  if (name) name = name.trim();
+  if (!name) return showToast('여행 이름을 입력해주세요');
+  S.trip.name = name;
+  await dbSet('trip:' + S.code, S.trip);
+  editingName = false;
+  renderTrip();
+  showToast('저장됐어요 ✅');
+}
+
+async function saveDate() {
+  var startDate = (document.getElementById('set-start') || {}).value;
+  var endDate = (document.getElementById('set-end') || {}).value;
+  if (!startDate || !endDate) return showToast('날짜를 선택해주세요');
+  if (new Date(endDate) < new Date(startDate)) return showToast('종료일이 시작일보다 빨라요');
+  S.trip.startDate = startDate;
+  S.trip.endDate = endDate;
+  await dbSet('trip:' + S.code, S.trip);
+  editingDate = false;
+  renderTrip();
+  showToast('저장됐어요 ✅');
+}
+
+// saveSettings는 하위 호환용으로 유지
+async function saveSettings() { await saveName(); await saveDate(); }
 function goHome() { go("home"); }
+
+async function deleteTrip() {
+  if (!confirm('정말로 이 여행을 삭제할까요? 모든 데이터가 사라져요.')) return;
+  try {
+    var code = S.code;
+    var uid = S.user.uid;
+    // Firebase에서 여행 데이터 삭제
+    await fetch(FB + '/trip_' + code + '.json?auth=' + (await getToken()), { method: 'DELETE' });
+    // 모든 멤버의 user-trips에서 제거 (내 것만 확실히 삭제)
+    var members = getMembers();
+    for (var i = 0; i < members.length; i++) {
+      var m = members[i];
+      var mUid = typeof m === 'object' ? m.uid : null;
+      if (mUid) {
+        var token = await getToken();
+        await fetch(FB + '/user-trips_' + mUid + '/' + code + '.json?auth=' + token, { method: 'DELETE' });
+      }
+    }
+    stopSync();
+    S.trip = null; S.code = ''; S.me = '';
+    showToast('여행이 삭제됐어요');
+    go('home');
+  } catch(e) {
+    showToast('삭제 실패: ' + (e.message || e));
+  }
+}
 
 function updateSettingNights() {
   var s = (document.getElementById('set-start') || {}).value;
