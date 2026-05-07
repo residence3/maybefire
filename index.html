@@ -280,6 +280,17 @@ var EF = { open: false, title: '', amount: '', paidBy: '', split: [], cat: '식�
 var rateCache = {};
 var syncTimer = null;
 
+function normalizeTripData(t) {
+  if (!t) return t;
+  t.members = t.members || [];
+  t.itinerary = t.itinerary || [];
+  t.expenses = t.expenses || [];
+  t.itinerary.forEach(function(day) {
+    day.activities = day.activities || [];
+  });
+  return t;
+}
+
 function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 4); }
 function mkCode() { return Math.random().toString(36).substr(2, 6).toUpperCase(); }
 function fmt(n) { return Math.round(n).toLocaleString('ko-KR'); }
@@ -426,7 +437,7 @@ async function enterTrip(code) {
     if (myInfo && myInfo.nickname) {
       var t = await dbGet('trip:' + code);
       if (!t) { showToast('여행 데이터를 불러오지 못했어요. 잠시 후 다시 시도해주세요.'); return; }
-      S.trip = t; S.code = code; S.me = myInfo.nickname;
+      S.trip = normalizeTripData(t); S.code = code; S.me = myInfo.nickname;
       renderTrip(); go('trip'); startSync(code);
     } else {
       S.pendingCode = code;
@@ -502,7 +513,7 @@ async function doCreate() {
   await dbPatch('user-trips:' + S.user.uid, patch);
   if (btn) { btn.disabled = false; btn.innerHTML = '여행 만들기 <i class="ti ti-arrow-right"></i>'; }
   showErr('err-create', '');
-  S.trip = t; S.code = c; S.me = nick;
+  S.trip = normalizeTripData(t); S.code = c; S.me = nick;
   renderTrip(); go('trip'); startSync(c);
 }
 
@@ -553,7 +564,7 @@ async function doSetNick() {
     await dbSet('trip:' + S.pendingCode, t);
     var patch = {}; patch[S.pendingCode] = { nickname: nick, joinedAt: Date.now() };
     await dbPatch('user-trips:' + S.user.uid, patch);
-    S.trip = t; S.code = S.pendingCode; S.me = nick;
+    S.trip = normalizeTripData(t); S.code = S.pendingCode; S.me = nick;
     renderTrip(); go('trip'); startSync(S.code);
   } catch(e) {
     showErr('err-nick', e.message || '오류가 발생했어요');
@@ -624,7 +635,7 @@ function startSync(code) {
     if (f && (f.tagName === 'INPUT' || f.tagName === 'TEXTAREA')) return;
     if (openDayForm || openActForms.size > 0 || EF.open) return;
     var t = await dbGet('trip:' + code);
-    if (t && JSON.stringify(t) !== JSON.stringify(S.trip)) { S.trip = t; renderTrip(); }
+    if (t && JSON.stringify(t) !== JSON.stringify(S.trip)) { S.trip = normalizeTripData(t); renderTrip(); }
   }, 5000);
 }
 function stopSync() { if (syncTimer) { clearInterval(syncTimer); syncTimer = null; } }
@@ -657,8 +668,9 @@ function renderSchedule() {
       + '<button class="bt" onclick="toggleAF(\'' + day.id + '\')"><i class="ti ti-plus"></i> 일정</button>'
       + (day.auto ? '' : '<button class="bd" onclick="removeDay(\'' + day.id + '\')"><i class="ti ti-trash"></i></button>')
       + '</div></div>';
-    if (!day.activities.length && !actOpen) h += '<p style="font-size:13px;color:var(--muted);text-align:center;padding:10px 0">아직 일정이 없어요</p>';
-    day.activities.forEach(function(act) {
+    var dayActs = day.activities || [];
+    if (!dayActs.length && !actOpen) h += '<p style="font-size:13px;color:var(--muted);text-align:center;padding:10px 0">아직 일정이 없어요</p>';
+    dayActs.forEach(function(act) {
       var ek = day.id + '_' + act.id;
       if (editActState[ek]) {
         h += '<div style="padding:12px 0;border-top:1px solid var(--border)">'
