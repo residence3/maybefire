@@ -598,7 +598,11 @@ function toggleCode() {
 
 // ── 멤버 헬퍼 ──
 function getMembers() { return (S.trip && S.trip.members) ? S.trip.members : []; }
-function getNicks() { return getMembers().map(function(m) { return typeof m === 'object' ? m.nickname : m; }); }
+function getNicks() {
+  var seen = {};
+  return getMembers().map(function(m) { return typeof m === 'object' ? m.nickname : m; })
+    .filter(function(n) { if (!n || seen[n]) return false; seen[n] = true; return true; });
+}
 function getMemberName(nick) {
   var m = getMembers().find(function(m) { return (typeof m === 'object' ? m.nickname : m) === nick; });
   if (!m) return nick;
@@ -844,7 +848,7 @@ function renderExpenses() {
 
     if (nicks.length) {
       h += '<div><label class="lbl">결제자</label><div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:7px" id="paidby-chips"></div></div>';
-      h += '<div><label class="lbl">분담 멤버 <span style="font-weight:400;font-size:12px;color:var(--muted)">(탭하면 제외)</span></label><div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:7px" id="split-chips"></div>'
+      h += '<div><label class="lbl">분담 멤버</label><div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:7px" id="split-chips"></div>'
         + (per ? '<p style="font-size:13px;color:var(--A);font-weight:700;margin-top:7px">' + EF.split.length + '명 · 1인당 ' + per + '원</p>' : '')
         + '</div>';
     }
@@ -956,7 +960,7 @@ function startEditExp(id) {
   var nicks = getNicks();
   EF.open = true;
   EF.title = exp.title;
-  EF.amount = String(exp.origAmount || exp.amount);
+  EF.amount = String(exp.origAmount || exp.amount); // 숫자만 저장
   EF.paidBy = exp.paidBy;
   EF.split = (exp.split || []).slice();
   EF.cat = exp.cat || '식비';
@@ -1004,7 +1008,8 @@ function openEF() {
   var nicks = getNicks();
   EF.open = true; EF.title = ''; EF.amount = '';
   EF.paidBy = S.me || (nicks[0] || '');
-  EF.split = nicks.slice(); EF.cat = '식비'; EF.dayId = ''; EF.currency = 'KRW';
+  EF.split = nicks.slice(); // 전체 선택
+  EF.cat = '식비'; EF.dayId = ''; EF.currency = 'KRW';
   renderExpenses();
 }
 function toggleSplit(n) {
@@ -1081,14 +1086,50 @@ function pickCustomCurrency() {
 // ══════════════════════════════
 // 정산 탭
 // ══════════════════════════════
+function calcSettle(exps, nicks) {
+  var bal = {};
+  nicks.forEach(function(n) { bal[n] = 0; });
+  exps.forEach(function(e) {
+    var splitList = (e.split && e.split.length) ? e.split : nicks;
+    // split에 없는 닉네임 필터링 (멤버가 빠진 경우 대비)
+    var validSplit = splitList.filter(function(n) { return n in bal; });
+    if (!validSplit.length) validSplit = nicks;
+    var sh = e.amount / validSplit.length;
+    validSplit.forEach(function(n) { bal[n] -= sh; });
+    if (e.paidBy in bal) bal[e.paidBy] += e.amount;
+  });
+  var pos = [], neg = [];
+  Object.keys(bal).forEach(function(n) {
+    if (bal[n] > 0.5) pos.push([n, bal[n]]);
+    else if (bal[n] < -0.5) neg.push([n, -bal[n]]);
+  });
+  pos.sort(function(a,b) { return b[1]-a[1]; });
+  neg.sort(function(a,b) { return b[1]-a[1]; });
+  var out = [];
+  while (pos.length && neg.length) {
+    var cn = pos[0][0], ca = pos[0][1];
+    var dn = neg[0][0], da = neg[0][1];
+    var a = Math.min(ca, da);
+    out.push({ from: dn, to: cn, amount: Math.round(a) });
+    pos[0][1] -= a; neg[0][1] -= a;
+    if (pos[0][1] < 0.5) pos.shift();
+    if (neg[0][1] < 0.5) neg.shift();
+  }
+  return out;
+}
+
 function renderSettle() {
   var el = document.getElementById('tab-settle');
   var nicks = getNicks();
   var exps = (S.trip && S.trip.expenses) ? S.trip.expenses : [];
   var checked = (S.trip && S.trip.settleChecked) ? S.trip.settleChecked : {};
 
-  if (nicks.length < 2 || !exps.length) {
-    el.innerHTML = '<div class="card"><div class="empty"><i class="ti ti-receipt-off"></i><p>' + (!exps.length ? '지출 내역을 먼저 추가해주세요' : '멤버가 2명 이상이어야 정산할 수 있어요') + '</p></div></div>';
+  if (!exps.length) {
+    el.innerHTML = '<div class="card"><div class="empty"><i class="ti ti-receipt-off"></i><p>지출 내역을 먼저 추가해주세요</p></div></div>';
+    return;
+  }
+  if (nicks.length < 2) {
+    el.innerHTML = '<div class="card"><div class="empty"><i class="ti ti-users"></i><p>멤버가 2명 이상이어야 정산할 수 있어요<br><span style="font-size:12px;color:var(--muted)">현재 ' + nicks.length + '명: ' + nicks.join(', ') + '</span></p></div></div>';
     return;
   }
 
@@ -1121,7 +1162,7 @@ function renderSettle() {
     txns.forEach(function(tx) {
       var key = tx.from + '_' + tx.to + '_' + tx.amount;
       var isDone = !!checked[key];
-      h += '<div class="card" data-skey="' + key + '" style="' + (isDone ? 'opacity:.6;' : '') + 'cursor:pointer" onclick="toggleSettle(this.dataset.skey)">' + '\n';
+      h += '<div class="card" data-skey="' + key + '" style="' + (isDone ? 'opacity:.6;' : '') + 'cursor:pointer" onclick="toggleSettle(this.dataset.skey)">'
         + '<div style="display:flex;align-items:center;gap:12px">'
         + '<div style="width:26px;height:26px;border-radius:50%;border:2px solid ' + (isDone ? 'var(--ok)' : 'var(--border)') + ';background:' + (isDone ? 'var(--ok)' : 'transparent') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s">'
         + (isDone ? '<i class="ti ti-check" style="color:#fff;font-size:13px"></i>' : '')
@@ -1307,6 +1348,9 @@ async function deleteTrip() {
         await fetch(FB + '/user-trips_' + mUid + '/' + code + '.json?auth=' + token, { method: 'DELETE' });
       }
     }
+    // 내 user-trips에서도 제거
+    var myToken = await getToken();
+    await fetch(FB + '/user-trips_' + uid + '/' + code + '.json?auth=' + myToken, { method: 'DELETE' });
     stopSync();
     S.trip = null; S.code = ''; S.me = '';
     showToast('여행이 삭제됐어요');
