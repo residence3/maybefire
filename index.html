@@ -192,13 +192,13 @@ input[type=password]{letter-spacing:.1em}
     <button class="tab on" data-tab="schedule" onclick="switchTab('schedule')"><i class="ti ti-calendar" style="font-size:14px"></i>일정</button>
     <button class="tab" data-tab="expenses" onclick="switchTab('expenses')"><i class="ti ti-credit-card" style="font-size:14px"></i>비용</button>
     <button class="tab" data-tab="settle" onclick="switchTab('settle')"><i class="ti ti-receipt" style="font-size:14px"></i>정산</button>
-    <button class="tab" data-tab="members" onclick="switchTab('members')"><i class="ti ti-users" style="font-size:14px"></i>멤버</button>
+    <button class="tab" data-tab="settings" onclick="switchTab('settings')"><i class="ti ti-settings" style="font-size:14px"></i>설정</button>
   </div>
   <div class="content">
     <div id="tab-schedule"></div>
     <div id="tab-expenses" style="display:none"></div>
     <div id="tab-settle" style="display:none"></div>
-    <div id="tab-members" style="display:none"></div>
+    <div id="tab-settings" style="display:none"></div>
   </div>
 </div>
 
@@ -616,11 +616,11 @@ function renderTabSafe(n) {
   if (n === 'schedule') renderSchedule();
   else if (n === 'expenses') renderExpenses();
   else if (n === 'settle') renderSettle();
-  else if (n === 'members') renderMembers();
+  else if (n === 'settings') renderSettings();
 }
 function switchTab(n) {
   document.querySelectorAll('.tab').forEach(function(b) { b.classList.toggle('on', b.dataset.tab === n); });
-  ['schedule','expenses','settle','members'].forEach(function(t) {
+  ['schedule','expenses','settle','settings'].forEach(function(t) {
     document.getElementById('tab-' + t).style.display = t === n ? 'block' : 'none';
   });
   renderTabSafe(n);
@@ -1097,23 +1097,78 @@ function renderSettle() {
 }
 
 // ══════════════════════════════
-// 멤버 탭
+// 설정 탭
 // ══════════════════════════════
-function renderMembers() {
-  var el = document.getElementById('tab-members');
+function renderSettings() {
+  var el = document.getElementById('tab-settings');
+  if (!el) return;
   var members = getMembers();
-  var h = '<h3 style="font-size:17px;font-weight:900;margin-bottom:14px">멤버 ' + members.length + '명</h3>';
+  var isCreator = S.trip && S.trip.createdBy && S.user && S.trip.createdBy === S.user.uid;
+  var h = '';
+
+  if (isCreator) {
+    h += '<div class="card" style="margin-bottom:16px">'
+      + '<p style="font-size:15px;font-weight:900;margin-bottom:14px"><i class="ti ti-crown" style="color:var(--A);margin-right:6px"></i>여행 설정</p>'
+      + '<div class="col">'
+      + '<div><label class="lbl">여행 이름</label>'
+      + '<input id="set-name" value="' + (S.trip.name || '') + '" maxlength="10" autocomplete="off" placeholder="여행 이름"></div>'
+      + '<div><label class="lbl">여행 날짜</label>'
+      + '<div class="date-range"><div class="date-range-row">'
+      + '<div><div style="font-size:11px;font-weight:700;color:var(--muted);padding:8px 12px 0">시작일</div>'
+      + '<input id="set-start" type="date" value="' + (S.trip.startDate || '') + '" onchange="updateSettingNights()"></div>'
+      + '<div class="date-range-div"></div>'
+      + '<div><div style="font-size:11px;font-weight:700;color:var(--muted);padding:8px 12px 0">종료일</div>'
+      + '<input id="set-end" type="date" value="' + (S.trip.endDate || '') + '" onchange="updateSettingNights()"></div>'
+      + '</div></div>'
+      + '<p id="set-nights" style="font-size:13px;color:var(--A);text-align:right;margin-top:6px"></p>'
+      + '<button class="bp" onclick="saveSettings()">저장하기</button>'
+      + '</div></div>';
+  }
+
+  h += '<h3 style="font-size:17px;font-weight:900;margin-bottom:14px">멤버 ' + members.length + '명</h3>';
   members.forEach(function(m) {
     var nick = typeof m === 'object' ? m.nickname : m;
     h += '<div class="card" style="display:flex;align-items:center;gap:12px">'
       + '<div class="av">' + nick[0].toUpperCase() + '</div>'
       + '<div style="flex:1;min-width:0"><p style="font-weight:700;font-size:15px">' + nick
-      + (nick === S.me ? ' <span style="font-size:12px;color:var(--A);font-weight:700">나</span>' : '') + '</p></div></div>';
+      + (nick === S.me ? ' <span style="font-size:12px;color:var(--A);font-weight:700">나</span>' : '')
+      + '</p></div></div>';
   });
-  h += '<div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border)"><button class="bg" style="width:100%" onclick="go(\'home\')"><i class="ti ti-home"></i>홈으로 돌아가기</button></div>';
+  h += '<div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border)">'
+    + '<button class="bg" style="width:100%" onclick="goHome()"><i class="ti ti-home"></i>홈으로 돌아가기</button>'
+    + '</div>';
   el.innerHTML = h;
+  updateSettingNights();
 }
 
+function goHome() { go("home"); }
+
+function updateSettingNights() {
+  var s = (document.getElementById('set-start') || {}).value;
+  var e = (document.getElementById('set-end') || {}).value;
+  var badge = document.getElementById('set-nights');
+  if (!badge) return;
+  if (s && e && new Date(e) >= new Date(s)) {
+    var nights = Math.round((new Date(e) - new Date(s)) / 86400000);
+    badge.textContent = nights === 0 ? '당일치기' : (nights + '박 ' + (nights+1) + '일');
+  } else { badge.textContent = ''; }
+}
+
+async function saveSettings() {
+  var name = (document.getElementById('set-name') || {}).value;
+  if (name) name = name.trim();
+  var startDate = (document.getElementById('set-start') || {}).value;
+  var endDate = (document.getElementById('set-end') || {}).value;
+  if (!name) return showToast('여행 이름을 입력해주세요');
+  if (!startDate || !endDate) return showToast('날짜를 선택해주세요');
+  if (new Date(endDate) < new Date(startDate)) return showToast('종료일이 시작일보다 빨라요');
+  S.trip.name = name;
+  S.trip.startDate = startDate;
+  S.trip.endDate = endDate;
+  await dbSet('trip:' + S.code, S.trip);
+  renderTrip();
+  showToast('저장됐어요 ✅');
+}
 // ══════════════════════════════
 // 드래그 앤 드롭
 // ══════════════════════════════
