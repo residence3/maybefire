@@ -461,10 +461,8 @@ function onStartChange() {
   var s = document.getElementById('inp-start').value;
   var endInput = document.getElementById('inp-end');
   if (s) {
-    var next = new Date(s + 'T00:00:00');
-    next.setDate(next.getDate() + 1);
-    endInput.min = next.toISOString().split('T')[0];
-    if (endInput.value && endInput.value <= s) endInput.value = '';
+    endInput.min = s; // 당일치기 허용 (시작일 = 종료일)
+    if (endInput.value && endInput.value < s) endInput.value = '';
     endInput.focus();
   }
   updateNights();
@@ -598,10 +596,14 @@ function toggleCode() {
 }
 
 // ── 멤버 헬퍼 ──
-function getMembers() { return (S.trip && S.trip.members) ? S.trip.members : []; }
+function getMembers() {
+  var m = (S.trip && S.trip.members) ? S.trip.members : [];
+  return Array.isArray(m) ? m : Object.values(m);
+}
 function getNicks() {
   var seen = {};
-  return getMembers().map(function(m) { return typeof m === 'object' ? m.nickname : m; })
+  return getMembers()
+    .map(function(m) { return typeof m === 'object' ? (m.nickname || '') : String(m); })
     .filter(function(n) { if (!n || seen[n]) return false; seen[n] = true; return true; });
 }
 function getMemberName(nick) {
@@ -1087,10 +1089,15 @@ function renderSettle() {
   try {
 
   var members = S.trip.members || [];
+  // Firebase fixArrays로 인해 members가 객체일 수 있음
+  if (!Array.isArray(members)) {
+    members = Object.values(members);
+  }
   var seen = {};
   var nicks = members
-    .map(function(m) { return typeof m === 'object' ? m.nickname : m; })
+    .map(function(m) { return typeof m === 'object' ? (m.nickname || m.name || '') : String(m); })
     .filter(function(n) { if (!n || seen[n]) return false; seen[n] = true; return true; });
+  console.log('[settle] members:', members.length, 'nicks:', nicks);
   var exps = S.trip.expenses || [];
   var checked = S.trip.settleChecked || {};
 
