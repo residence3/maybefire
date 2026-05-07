@@ -287,6 +287,7 @@ function normalizeTripData(t) {
   t.members = t.members || [];
   t.itinerary = t.itinerary || [];
   t.expenses = t.expenses || [];
+  t.settleChecked = t.settleChecked || {};
   t.itinerary.forEach(function(day) {
     day.activities = day.activities || [];
   });
@@ -843,8 +844,8 @@ function renderExpenses() {
 
     if (nicks.length) {
       h += '<div><label class="lbl">결제자</label><div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:7px" id="paidby-chips"></div></div>';
-      h += '<div><label class="lbl">분담 멤버</label><div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:7px" id="split-chips"></div>'
-        + (per ? '<p style="font-size:13px;color:var(--muted);margin-top:7px">1인당 ' + per + '원</p>' : '')
+      h += '<div><label class="lbl">분담 멤버 <span style="font-weight:400;font-size:12px;color:var(--muted)">(탭하면 제외)</span></label><div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:7px" id="split-chips"></div>'
+        + (per ? '<p style="font-size:13px;color:var(--A);font-weight:700;margin-top:7px">' + EF.split.length + '명 · 1인당 ' + per + '원</p>' : '')
         + '</div>';
     }
     h += '<div style="display:flex;gap:8px;justify-content:flex-end">'
@@ -939,9 +940,9 @@ function renderExpenses() {
     if (sc) {
       nicks.forEach(function(n) {
         var b = document.createElement('button');
-        b.className = 'chip' + (EF.split.includes(n) ? ' on' : '');
-        if (EF.split.includes(n)) b.innerHTML = '<i class="ti ti-check" style="font-size:11px"></i>';
-        b.innerHTML += getMemberName(n);
+        var included = EF.split.includes(n);
+        b.className = 'chip' + (included ? ' on' : '');
+        b.innerHTML = (included ? '<i class="ti ti-check" style="font-size:11px"></i>' : '<i class="ti ti-x" style="font-size:11px;opacity:.5"></i>') + getMemberName(n);
         b.onclick = function() { toggleSplit(n); };
         sc.appendChild(b);
       });
@@ -1080,63 +1081,63 @@ function pickCustomCurrency() {
 // ══════════════════════════════
 // 정산 탭
 // ══════════════════════════════
-function calcSettle(exps, nicks) {
-  var bal = {};
-  nicks.forEach(function(n) { bal[n] = 0; });
-  exps.forEach(function(e) {
-    var am = (e.split && e.split.length) ? e.split : nicks;
-    var sh = e.amount / am.length;
-    am.forEach(function(n) { if (n in bal) bal[n] -= sh; });
-    if (e.paidBy in bal) bal[e.paidBy] += e.amount;
-  });
-  var pos = [], neg = [];
-  Object.keys(bal).forEach(function(n) {
-    if (bal[n] > 1) pos.push([n, bal[n]]); else if (bal[n] < -1) neg.push([n, -bal[n]]);
-  });
-  pos.sort(function(a,b) { return b[1]-a[1]; }); neg.sort(function(a,b) { return b[1]-a[1]; });
-  var out = [];
-  while (pos.length && neg.length) {
-    var cn = pos[0][0], ca = pos[0][1], dn = neg[0][0], da = neg[0][1];
-    var a = Math.min(ca, da);
-    out.push({ from: dn, to: cn, amount: Math.round(a) });
-    pos[0][1] -= a; neg[0][1] -= a;
-    if (pos[0][1] < 1) pos.shift(); if (neg[0][1] < 1) neg.shift();
-  }
-  return out;
-}
-
 function renderSettle() {
   var el = document.getElementById('tab-settle');
   var nicks = getNicks();
   var exps = (S.trip && S.trip.expenses) ? S.trip.expenses : [];
+  var checked = (S.trip && S.trip.settleChecked) ? S.trip.settleChecked : {};
+
   if (nicks.length < 2 || !exps.length) {
     el.innerHTML = '<div class="card"><div class="empty"><i class="ti ti-receipt-off"></i><p>' + (!exps.length ? '지출 내역을 먼저 추가해주세요' : '멤버가 2명 이상이어야 정산할 수 있어요') + '</p></div></div>';
     return;
   }
+
   var total = exps.reduce(function(s,e) { return s+e.amount; }, 0);
   var txns = calcSettle(exps, nicks);
   var paid = {};
   nicks.forEach(function(n) { paid[n] = 0; });
   exps.forEach(function(e) { paid[e.paidBy] = (paid[e.paidBy] || 0) + e.amount; });
+
   var h = '<h3 style="font-size:17px;font-weight:900;margin-bottom:14px">정산 결과</h3>'
     + '<div class="stat-grid">'
     + '<div class="stat-card"><div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px">총 지출</div><div style="font-size:15px;font-weight:900;color:var(--A)">' + fmt(total) + '원</div></div>'
     + '<div class="stat-card"><div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px">인원</div><div style="font-size:15px;font-weight:900;color:var(--A)">' + nicks.length + '명</div></div>'
     + '<div class="stat-card"><div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px">1인당</div><div style="font-size:15px;font-weight:900;color:var(--A)">' + fmt(total / nicks.length) + '원</div></div>'
     + '</div>';
+
   if (!txns.length) {
-    h += '<div class="card" style="text-align:center;padding:2rem"><i class="ti ti-circle-check" style="font-size:40px;color:var(--ok);display:block;margin-bottom:10px"></i><p style="font-size:17px;font-weight:900;color:var(--ok)">정산 완료! 🎉</p></div>';
+    h += '<div class="card" style="text-align:center;padding:2rem"><i class="ti ti-circle-check" style="font-size:40px;color:var(--ok);display:block;margin-bottom:10px"></i>'
+      + '<p style="font-size:17px;font-weight:900;color:var(--ok)">균등 분담 완료! 🎉</p>'
+      + '<p style="font-size:13px;color:var(--muted);margin-top:5px">모두 동일하게 지출했어요</p></div>';
   } else {
-    h += '<p style="font-size:13px;color:var(--muted);margin-bottom:10px">아래와 같이 정산해주세요</p>';
+    var allDone = txns.every(function(tx) {
+      var key = tx.from + '_' + tx.to + '_' + tx.amount;
+      return checked[key];
+    });
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+      + '<p style="font-size:13px;color:var(--muted)">송금 완료되면 체크해주세요</p>'
+      + (allDone ? '<span style="font-size:13px;font-weight:700;color:var(--ok)"><i class="ti ti-circle-check"></i> 전체 완료!</span>' : '')
+      + '</div>';
     txns.forEach(function(tx) {
-      h += '<div class="card"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
-        + '<span style="font-weight:700;font-size:15px">' + getMemberName(tx.from) + '</span>'
+      var key = tx.from + '_' + tx.to + '_' + tx.amount;
+      var isDone = !!checked[key];
+      h += '<div class="card" data-skey="' + key + '" style="' + (isDone ? 'opacity:.6;' : '') + 'cursor:pointer" onclick="toggleSettle(this.dataset.skey)">' + '\n';
+        + '<div style="display:flex;align-items:center;gap:12px">'
+        + '<div style="width:26px;height:26px;border-radius:50%;border:2px solid ' + (isDone ? 'var(--ok)' : 'var(--border)') + ';background:' + (isDone ? 'var(--ok)' : 'transparent') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s">'
+        + (isDone ? '<i class="ti ti-check" style="color:#fff;font-size:13px"></i>' : '')
+        + '</div>'
+        + '<div style="flex:1">'
+        + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+        + '<span style="font-weight:700;font-size:15px' + (isDone ? ';text-decoration:line-through;color:var(--muted)' : '') + '">' + getMemberName(tx.from) + '</span>'
         + '<i class="ti ti-arrow-right" style="color:var(--muted)"></i>'
-        + '<span style="font-weight:700;font-size:15px">' + getMemberName(tx.to) + '</span>'
-        + '<span style="margin-left:auto;font-weight:900;color:var(--A);font-size:16px;white-space:nowrap">' + fmt(tx.amount) + '원</span>'
-        + '</div></div>';
+        + '<span style="font-weight:700;font-size:15px' + (isDone ? ';text-decoration:line-through;color:var(--muted)' : '') + '">' + getMemberName(tx.to) + '</span>'
+        + '<span style="margin-left:auto;font-weight:900;color:' + (isDone ? 'var(--muted)' : 'var(--A)') + ';font-size:16px;white-space:nowrap">' + fmt(tx.amount) + '원</span>'
+        + '</div>'
+        + (isDone ? '<p style="font-size:12px;color:var(--ok);margin-top:3px;font-weight:700">송금 완료 ✓</p>' : '<p style="font-size:12px;color:var(--muted);margin-top:3px">탭하면 완료 처리</p>')
+        + '</div></div></div>';
     });
   }
+
   h += '<h3 style="font-size:16px;font-weight:900;margin:1.5rem 0 12px">멤버별 현황</h3>';
   nicks.forEach(function(n) {
     var mp = paid[n] || 0, diff = mp - total / nicks.length;
@@ -1145,9 +1146,20 @@ function renderSettle() {
       + '<p style="font-size:12px;color:' + (diff >= 0 ? 'var(--ok)' : 'var(--no)') + ';margin-top:3px">'
       + (diff >= 0 ? '+' + fmt(diff) + '원 받아야 함' : fmt(diff) + '원 내야 함') + '</p></div></div></div>';
   });
+
   el.innerHTML = h;
 }
 
+async function toggleSettle(key) {
+  if (!S.trip.settleChecked) S.trip.settleChecked = {};
+  if (S.trip.settleChecked[key]) {
+    delete S.trip.settleChecked[key];
+  } else {
+    S.trip.settleChecked[key] = true;
+  }
+  await dbSet('trip:' + S.code, S.trip);
+  renderSettle();
+}
 // ══════════════════════════════
 // 설정 탭
 // ══════════════════════════════
