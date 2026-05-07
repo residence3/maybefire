@@ -192,13 +192,11 @@ input[type=password]{letter-spacing:.1em}
   <div class="tabs">
     <button class="tab on" data-tab="schedule" onclick="switchTab('schedule')"><i class="ti ti-calendar" style="font-size:14px"></i>일정</button>
     <button class="tab" data-tab="expenses" onclick="switchTab('expenses')"><i class="ti ti-credit-card" style="font-size:14px"></i>비용</button>
-    <button class="tab" data-tab="settle" onclick="switchTab('settle')"><i class="ti ti-receipt" style="font-size:14px"></i>정산</button>
     <button class="tab" data-tab="settings" onclick="switchTab('settings')"><i class="ti ti-settings" style="font-size:14px"></i>설정</button>
   </div>
   <div class="content">
     <div id="tab-schedule"></div>
     <div id="tab-expenses" style="display:none"></div>
-    <div id="tab-settle" style="display:none"></div>
     <div id="tab-settings" style="display:none"></div>
   </div>
 </div>
@@ -625,18 +623,16 @@ function renderTrip() {
 function renderTabSafe(n) {
   if (n === 'schedule') renderSchedule();
   else if (n === 'expenses') renderExpenses(); // 폼 열려있으면 스킵
-  else if (n === 'settle') renderSettle();
   else if (n === 'settings') renderSettings();
 }
 function switchTab(n) {
   document.querySelectorAll('.tab').forEach(function(b) { b.classList.toggle('on', b.dataset.tab === n); });
-  ['schedule','expenses','settle','settings'].forEach(function(t) {
+  ['schedule','expenses','settings'].forEach(function(t) {
     var tabEl = document.getElementById('tab-' + t);
     if (tabEl) tabEl.style.display = t === n ? 'block' : 'none';
   });
   if (n === 'schedule') renderSchedule();
   else if (n === 'expenses') renderExpenses();
-  else if (n === 'settle') renderSettle();
   else if (n === 'settings') renderSettings();
 }
 
@@ -879,41 +875,50 @@ function renderExpenses() {
       if (!groups[gkey]) { groups[gkey] = []; groupOrder.push(gkey); }
       groups[gkey].push(e);
     });
-    // 그룹 순서: 사전예약 → 일차 순 → 미정
-    groupOrder.sort(function(a,b) {
-      if (a==='pre' && b!=='pre') return -1;
-      if (b==='pre' && a!=='pre') return 1;
-      if (a==='none') return 1;
-      if (b==='none') return -1;
-      var da = (S.trip.itinerary||[]).findIndex(function(d){return d.id===a;});
-      var db = (S.trip.itinerary||[]).findIndex(function(d){return d.id===b;});
-      return da - db;
+    // 그룹 순서: 사전예약 → 일차순 → 미정
+    groupOrder.sort(function(a, b) {
+      if (a === 'pre' && b !== 'pre') return -1;
+      if (b === 'pre' && a !== 'pre') return 1;
+      if (a === 'none') return 1;
+      if (b === 'none') return -1;
+      var ia = (S.trip.itinerary||[]).findIndex(function(d){return d.id===a;});
+      var ib = (S.trip.itinerary||[]).findIndex(function(d){return d.id===b;});
+      return ia - ib;
     });
+    var CI = {식비:'tools-kitchen-2',숙박:'bed',교통:'car',관광:'camera',쇼핑:'shopping-cart',기타:'dots'};
     groupOrder.forEach(function(gkey) {
-      var gexps = groups[gkey];
-      var gtotal = gexps.reduce(function(s,e){return s+e.amount;},0);
-      var glabel = gkey==='pre'?'사전 예약':gkey==='none'?'날짜 미정':((S.trip.itinerary||[]).find(function(d){return d.id===gkey;})||{}).label||gkey;
-      var isOpen = openExpGroups[gkey] !== false; // 기본 열림
-      h += '<div style="margin-bottom:4px">'
-        + '<div data-gkey="'+gkey+'" onclick="toggleExpGroup(this.dataset.gkey)" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--AX);border-radius:var(--r);cursor:pointer;margin-bottom:4px">'
-        + '<div><span style="font-weight:700;font-size:14px;color:var(--A)">'+glabel+'</span><span style="font-size:13px;color:var(--muted);margin-left:10px">'+gexps.length+'건 · '+fmt(gtotal)+'원</span></div>'
-        + '<i class="ti ti-chevron-'+(isOpen?'up':'down')+'" style="color:var(--A);font-size:16px"></i>'
+      var gexps = groups[gkey].slice().reverse(); // 최신순
+      var gtotal = groups[gkey].reduce(function(s,e){return s+e.amount;},0);
+      var glabel = gkey==='pre' ? '사전 예약' : gkey==='none' ? '날짜 미정'
+        : ((S.trip.itinerary||[]).find(function(d){return d.id===gkey;})||{}).label || gkey;
+      var isOpen = openExpGroups[gkey] !== false;
+      // 그룹 헤더
+      h += '<div style="margin-bottom:8px">'
+        + '<div data-gkey="' + gkey + '" onclick="toggleExpGroup(this.dataset.gkey)"'
+        + ' style="display:flex;align-items:center;justify-content:space-between;'
+        + 'padding:11px 14px;background:var(--AX);border:1.5px solid var(--AL);'
+        + 'border-radius:var(--r);cursor:pointer;user-select:none">'
+        + '<div><span style="font-weight:900;font-size:14px;color:var(--A)">' + glabel + '</span>'
+        + '<span style="font-size:12px;color:var(--muted);margin-left:10px">'
+        + groups[gkey].length + '건 · ' + fmt(gtotal) + '원</span></div>'
+        + '<span style="color:var(--A);font-size:18px;line-height:1">' + (isOpen ? '▲' : '▼') + '</span>'
         + '</div>';
       if (isOpen) {
         gexps.forEach(function(exp) {
-          var CI={식비:'tools-kitchen-2',숙박:'bed',교통:'car',관광:'camera',쇼핑:'shopping-cart',기타:'dots'};
-          h += '<div class="card" style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
-            + '<div style="display:flex;gap:12px;align-items:flex-start;flex:1;min-width:0">'
-            + '<i class="ti ti-'+(CI[exp.cat]||'credit-card')+'" style="font-size:22px;color:var(--A);flex-shrink:0;padding-top:2px"></i>'
-            + '<div style="min-width:0"><p style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+exp.title+'</p>'
-            + (exp.origAmount?'<p style="font-size:11px;color:var(--muted);margin-top:2px">'+exp.origAmount.toLocaleString()+' '+exp.origCurrency+' → '+fmt(exp.amount)+'원</p>':'')
-            + '<p style="font-size:12px;color:var(--muted);margin-top:3px">'+getMemberName(exp.paidBy)+' 결제 · '+(exp.split||[]).length+'명 분담</p>'
-            + '<p style="font-size:11px;color:var(--muted);margin-top:2px">1인당 '+fmt(exp.amount/((exp.split||[]).length||1))+'원</p>'
+          h += '<div class="card" style="margin-top:4px;margin-bottom:0">'
+            + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
+            + '<div style="display:flex;gap:10px;align-items:flex-start;flex:1;min-width:0">'
+            + '<i class="ti ti-' + (CI[exp.cat]||'credit-card') + '" style="font-size:20px;color:var(--A);flex-shrink:0;padding-top:3px"></i>'
+            + '<div style="min-width:0">'
+            + '<p style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + exp.title + '</p>'
+            + (exp.origAmount ? '<p style="font-size:11px;color:var(--muted);margin-top:2px">' + exp.origAmount.toLocaleString() + ' ' + exp.origCurrency + ' → ' + fmt(exp.amount) + '원</p>' : '')
+            + '<p style="font-size:12px;color:var(--muted);margin-top:3px">' + (exp.paidBy==='individual'?'개별결제':getMemberName(exp.paidBy)+' 결제') + ' · ' + (exp.split||[]).length + '명 분담</p>'
+            + '<p style="font-size:11px;color:var(--muted);margin-top:2px">1인당 ' + fmt(Math.round(exp.amount / ((exp.split||[]).length||1))) + '원</p>'
             + '</div></div>'
-            + '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">'
-            + '<span style="font-weight:900;font-size:16px;color:var(--A);white-space:nowrap">'+fmt(exp.amount)+'원</span>'
-            + '<button class="bt" data-eid="'+exp.id+'" onclick="startEditExp(this.dataset.eid)" style="color:var(--muted);padding:4px 6px"><i class="ti ti-pencil" style="font-size:15px"></i></button>'
-            + '<button class="bd" data-eid="'+exp.id+'" onclick="removeExp(this.dataset.eid)"><i class="ti ti-x"></i></button>'
+            + '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'
+            + '<span style="font-weight:900;font-size:15px;color:var(--A);white-space:nowrap">' + fmt(exp.amount) + '원</span>'
+            + '<button class="bt" data-eid="' + exp.id + '" onclick="startEditExp(this.dataset.eid)" style="color:var(--muted);padding:4px 5px"><i class="ti ti-pencil" style="font-size:14px"></i></button>'
+            + '<button class="bd" data-eid="' + exp.id + '" onclick="removeExp(this.dataset.eid)" style="padding:4px 5px"><i class="ti ti-x" style="font-size:14px"></i></button>'
             + '</div></div></div>';
         });
       }
@@ -942,7 +947,21 @@ function renderExpenses() {
       ['식비','숙박','교통','관광','쇼핑','기타'].forEach(function(c){ var b=document.createElement('button'); b.className='chip'+(EF.cat===c?' on':''); b.innerHTML='<i class="ti ti-'+CI2[c]+'"></i>'+c; b.onclick=function(){EF.cat=c;renderExpenses();}; catC.appendChild(b); });
     }
     var pc = el.querySelector('#paidby-chips');
-    if (pc) { nicks.forEach(function(n){ var b=document.createElement('button'); b.className='chip'+(EF.paidBy===n?' on':''); b.textContent=getMemberName(n); b.onclick=function(){EF.paidBy=n;renderExpenses();}; pc.appendChild(b); }); }
+    if (pc) {
+      // 개별결제 버튼
+      var indBtn = document.createElement('button');
+      indBtn.className = 'chip' + (EF.paidBy === 'individual' ? ' on' : '');
+      indBtn.innerHTML = '<i class="ti ti-users" style="font-size:12px"></i>개별결제';
+      indBtn.onclick = function() { EF.paidBy = 'individual'; renderExpenses(); };
+      pc.appendChild(indBtn);
+      nicks.forEach(function(n) {
+        var b = document.createElement('button');
+        b.className = 'chip' + (EF.paidBy === n ? ' on' : '');
+        b.textContent = getMemberName(n);
+        b.onclick = function() { EF.paidBy = n; renderExpenses(); };
+        pc.appendChild(b);
+      });
+    }
     var sc = el.querySelector('#split-chips');
     if (sc) {
       nicks.forEach(function(n) {
@@ -1117,6 +1136,10 @@ function renderSettle() {
     var sl = (e.split && e.split.length) ? e.split : nicks;
     var vs = sl.filter(function(n) { return bal.hasOwnProperty(n); });
     if (!vs.length) vs = nicks;
+    if (e.paidBy === 'individual') {
+      // 개별결제: 각자 자기 몫을 냄 → 정산 영향 없음
+      return;
+    }
     var sh = e.amount / vs.length;
     vs.forEach(function(n) { bal[n] -= sh; });
     if (bal.hasOwnProperty(e.paidBy)) bal[e.paidBy] += e.amount;
