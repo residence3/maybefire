@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -956,8 +957,9 @@ function openEF() {
   renderExpenses();
 }
 function toggleSplit(n) {
+  // 콤마 제거하고 숫자만 저장
   var amt = document.getElementById('ef-a');
-  if (amt) EF.amount = amt.value;
+  if (amt) EF.amount = amt.value.replace(/[^0-9]/g, '');
   var idx = EF.split.indexOf(n);
   if (idx >= 0) EF.split.splice(idx, 1); else EF.split.push(n);
   renderExpenses();
@@ -1346,5 +1348,6 @@ function onDragEnd(e) {
   dragState = null; dropTargetId = null;
 }
 </script>
+
 </body>
 </html>
