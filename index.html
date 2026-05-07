@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -621,7 +620,7 @@ function renderTrip() {
 }
 function renderTabSafe(n) {
   if (n === 'schedule') renderSchedule();
-  else if (n === 'expenses') { if (!EF.open) renderExpenses(); } // 폼 열려있으면 스킵
+  else if (n === 'expenses') renderExpenses(); // 폼 열려있으면 스킵
   else if (n === 'settle') renderSettle();
   else if (n === 'settings') renderSettings();
 }
@@ -632,7 +631,7 @@ function switchTab(n) {
     if (tabEl) tabEl.style.display = t === n ? 'block' : 'none';
   });
   if (n === 'schedule') renderSchedule();
-  else if (n === 'expenses') { if (!EF.open) renderExpenses(); }
+  else if (n === 'expenses') renderExpenses();
   else if (n === 'settle') renderSettle();
   else if (n === 'settings') renderSettings();
 }
@@ -1034,7 +1033,7 @@ function toggleSplit(n) {
 function addExp() {
   var tEl = document.getElementById('ef-t');
   var aEl = document.getElementById('ef-a');
-  var title = (tEl && tEl.value.trim()) || EF.title.trim();
+  var title = (tEl && tEl.value.trim()) || (EF.title ? EF.title.trim() : '');
   var rawAmt = EF.amount || (aEl ? aEl.value.replace(/[^0-9]/g, '') : '');
   var a = parseFloat(rawAmt);
   if (!title || isNaN(a) || a <= 0) return;
@@ -1426,32 +1425,9 @@ async function deleteTrip() {
   }
 }
 
-function updateSettingNights() {
-  var s = (document.getElementById('set-start') || {}).value;
-  var e = (document.getElementById('set-end') || {}).value;
-  var badge = document.getElementById('set-nights');
-  if (!badge) return;
-  if (s && e && new Date(e) >= new Date(s)) {
-    var nights = Math.round((new Date(e) - new Date(s)) / 86400000);
-    badge.textContent = nights === 0 ? '당일치기' : (nights + '박 ' + (nights+1) + '일');
-  } else { badge.textContent = ''; }
-}
 
-async function saveSettings() {
-  var name = (document.getElementById('set-name') || {}).value;
-  if (name) name = name.trim();
-  var startDate = (document.getElementById('set-start') || {}).value;
-  var endDate = (document.getElementById('set-end') || {}).value;
-  if (!name) return showToast('여행 이름을 입력해주세요');
-  if (!startDate || !endDate) return showToast('날짜를 선택해주세요');
-  if (new Date(endDate) < new Date(startDate)) return showToast('종료일이 시작일보다 빨라요');
-  S.trip.name = name;
-  S.trip.startDate = startDate;
-  S.trip.endDate = endDate;
-  await dbSet('trip:' + S.code, S.trip);
-  renderTrip();
-  showToast('저장됐어요 ✅');
-}
+
+async 
 // ══════════════════════════════
 // 드래그 앤 드롭
 // ══════════════════════════════
@@ -1520,6 +1496,5 @@ function onDragEnd(e) {
   dragState = null; dropTargetId = null;
 }
 </script>
-
 </body>
 </html>
