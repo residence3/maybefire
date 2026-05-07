@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -836,6 +837,7 @@ function renderExpenses() {
   }
   var el = document.getElementById('tab-expenses');
   if (!el) return;
+  try {
   var exps = (S.trip && S.trip.expenses) ? S.trip.expenses : [];
   var nicks = getNicks();
   var total = exps.reduce(function(s,e){return s+e.amount;},0);
@@ -948,6 +950,10 @@ function renderExpenses() {
         b.onclick=function(){toggleSplit(n);}; sc.appendChild(b);
       });
     }
+  }
+  } catch(err) {
+    el.innerHTML = '<div class="card" style="border-color:var(--no)"><p style="color:var(--no);font-weight:700">비용탭 오류: ' + err.message + '</p></div>';
+    console.error("renderExpenses error:", err);
   }
 }
 
@@ -1073,7 +1079,12 @@ function calcSettle(exps, nicks) {
 
 function renderSettle() {
   var el = document.getElementById('tab-settle');
-  if (!el || !S.trip) return;
+  if (!el) return;
+  if (!S.trip) {
+    el.innerHTML = '<div class="card"><div class="empty"><i class="ti ti-loader"></i><p>데이터 로딩 중...</p></div></div>';
+    return;
+  }
+  try {
 
   var members = S.trip.members || [];
   var seen = {};
@@ -1162,6 +1173,10 @@ function renderSettle() {
   });
 
   el.innerHTML = h;
+  } catch(err) {
+    el.innerHTML = '<div class="card" style="border-color:var(--no)"><p style="color:var(--no);font-weight:700;padding:8px">정산 오류: ' + err.message + '</p></div>';
+    console.error('renderSettle error:', err);
+  }
 }
 
 async function toggleSettle(key) {
@@ -1404,5 +1419,6 @@ function onDragEnd(e) {
   dragState = null; dropTargetId = null;
 }
 </script>
+
 </body>
 </html>
