@@ -890,7 +890,7 @@ function renderSchedule(){
           +'</div></div></div>';
       } else {
         h+='<div class="act-row" data-act-id="'+act.id+'">'
-          +'<button onmousedown="startDrag(\''+day.id+'\',\''+act.id+'\',event)" ontouchstart="startDrag(\''+day.id+'\',\''+act.id+'\',event)" style="background:none;border:none;cursor:grab;padding:4px 2px;color:#ccc;font-size:18px;touch-action:none;flex-shrink:0;align-self:center"><i class="ti ti-grip-vertical"></i></button>'
+          +(act.time?'<span style="width:22px;flex-shrink:0"></span>':'<button onmousedown="startDrag(\''+day.id+'\',\''+act.id+'\',event)" ontouchstart="startDrag(\''+day.id+'\',\''+act.id+'\',event)" style="background:none;border:none;cursor:grab;padding:4px 2px;color:#ccc;font-size:18px;touch-action:none;flex-shrink:0;align-self:center"><i class="ti ti-grip-vertical"></i></button>')
           +'<span style="font-size:11px;color:var(--A);font-weight:700;min-width:42px;padding-top:3px;flex-shrink:0;text-align:center">'+(act.time||'')+'</span>'
           +'<div style="flex:1;min-width:0"><p style="font-size:14px;font-weight:700">'+act.title+'</p>'
           +(act.location?'<p style="font-size:12px;color:var(--muted);margin-top:3px"><i class="ti ti-map-pin" style="font-size:11px;margin-right:2px"></i>'+act.location+'</p>':'')
@@ -937,6 +937,13 @@ function addAct(dayId){
   var day=S.trip.itinerary.find(function(d){return d.id===dayId;});
   if(day) day.activities.push({id:uid(),time:(document.getElementById('at-'+dayId)||{}).value||'',title:title,location:(document.getElementById('al-'+dayId)||{}).value||'',note:(document.getElementById('am-'+dayId)||{}).value||''});
   openActForms.delete(dayId); actMoreFields.delete(dayId+'_loc'); actMoreFields.delete(dayId+'_note');
+  // 시간 있는 것 먼저 시간순, 없는 건 뒤에
+  if(day) day.activities.sort(function(a,b){
+    if(!a.time && !b.time) return 0;
+    if(!a.time) return 1;
+    if(!b.time) return -1;
+    return a.time.localeCompare(b.time);
+  });
   dbSet('trip:'+S.code,S.trip); renderSchedule();
 }
 function removeAct(dayId,actId){var day=S.trip.itinerary.find(function(d){return d.id===dayId;});if(day)day.activities=day.activities.filter(function(a){return a.id!==actId;});dbSet('trip:'+S.code,S.trip);renderSchedule();}
@@ -957,7 +964,16 @@ function saveEditAct(dayId,actId,key){
   var day=S.trip.itinerary.find(function(d){return d.id===dayId;});
   var act=day&&day.activities.find(function(a){return a.id===actId;});
   if(act){act.title=title.trim();act.time=(document.getElementById('et-'+key)||{}).value||'';act.location=(document.getElementById('el-'+key)||{}).value||'';act.note=(document.getElementById('em-'+key)||{}).value||'';}
-  delete editActState[key]; dbSet('trip:'+S.code,S.trip); renderSchedule();
+  delete editActState[key];
+  // 시간 수정 후 재정렬
+  var sortDay = S.trip.itinerary.find(function(d){return d.id===dayId;});
+  if(sortDay) sortDay.activities.sort(function(a,b){
+    if(!a.time && !b.time) return 0;
+    if(!a.time) return 1;
+    if(!b.time) return -1;
+    return a.time.localeCompare(b.time);
+  });
+  dbSet('trip:'+S.code,S.trip); renderSchedule();
 }
 
 // ══ 비용 탭 ══
