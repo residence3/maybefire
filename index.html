@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -674,7 +673,7 @@ function renderExpenses(){
     +'<h3 style="font-size:17px;font-weight:900">지출 내역'+(total>0?' · 총 '+fmt(total)+'원':'')+'</h3>'
     +(exps.length>0&&nicks.length>=2?'<button onclick="toggleSettle()" style="background:var(--A);color:#412402;border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px"><i class="ti ti-receipt"></i>정산하기</button>':'')
     +'</div>'
-    +'<div id="settle-panel" style="display:none;margin-bottom:14px"></div>';
+    +'<div id="settle-panel" style="display:'+(settleOpen?'block':'none')+';margin-bottom:14px">'+(settleOpen?renderSettlePanelHTML():'')+'</div>';
 
   if(EF.open){
     var per=(EF.split.length>0&&EF.amount&&!isNaN(parseFloat(EF.amount)))?fmt(parseFloat(EF.amount)/EF.split.length):null;
@@ -695,7 +694,7 @@ function renderExpenses(){
   }
 
   if(!EF.open){
-    h+='<button onclick="openEF()" style="border:2px dashed var(--border);background:transparent;border-radius:var(--r);padding:12px 20px;color:var(--A);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;margin-bottom:14px"><i class="ti ti-plus"></i>지출 추가</button>';
+    h+='<button onclick="openEF()" style="width:100%;border:2px dashed var(--border);background:transparent;border-radius:var(--r);padding:11px 14px;color:var(--A);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;margin-bottom:14px"><i class="ti ti-plus"></i>지출 추가</button>';
   }
   if(!EF.open&&exps.length>0){
     var groups={}, groupOrder=[];
@@ -765,19 +764,17 @@ function renderExpenses(){
 }
 
 function toggleSettle(){
-  var panel=document.getElementById('settle-panel');
-  if(!panel) return;
-  if(panel.style.display==='none'){
-    panel.style.display='block';
-    renderSettlePanel();
-  } else {
-    panel.style.display='none';
-  }
+  settleOpen=!settleOpen;
+  renderExpenses();
 }
 
 function renderSettlePanel(){
   var panel=document.getElementById('settle-panel');
   if(!panel) return;
+  panel.innerHTML=renderSettlePanelHTML();
+}
+
+function renderSettlePanelHTML(){
   var nicks=getNicks();
   var exps=S.trip.expenses||[];
   var checked=S.trip.settleChecked||{};
@@ -853,7 +850,7 @@ function renderSettlePanel(){
       +'</div>';
   });
   h+='</div>';
-  panel.innerHTML=h;
+  return h;
 }
 
 async function toggleSettleItem(key){
@@ -861,7 +858,7 @@ async function toggleSettleItem(key){
   if(S.trip.settleChecked[key]) delete S.trip.settleChecked[key];
   else S.trip.settleChecked[key]=true;
   await dbSet('trip:'+S.code,S.trip);
-  renderSettlePanel();
+  renderExpenses();
 }
 
 function toggleExpGroup(key){openExpGroups[key]=openExpGroups[key]===false?true:false;renderExpenses();}
@@ -1113,6 +1110,5 @@ function onDragEnd(e){
 }
 
 </script>
-
 </body>
 </html>
