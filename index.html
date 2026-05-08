@@ -969,7 +969,7 @@ function renderSchedule(){
           +'</div></div></div>';
       } else {
         h+='<div class="act-row" data-act-id="'+act.id+'">'
-          +(act.time?'<span style="width:36px;flex-shrink:0"></span>':'<button onmousedown="startDrag(\''+day.id+'\',\''+act.id+'\',event)" ontouchstart="startDrag(\''+day.id+'\',\''+act.id+'\',event)" style="background:none;border:none;cursor:grab;padding:4px 2px;color:#ccc;font-size:18px;touch-action:none;flex-shrink:0;align-self:center"><i class="ti ti-grip-vertical"></i></button>')
+          +(act.time?'':'<button onmousedown="startDrag(\''+day.id+'\',\''+act.id+'\',event)" ontouchstart="startDrag(\''+day.id+'\',\''+act.id+'\',event)" style="background:none;border:none;cursor:grab;padding:0;width:36px;color:#ccc;font-size:18px;touch-action:none;flex-shrink:0;align-self:center;display:flex;justify-content:center"><i class="ti ti-grip-vertical"></i></button>')
           +'<span style="font-size:11px;color:var(--A);font-weight:700;width:36px;flex-shrink:0;text-align:center;padding-top:3px">'+(act.time||'')+'</span>'
           +'<div style="flex:1;min-width:0"><p style="font-size:14px;font-weight:700">'+act.title+'</p>'
           +(act.location?'<p style="font-size:12px;color:var(--muted);margin-top:3px"><i class="ti ti-map-pin" style="font-size:11px;margin-right:2px"></i>'+act.location+'</p>':'')
@@ -1390,6 +1390,18 @@ function renderSettings(){
       +'</div>';
   }
   h+='</div>';
+  // 방 아이콘 선택
+  var ICON_MAP2={plane:'ti-plane',beach:'ti-beach',mountain:'ti-mountain',map:'ti-map',luggage:'ti-luggage',ship:'ti-ship',train:'ti-train',tent:'ti-tent',world:'ti-world',building:'ti-building-castle',backpack:'ti-backpack',motorbike:'ti-motorbike'};
+  var curIcon2=S.trip.icon||'plane';
+  h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">방 아이콘</h3>';
+  h+='<div class="card"><div style="display:flex;flex-wrap:wrap;gap:8px">';
+  Object.keys(ICON_MAP2).forEach(function(id){
+    var isOn=curIcon2===id;
+    h+='<button onclick="setTripIcon(\''+id+'\')" style="width:44px;height:44px;border-radius:10px;border:2px solid '+(isOn?'var(--A)':'var(--border)')+';background:'+(isOn?'var(--AX)':'transparent')+';cursor:pointer;display:flex;align-items:center;justify-content:center">'
+      +'<i class="ti '+ICON_MAP2[id]+'" style="font-size:20px;color:'+(isOn?'var(--A)':'var(--muted)')+';"></i></button>';
+  });
+  h+='</div></div>';
+
   // 테마 선택
   var curTheme = localStorage.getItem('app-theme')||'default';
   var themes=[
