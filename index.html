@@ -69,6 +69,109 @@ input[type=password]{letter-spacing:.1em}
 #s-loading{display:flex}
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 @media(max-width:380px){.big-code{font-size:18px;letter-spacing:3px}.tab{font-size:12px;gap:3px}}
+
+/* ── 엑셀 테마 ── */
+body.excel-mode {
+  font-family: 'Calibri', 'Arial', sans-serif !important;
+  background: #fff !important;
+}
+body.excel-mode .tabs {
+  background: #217346 !important;
+  border-bottom: none !important;
+}
+body.excel-mode .tab {
+  color: #fff !important;
+  font-size: 12px !important;
+  border-bottom: none !important;
+  padding: 6px 4px !important;
+}
+body.excel-mode .tab.on {
+  background: #fff !important;
+  color: #217346 !important;
+  border-bottom: none !important;
+}
+body.excel-mode .trip-hd {
+  background: #f2f2f2 !important;
+  border-bottom: 2px solid #bbb !important;
+}
+body.excel-mode #trip-name {
+  font-family: 'Calibri', 'Arial', sans-serif !important;
+  font-size: 14px !important;
+  color: #000 !important;
+}
+body.excel-mode #trip-dates, body.excel-mode #trip-me {
+  color: #555 !important;
+  font-size: 11px !important;
+}
+body.excel-mode .content {
+  padding: 0 !important;
+}
+body.excel-mode .card {
+  border-radius: 0 !important;
+  border: 1px solid #bbb !important;
+  margin-bottom: 0 !important;
+  border-top: none !important;
+  padding: 6px 10px !important;
+}
+body.excel-mode .card:first-child {
+  border-top: 1px solid #bbb !important;
+}
+body.excel-mode h3 {
+  font-size: 12px !important;
+  font-weight: bold !important;
+  color: #000 !important;
+  background: #d6e4bc !important;
+  padding: 4px 8px !important;
+  border: 1px solid #bbb !important;
+  margin-bottom: 0 !important;
+}
+body.excel-mode .chip {
+  border-radius: 0 !important;
+  font-size: 11px !important;
+  padding: 4px 8px !important;
+  border: 1px solid #bbb !important;
+}
+body.excel-mode .chip.on {
+  background: #d6e4bc !important;
+  color: #217346 !important;
+  border-color: #217346 !important;
+}
+body.excel-mode input, body.excel-mode textarea {
+  border-radius: 0 !important;
+  border: 1px solid #bbb !important;
+  font-size: 12px !important;
+  height: 26px !important;
+  padding: 2px 6px !important;
+  font-family: 'Calibri', 'Arial', sans-serif !important;
+}
+body.excel-mode .bp {
+  border-radius: 0 !important;
+  background: #217346 !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  padding: 5px 12px !important;
+  font-family: 'Calibri', 'Arial', sans-serif !important;
+}
+body.excel-mode .bg {
+  border-radius: 0 !important;
+  font-size: 12px !important;
+  padding: 5px 12px !important;
+}
+body.excel-mode .day-card {
+  border-left: 3px solid #217346 !important;
+}
+body.excel-mode p, body.excel-mode span, body.excel-mode label {
+  font-size: 12px !important;
+  font-family: 'Calibri', 'Arial', sans-serif !important;
+}
+body.excel-mode .act-row {
+  border-top: 1px solid #e0e0e0 !important;
+  padding: 4px 0 !important;
+}
+body.excel-mode #excel-toggle-btn {
+  background: #217346 !important;
+  color: #fff !important;
+}
 </style>
 </head>
 <body>
@@ -172,6 +275,7 @@ input[type=password]{letter-spacing:.1em}
       <div style="display:flex;gap:6px;flex-shrink:0">
         <button onclick="toggleCode()" style="background:var(--AX);border:1.5px solid var(--AL);border-radius:var(--r);padding:9px 12px;font-size:13px;font-weight:700;cursor:pointer;color:var(--A);font-family:inherit"><i class="ti ti-share"></i></button>
         <button onclick="go('home')" style="background:transparent;border:1.5px solid var(--border);border-radius:var(--r);padding:9px 12px;font-size:13px;cursor:pointer;color:var(--muted);font-family:inherit"><i class="ti ti-home"></i></button>
+        <button id="excel-toggle-btn" onclick="toggleExcelMode()" style="background:transparent;border:1.5px solid var(--border);border-radius:var(--r);padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;color:#217346;font-family:inherit" title="엑셀 모드">📊</button>
       </div>
     </div>
     <div id="code-panel" style="display:none;max-width:600px;margin:8px auto 0;background:var(--AX);border:1.5px solid var(--AL);border-radius:var(--r);padding:10px 14px">
@@ -502,6 +606,18 @@ function copyCode() {
   var txt='같이 가자! 여행 코드: '+code+'\n"코드로 참여하기"를 누르고 코드를 입력해줘 👉 '+(location.origin+location.pathname).replace(/\/$/,'');
   if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){showToast('코드가 복사됐어요! 📋');});}
   else{var el=document.createElement('textarea');el.value=txt;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);showToast('코드가 복사됐어요! 📋');}
+}
+
+function toggleExcelMode(){
+  var isExcel = document.body.classList.toggle('excel-mode');
+  var btn = document.getElementById('excel-toggle-btn');
+  if(btn) {
+    btn.title = isExcel ? '기본 테마로 돌아가기' : '엑셀 모드';
+    btn.textContent = isExcel ? '🌿' : '📊';
+  }
+  // 탭 바 색상도 변경
+  var tabs = document.querySelector('.tabs');
+  if(tabs) tabs.style.setProperty('--tab-bg', isExcel ? '#217346' : '#fff');
 }
 
 function toggleCode(){var p=document.getElementById('code-panel');p.style.display=p.style.display==='none'?'block':'none';}
