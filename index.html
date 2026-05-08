@@ -499,7 +499,7 @@ async function doSetNick() {
 
 function copyCode() {
   var code=S.pendingCode||S.code; if(!code) return;
-  var txt='같이 가자! 여행 코드: '+code+'\n앱에서 "코드로 참여하기"를 누르고 코드를 입력해줘 👉 '+location.origin;
+  var txt='같이 가자! 여행 코드: '+code+'\n"코드로 참여하기"를 누르고 코드를 입력해줘 👉 '+(location.origin+location.pathname).replace(/\/$/,'');
   if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){showToast('코드가 복사됐어요! 📋');});}
   else{var el=document.createElement('textarea');el.value=txt;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);showToast('코드가 복사됐어요! 📋');}
 }
