@@ -88,39 +88,39 @@ input[type=password]{letter-spacing:.1em}
   animation:takeoff 1.4s ease-in infinite;
   display:block;
 }
-.plane-loader .runway{
-  position:absolute;
-  bottom:0px;left:50%;transform:translateX(-50%);
-  width:70px;height:3px;
-  background:linear-gradient(90deg,transparent,var(--A),transparent);
-  border-radius:2px;
-  animation:runwayPulse 1.4s ease-in infinite;
-}
-@keyframes runwayPulse{
-  0%{opacity:.8;width:60px;}
-  60%{opacity:.4;width:80px;}
-  100%{opacity:0;width:40px;}
-}
+
 @media(max-width:380px){.big-code{font-size:18px;letter-spacing:3px}.tab{font-size:12px;gap:3px}}
 
 /* ── 다크 테마 ── */
-body.dark-mode{–bg:#1a1a2e;–card:#16213e;–border:#2a2a4a;–bm:#3a3a5a;–text:#e8e8f0;–muted:#8888aa;–A:#a78bfa;–AX:#2d2550;–AL:#6d5fd0;–ok:#34d399;–no:#f87171;–r:12px;–rl:16px}
-body.dark-mode .tabs{background:#16213e!important;border-bottom:1px solid #2a2a4a!important}
-body.dark-mode .tab.on{color:var(–A)!important;border-bottom-color:var(–A)!important}
-body.dark-mode .trip-hd{background:#16213e!important;border-bottom:1px solid #2a2a4a!important}
-body.dark-mode input,body.dark-mode textarea{background:#0f0f23!important;color:#e8e8f0!important;border-color:#2a2a4a!important}
-body.dark-mode .copy-btn{background:rgba(167,139,250,.12)!important;border-color:var(–AL)!important}
-body.dark-mode .chip{background:#0f0f23!important;color:var(–muted)!important}
-body.dark-mode .trip-card{background:#16213e!important}
-body.dark-mode .loading{background:#1a1a2e!important}
+body.dark-mode{–bg:#111318;–card:#1e2128;–border:#2e3340;–bm:#3e4455;–text:#e2e4ec;–muted:#7b8299;–A:#c084fc;–AX:#2a1f3d;–AL:#9333ea;–ok:#4ade80;–no:#f87171;–r:12px;–rl:16px}
+body.dark-mode{background:#111318!important;color:#e2e4ec!important}
+body.dark-mode .tabs{background:#1e2128!important;border-bottom:1px solid #2e3340!important}
+body.dark-mode .tab{color:#7b8299!important}
+body.dark-mode .tab.on{color:#c084fc!important;border-bottom-color:#c084fc!important}
+body.dark-mode .trip-hd{background:#1e2128!important;border-bottom:1px solid #2e3340!important}
+body.dark-mode .card{background:#1e2128!important;border-color:#2e3340!important}
+body.dark-mode .trip-card{background:#1e2128!important;border-color:#2e3340!important}
+body.dark-mode input,body.dark-mode textarea{background:#111318!important;color:#e2e4ec!important;border-color:#2e3340!important}
+body.dark-mode .bp{background:#9333ea!important;color:#fff!important}
+body.dark-mode .chip{background:#1e2128!important;color:#7b8299!important;border-color:#2e3340!important}
+body.dark-mode .chip.on{background:#2a1f3d!important;color:#c084fc!important;border-color:#9333ea!important}
+body.dark-mode .loading{background:#111318!important}
+body.dark-mode .page{background:#111318!important}
+body.dark-mode .content{background:#111318!important}
 /* ── 블루 테마 ── */
-body.blue-mode{–bg:#EEF4FF;–card:#fff;–border:#C7D8F8;–bm:#9BB8EE;–text:#0D1B4B;–muted:#4A6BB5;–A:#2563EB;–AX:#DBEAFE;–AL:#93C5FD;–ok:#059669;–no:#DC2626;–r:12px;–rl:16px}
-body.blue-mode .tabs{background:#1D4ED8!important;border-bottom:1px solid #1E40AF!important}
-body.blue-mode .tab{color:rgba(255,255,255,.8)!important}
-body.blue-mode .tab.on{color:#fff!important;border-bottom-color:#fff!important}
-body.blue-mode .trip-hd{background:#1D4ED8!important;border-bottom:none!important}
+body.blue-mode{–bg:#f0f7ff;–card:#fff;–border:#bfdbfe;–bm:#93c5fd;–text:#0c1a3d;–muted:#3b6cb0;–A:#0ea5e9;–AX:#e0f2fe;–AL:#7dd3fc;–ok:#059669;–no:#dc2626;–r:12px;–rl:16px}
+body.blue-mode{background:#f0f7ff!important;color:#0c1a3d!important}
+body.blue-mode .tabs{background:#0284c7!important;border-bottom:1px solid #0369a1!important}
+body.blue-mode .tab{color:rgba(255,255,255,.75)!important}
+body.blue-mode .tab.on{color:#fff!important;border-bottom-color:#fff!important;background:rgba(255,255,255,.15)!important}
+body.blue-mode .trip-hd{background:#0284c7!important;border-bottom:none!important}
 body.blue-mode #trip-name,body.blue-mode #trip-dates,body.blue-mode #trip-me{color:#fff!important}
-body.blue-mode .copy-btn{background:rgba(37,99,235,.1)!important}
+body.blue-mode .card{background:#fff!important;border-color:#bfdbfe!important}
+body.blue-mode .trip-card{background:#fff!important;border-color:#bfdbfe!important}
+body.blue-mode .bp{background:#0ea5e9!important;color:#fff!important}
+body.blue-mode .chip.on{background:#e0f2fe!important;color:#0284c7!important;border-color:#0ea5e9!important}
+body.blue-mode .page{background:#f0f7ff!important}
+body.blue-mode .content{background:#f0f7ff!important}
 
 /* ── 엑셀 테마 ── */
 body.excel-mode {
@@ -408,7 +408,7 @@ width: 60px;
 <div id="s-loading" class="loading">
   <div class="plane-loader">
     <i class="ti ti-plane-departure plane" style="font-size:44px;color:var(--A)"></i>
-    <div class="runway"></div>
+
   </div>
 </div>
 <div id="s-auth" class="page">
@@ -969,8 +969,8 @@ function renderSchedule(){
           +'</div></div></div>';
       } else {
         h+='<div class="act-row" data-act-id="'+act.id+'">'
-          +(act.time?'<span style="width:22px;flex-shrink:0"></span>':'<button onmousedown="startDrag(\''+day.id+'\',\''+act.id+'\',event)" ontouchstart="startDrag(\''+day.id+'\',\''+act.id+'\',event)" style="background:none;border:none;cursor:grab;padding:4px 2px;color:#ccc;font-size:18px;touch-action:none;flex-shrink:0;align-self:center"><i class="ti ti-grip-vertical"></i></button>')
-          +'<span style="font-size:11px;color:var(--A);font-weight:700;min-width:42px;padding-top:3px;flex-shrink:0;text-align:center">'+(act.time||'')+'</span>'
+          +(act.time?'<span style="width:36px;flex-shrink:0"></span>':'<button onmousedown="startDrag(\''+day.id+'\',\''+act.id+'\',event)" ontouchstart="startDrag(\''+day.id+'\',\''+act.id+'\',event)" style="background:none;border:none;cursor:grab;padding:4px 2px;color:#ccc;font-size:18px;touch-action:none;flex-shrink:0;align-self:center"><i class="ti ti-grip-vertical"></i></button>')
+          +'<span style="font-size:11px;color:var(--A);font-weight:700;width:36px;flex-shrink:0;text-align:center;padding-top:3px">'+(act.time||'')+'</span>'
           +'<div style="flex:1;min-width:0"><p style="font-size:14px;font-weight:700">'+act.title+'</p>'
           +(act.location?'<p style="font-size:12px;color:var(--muted);margin-top:3px"><i class="ti ti-map-pin" style="font-size:11px;margin-right:2px"></i>'+act.location+'</p>':'')
           +(act.note?'<p style="font-size:12px;color:var(--muted);margin-top:2px">'+act.note+'</p>':'')
@@ -1393,9 +1393,9 @@ function renderSettings(){
   // 테마 선택
   var curTheme = localStorage.getItem('app-theme')||'default';
   var themes=[
-    {id:'default',label:'기본',icon:'ti-leaf'},
+    {id:'default',label:'기본',icon:'ti-sun'},
     {id:'dark',label:'다크',icon:'ti-moon'},
-    {id:'blue',label:'블루',icon:'ti-drop'},
+    {id:'blue',label:'블루',icon:'ti-surfboard'},
     {id:'excel',label:'엑셀',icon:'ti-table'}
   ];
   h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">테마</h3>';
@@ -1410,9 +1410,12 @@ function renderSettings(){
   h+='</div></div>';
   // 위험 구역 (방장만, 맨 아래)
   if (isCreator) {
-    h += '<div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border)">'
-      + '<button onclick="deleteTrip()" style="width:100%;padding:13px;background:transparent;border:1.5px solid var(--no);border-radius:var(--r);color:var(--no);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="ti ti-trash"></i>여행 삭제하기</button>'
-      + '</div>';
+    h += '<div style="margin-top:2rem">'
+      + '<div class="card" style="border-color:var(--no)">'
+      + '<p style="font-size:14px;font-weight:900;color:var(--no);margin-bottom:6px"><i class="ti ti-alert-triangle" style="margin-right:6px"></i>위험 구역</p>'
+      + '<p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">여행을 삭제하면 모든 일정과 비용 데이터가 영구적으로 사라져요.</p>'
+      + '<button onclick="confirmDeleteTrip()" style="width:100%;padding:12px;background:transparent;border:1.5px solid var(--no);border-radius:var(--r);color:var(--no);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="ti ti-trash"></i>여행 삭제하기</button>'
+      + '</div></div>';
   }
   el.innerHTML=h;
   updateSettingNights();
@@ -1423,6 +1426,12 @@ function updateSettingNights(){var s=(document.getElementById('set-start')||{}).
 async function saveName(){var name=(document.getElementById('set-name')||{}).value;if(name)name=name.trim();if(!name)return showToast('여행 이름을 입력해주세요');S.trip.name=name;await dbSet('trip:'+S.code,S.trip);editingName=false;renderTrip();showToast('저장됐어요 ✅');}
 
 async function saveDate(){var s=(document.getElementById('set-start')||{}).value,e=(document.getElementById('set-end')||{}).value;if(!s||!e)return showToast('날짜를 선택해주세요');if(new Date(e)<new Date(s))return showToast('종료일이 시작일보다 빨라요');S.trip.startDate=s;S.trip.endDate=e;await dbSet('trip:'+S.code,S.trip);editingDate=false;renderTrip();showToast('저장됐어요 ✅');}
+
+function confirmDeleteTrip(){
+  if(confirm('정말로 이 여행을 삭제할까요?\n\n모든 일정, 비용 데이터가 영구적으로 사라져요.')) {
+    deleteTrip();
+  }
+}
 
 async function deleteTrip(){
   if(!confirm('정말로 이 여행을 삭제할까요? 모든 데이터가 사라져요.')) return;
