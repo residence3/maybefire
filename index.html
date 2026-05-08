@@ -36,7 +36,7 @@ input[type=password]{letter-spacing:.1em}
 .chip{border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer;font-weight:600;background:transparent;color:var(--muted);border:1.5px solid var(--border);display:inline-flex;align-items:center;gap:4px;transition:all .15s;font-family:inherit}
 .chip:active{transform:scale(.96)}
 .chip.on{background:var(--AX);color:var(--A);border-color:var(--A)}
-.tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;height:46px}
 .tab{flex:1;border:none;background:none;padding:13px 4px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);border-bottom:2.5px solid transparent;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;font-family:inherit}
 .tab.on{color:var(--A);border-bottom-color:var(--A)}
 .page{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.25rem;background:var(--bg)}
@@ -386,9 +386,9 @@ body.excel-mode #excel-toggle-btn {
     <button class="tab" data-tab="settings" onclick="switchTab('settings')"><i class="ti ti-settings" style="font-size:14px"></i>설정</button>
   </div>
   <div class="content">
-    <div id="tab-schedule"></div>
-    <div id="tab-expenses" style="display:none"></div>
-    <div id="tab-settings" style="display:none"></div>
+    <div id="tab-schedule" style="min-height:60vh"></div>
+    <div id="tab-expenses" style="display:none;min-height:60vh"></div>
+    <div id="tab-settings" style="display:none;min-height:60vh"></div>
   </div>
 </div>
 
@@ -758,6 +758,7 @@ function renderTabSafe(n){
 function switchTab(n){
   document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('on',b.dataset.tab===n);});
   ['schedule','expenses','settings'].forEach(function(t){var el=document.getElementById('tab-'+t);if(el)el.style.display=t===n?'block':'none';});
+  window.scrollTo(0,0);
   renderTabSafe(n);
 }
 
