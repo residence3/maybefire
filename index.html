@@ -69,7 +69,58 @@ input[type=password]{letter-spacing:.1em}
 [id^="s-"]{display:none}
 #s-loading{display:flex}
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+@keyframes takeoff{
+  0%{transform:translate(0,0) rotate(-45deg);opacity:1;}
+  70%{transform:translate(50px,-50px) rotate(-45deg);opacity:.7;}
+  100%{transform:translate(90px,-90px) rotate(-45deg);opacity:0;}
+}
+@keyframes taxiIn{
+  0%{transform:translate(-20px,10px) rotate(-5deg);opacity:0;}
+  100%{transform:translate(0,0) rotate(-10deg);opacity:1;}
+}
+.plane-loader{
+  position:relative;
+  width:80px;height:80px;
+  display:flex;align-items:center;justify-content:center;
+}
+.plane-loader .plane{
+  font-size:44px;
+  animation:takeoff 1.4s ease-in infinite;
+  display:block;
+}
+.plane-loader .runway{
+  position:absolute;
+  bottom:8px;left:50%;transform:translateX(-50%);
+  width:60px;height:3px;
+  background:linear-gradient(90deg,transparent,var(--A),transparent);
+  border-radius:2px;
+  animation:runwayPulse 1.4s ease-in infinite;
+}
+@keyframes runwayPulse{
+  0%{opacity:.8;width:60px;}
+  60%{opacity:.4;width:80px;}
+  100%{opacity:0;width:40px;}
+}
 @media(max-width:380px){.big-code{font-size:18px;letter-spacing:3px}.tab{font-size:12px;gap:3px}}
+
+/* ── 다크 테마 ── */
+body.dark-mode{–bg:#1a1a2e;–card:#16213e;–border:#2a2a4a;–bm:#3a3a5a;–text:#e8e8f0;–muted:#8888aa;–A:#a78bfa;–AX:#2d2550;–AL:#6d5fd0;–ok:#34d399;–no:#f87171;–r:12px;–rl:16px}
+body.dark-mode .tabs{background:#16213e!important;border-bottom:1px solid #2a2a4a!important}
+body.dark-mode .tab.on{color:var(–A)!important;border-bottom-color:var(–A)!important}
+body.dark-mode .trip-hd{background:#16213e!important;border-bottom:1px solid #2a2a4a!important}
+body.dark-mode input,body.dark-mode textarea{background:#0f0f23!important;color:#e8e8f0!important;border-color:#2a2a4a!important}
+body.dark-mode .copy-btn{background:rgba(167,139,250,.12)!important;border-color:var(–AL)!important}
+body.dark-mode .chip{background:#0f0f23!important;color:var(–muted)!important}
+body.dark-mode .trip-card{background:#16213e!important}
+body.dark-mode .loading{background:#1a1a2e!important}
+/* ── 블루 테마 ── */
+body.blue-mode{–bg:#EEF4FF;–card:#fff;–border:#C7D8F8;–bm:#9BB8EE;–text:#0D1B4B;–muted:#4A6BB5;–A:#2563EB;–AX:#DBEAFE;–AL:#93C5FD;–ok:#059669;–no:#DC2626;–r:12px;–rl:16px}
+body.blue-mode .tabs{background:#1D4ED8!important;border-bottom:1px solid #1E40AF!important}
+body.blue-mode .tab{color:rgba(255,255,255,.8)!important}
+body.blue-mode .tab.on{color:#fff!important;border-bottom-color:#fff!important}
+body.blue-mode .trip-hd{background:#1D4ED8!important;border-bottom:none!important}
+body.blue-mode #trip-name,body.blue-mode #trip-dates,body.blue-mode #trip-me{color:#fff!important}
+body.blue-mode .copy-btn{background:rgba(37,99,235,.1)!important}
 
 /* ── 엑셀 테마 ── */
 body.excel-mode {
@@ -355,7 +406,10 @@ width: 60px;
 </head>
 <body>
 <div id="s-loading" class="loading">
-  <i class="ti ti-plane-departure" style="font-size:40px;color:var(--A);animation:spin 1.5s linear infinite"></i>
+  <div class="plane-loader">
+    <i class="ti ti-plane-departure plane" style="font-size:44px;color:var(--A)"></i>
+    <div class="runway"></div>
+  </div>
 </div>
 <div id="s-auth" class="page">
   <div class="fw col">
@@ -580,6 +634,9 @@ function go(screen) {
   if(screen==='nick'||screen==='create') setNickPlaceholders();
 }
 
+// 저장된 테마 복원
+(function(){ var t=localStorage.getItem('app-theme'); if(t) applyTheme(t); })();
+
 auth.onAuthStateChanged(function(user) {
   if(user){ S.user=user; document.getElementById('home-email').textContent=user.email; go('home'); }
   else { S.user=null; go('auth'); }
@@ -651,7 +708,7 @@ async function loadMyTrips() {
     var d=t.startDate?(t.endDate?t.startDate+' ~ '+t.endDate:t.startDate):'날짜 미정';
     var memberCount=(t.members||[]).length;
     var card=document.createElement('div'); card.className='trip-card';
-    card.innerHTML='<div style="width:46px;height:46px;border-radius:14px;background:var(--AX);border:1.5px solid var(--AL);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">✈️</div>'
+    card.innerHTML='<div style="width:46px;height:46px;border-radius:14px;background:var(--AX);border:1.5px solid var(--AL);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">'+(t.icon||'✈️')+'</div>'
       +'<div style="flex:1;min-width:0"><p style="font-weight:900;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+t.name+'</p>'
       +'<p style="font-size:12px;color:var(--muted);margin-top:3px">'+d+'</p>'
       +'<p style="font-size:12px;color:var(--muted);margin-top:2px"><i class="ti ti-users" style="font-size:11px;margin-right:3px"></i>'+memberCount+'명 · 내 닉네임: <span style="color:var(--A);font-weight:700">'+nick+'</span></p></div>'
@@ -798,6 +855,25 @@ function setNickPlaceholders() {
   });
 }
 
+async function setTripIcon(icon){
+  S.trip.icon = icon;
+  await dbSet('trip:'+S.code, S.trip);
+  renderSettings();
+}
+
+function setTheme(theme){
+  localStorage.setItem('app-theme', theme);
+  applyTheme(theme);
+  renderSettings();
+}
+
+function applyTheme(theme){
+  document.body.classList.remove('dark-mode','blue-mode','excel-mode');
+  if(theme==='dark') document.body.classList.add('dark-mode');
+  else if(theme==='blue') document.body.classList.add('blue-mode');
+  else if(theme==='excel') document.body.classList.add('excel-mode');
+}
+
 function toggleExcelMode(){
   document.body.classList.toggle('excel-mode');
   // 설정 탭 다시 렌더 (ON/OFF 버튼 상태 반영)
@@ -816,7 +892,7 @@ function renderTrip(){
   document.getElementById('trip-name').textContent=t.name;
   document.getElementById('trip-dates').textContent=t.startDate?(t.endDate?t.startDate+' ~ '+t.endDate:t.startDate):'';
   document.getElementById('trip-me').innerHTML='<i class="ti ti-user" style="font-size:11px;margin-right:3px"></i>'+S.me;
-  document.getElementById('share-code').textContent=S.code;
+  var sc=document.getElementById('share-code'); if(sc) sc.textContent=S.code;
   // 처음 입장 시만 일정 탭, 이미 탭 선택된 경우 유지
   var activeTab = (document.querySelector('.tab.on') || {}).dataset;
   var curTab = activeTab && activeTab.tab || 'schedule';
@@ -1319,12 +1395,35 @@ function renderSettings(){
     +'<p style="font-size:28px;font-weight:900;letter-spacing:8px;color:var(--A);margin-bottom:12px">'+S.code+'</p>'
     +'<button class="copy-btn" onclick="copyCode()"><i class="ti ti-copy"></i>코드 복사하기</button>'
     +'</div>';
-  // 테마 섹션
+  // 방 아이콘 선택
+  var TRIP_ICONS=['✈️','🏖️','🏔️','🗺️','🧳','🚢','🚂','🏕️','🌏','🎡','🏯','🗼','🍜','🎒','🛵','🚐'];
+  var curIcon = S.trip.icon || '✈️';
+  h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">방 아이콘</h3>';
+  h+='<div class="card"><div style="display:flex;flex-wrap:wrap;gap:8px">';
+  TRIP_ICONS.forEach(function(ic){
+    h+='<button onclick="setTripIcon(\''+ic+'\')" style="font-size:24px;width:44px;height:44px;border-radius:10px;border:2px solid '+(curIcon===ic?'var(--A)':'var(--border)')+';background:'+(curIcon===ic?'var(--AX)':'transparent')+';cursor:pointer">'+ic+'</button>';
+  });
+  h+='</div></div>';
+
+  // 테마 선택
+  var curTheme = localStorage.getItem('app-theme')||'default';
+  var themes=[
+    {id:'default',label:'기본',emoji:'🌿',desc:'따뜻한 베이지'},
+    {id:'dark',label:'다크',emoji:'🌙',desc:'눈이 편한 어두운 테마'},
+    {id:'blue',label:'블루',emoji:'💙',desc:'시원한 파란 계열'},
+    {id:'excel',label:'엑셀',emoji:'📊',desc:'회사에서도 들키지 않게 😂'}
+  ];
   h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">테마</h3>';
-  h+='<div class="card" style="display:flex;align-items:center;justify-content:space-between">'
-    +'<div><p style="font-weight:700;font-size:15px">📊 엑셀 모드</p><p style="font-size:12px;color:var(--muted);margin-top:3px">회사에서도 들키지 않게 😂</p></div>'
-    +'<button id="excel-toggle-btn" onclick="toggleExcelMode()" style="background:'+(document.body.classList.contains('excel-mode')?'#217346':'var(--border)')+';color:'+(document.body.classList.contains('excel-mode')?'#fff':'var(--muted)')+';border:none;border-radius:20px;padding:6px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s">'+(document.body.classList.contains('excel-mode')?'ON':'OFF')+'</button>'
-    +'</div>';
+  h+='<div class="col" style="gap:8px">';
+  themes.forEach(function(t){
+    var isOn=curTheme===t.id;
+    h+='<div onclick="setTheme(\''+t.id+'\')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:'+(isOn?'var(--AX)':'var(--card)')+';border:1.5px solid '+(isOn?'var(--A)':'var(--border)')+';border-radius:var(--r);cursor:pointer">'
+      +'<div style="display:flex;align-items:center;gap:12px"><span style="font-size:24px">'+t.emoji+'</span>'
+      +'<div><p style="font-weight:700;font-size:15px">'+t.label+'</p><p style="font-size:12px;color:var(--muted);margin-top:2px">'+t.desc+'</p></div></div>'
+      +(isOn?'<i class="ti ti-check" style="color:var(--A);font-size:20px"></i>':'')
+      +'</div>';
+  });
+  h+='</div>';
   el.innerHTML=h;
   updateSettingNights();
 }
