@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -72,284 +73,285 @@ input[type=password]{letter-spacing:.1em}
 
 /* ── 엑셀 테마 ── */
 body.excel-mode {
-  font-family: 'Calibri','Arial',sans-serif !important;
-  background: #fff !important;
-  color: #000 !important;
+font-family: ‘Calibri’,‘Arial’,sans-serif !important;
+background: #fff !important;
+color: #000 !important;
 }
 /* 포뮬라 바 */
 body.excel-mode::before {
-  content: '';
-  display: block;
+content: ‘’;
+display: block;
 }
 body.excel-mode .trip-hd {
-  background: #f2f2f2 !important;
-  border-bottom: none !important;
-  padding: 0 !important;
+background: #f2f2f2 !important;
+border-bottom: none !important;
+padding: 0 !important;
 }
 body.excel-mode .trip-hd > .bw {
-  background: #e8e8e8 !important;
-  border-bottom: 1px solid #bbb !important;
-  padding: 3px 6px !important;
-  font-size: 11px !important;
+background: #e8e8e8 !important;
+border-bottom: 1px solid #bbb !important;
+padding: 3px 6px !important;
+font-size: 11px !important;
 }
 body.excel-mode #trip-name {
-  font-size: 12px !important;
-  color: #000 !important;
-  font-family: 'Calibri','Arial',sans-serif !important;
-  font-weight: 400 !important;
+font-size: 12px !important;
+color: #000 !important;
+font-family: ‘Calibri’,‘Arial’,sans-serif !important;
+font-weight: 400 !important;
 }
 body.excel-mode #trip-dates, body.excel-mode #trip-me {
-  font-size: 10px !important; color: #666 !important;
+font-size: 10px !important; color: #666 !important;
 }
 /* 포뮬라 바 효과 */
 body.excel-mode #code-panel {
-  background: #fff !important;
-  border: none !important;
-  border-bottom: 1px solid #bbb !important;
-  border-radius: 0 !important;
-  padding: 2px 8px !important;
-  font-size: 11px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
+background: #fff !important;
+border: none !important;
+border-bottom: 1px solid #bbb !important;
+border-radius: 0 !important;
+padding: 2px 8px !important;
+font-size: 11px !important;
+display: flex !important;
+align-items: center !important;
+gap: 6px !important;
 }
 body.excel-mode #code-panel::before {
-  content: 'fx';
-  color: #217346;
-  font-weight: 700;
-  font-size: 13px;
-  font-style: italic;
-  border-right: 1px solid #bbb;
-  padding-right: 6px;
+content: ‘fx’;
+color: #217346;
+font-weight: 700;
+font-size: 13px;
+font-style: italic;
+border-right: 1px solid #bbb;
+padding-right: 6px;
 }
 /* 리본 탭 */
 body.excel-mode .tabs {
-  background: #217346 !important;
-  border-bottom: 2px solid #185a2e !important;
-  height: 46px !important;
+background: #217346 !important;
+border-bottom: 2px solid #185a2e !important;
+height: 46px !important;
 }
 body.excel-mode .tab {
-  color: rgba(255,255,255,0.85) !important;
-  font-size: 11px !important;
-  font-family: 'Calibri','Arial',sans-serif !important;
-  border-bottom: none !important;
-  padding: 6px 14px !important;
-  border-radius: 0 !important;
-  letter-spacing: 0 !important;
-  border-right: 1px solid rgba(255,255,255,0.15) !important;
+color: rgba(255,255,255,0.85) !important;
+font-size: 11px !important;
+font-family: ‘Calibri’,‘Arial’,sans-serif !important;
+border-bottom: none !important;
+padding: 6px 14px !important;
+border-radius: 0 !important;
+letter-spacing: 0 !important;
+border-right: 1px solid rgba(255,255,255,0.15) !important;
 }
 body.excel-mode .tab.on {
-  background: #fff !important;
-  color: #217346 !important;
-  font-weight: 700 !important;
-  border-top: 2px solid #217346 !important;
-  margin-top: -2px !important;
+background: #fff !important;
+color: #217346 !important;
+font-weight: 700 !important;
+border-top: 2px solid #217346 !important;
+margin-top: -2px !important;
 }
 /* 행/열 헤더 */
 body.excel-mode .content {
-  background: #fff !important;
-  padding: 0 !important;
+background: #fff !important;
+padding: 0 !important;
 }
 body.excel-mode #tab-schedule,
 body.excel-mode #tab-expenses,
 body.excel-mode #tab-settings {
-  min-height: 60vh;
+min-height: 60vh;
 }
 /* 셀 그리드 */
 body.excel-mode .card {
-  background: #fff !important;
-  border: none !important;
-  border-bottom: 1px solid #d0d7be !important;
-  border-right: 1px solid #d0d7de !important;
-  border-radius: 0 !important;
-  margin: 0 !important;
-  padding: 4px 8px 4px 32px !important;
-  box-shadow: none !important;
-  position: relative !important;
+background: #fff !important;
+border: none !important;
+border-bottom: 1px solid #d0d7be !important;
+border-right: 1px solid #d0d7de !important;
+border-radius: 0 !important;
+margin: 0 !important;
+padding: 4px 8px 4px 32px !important;
+box-shadow: none !important;
+position: relative !important;
 }
 /* 행 번호 */
 body.excel-mode .card::before {
-  content: attr(data-row);
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 28px;
-  background: #f2f2f2;
-  border-right: 1px solid #bbb;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  color: #666;
-  font-family: 'Calibri','Arial',sans-serif;
+content: attr(data-row);
+position: absolute;
+left: 0;
+top: 0;
+bottom: 0;
+width: 28px;
+background: #f2f2f2;
+border-right: 1px solid #bbb;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 10px;
+color: #666;
+font-family: ‘Calibri’,‘Arial’,sans-serif;
 }
 body.excel-mode .card:nth-child(even) {
-  background: #fff !important;
+background: #fff !important;
 }
 body.excel-mode .card:nth-child(odd) {
-  background: #fff !important;
+background: #fff !important;
 }
 /* 선택된 셀 효과 */
 body.excel-mode .card:focus-within {
-  outline: 2px solid #0070C0 !important;
-  z-index: 1 !important;
+outline: 2px solid #0070C0 !important;
+z-index: 1 !important;
 }
 /* 섹션 제목 → 열 헤더 */
 body.excel-mode h3 {
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  color: #000 !important;
-  background: #d6e4bc !important;
-  padding: 4px 8px 4px 32px !important;
-  border: 1px solid #a8c08a !important;
-  border-radius: 0 !important;
-  margin: 0 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.3px !important;
-  position: relative !important;
+font-size: 11px !important;
+font-weight: 700 !important;
+color: #000 !important;
+background: #d6e4bc !important;
+padding: 4px 8px 4px 32px !important;
+border: 1px solid #a8c08a !important;
+border-radius: 0 !important;
+margin: 0 !important;
+text-transform: uppercase !important;
+letter-spacing: 0.3px !important;
+position: relative !important;
 }
 body.excel-mode h3::before {
-  content: '▶';
-  position: absolute;
-  left: 8px;
-  font-size: 8px;
-  color: #217346;
+content: ‘▶’;
+position: absolute;
+left: 8px;
+font-size: 8px;
+color: #217346;
 }
 /* 행 번호 자동 부여 */
-body.excel-mode .card:nth-child(1)::before  { content: '1'; }
-body.excel-mode .card:nth-child(2)::before  { content: '2'; }
-body.excel-mode .card:nth-child(3)::before  { content: '3'; }
-body.excel-mode .card:nth-child(4)::before  { content: '4'; }
-body.excel-mode .card:nth-child(5)::before  { content: '5'; }
-body.excel-mode .card:nth-child(6)::before  { content: '6'; }
-body.excel-mode .card:nth-child(7)::before  { content: '7'; }
-body.excel-mode .card:nth-child(8)::before  { content: '8'; }
-body.excel-mode .card:nth-child(9)::before  { content: '9'; }
-body.excel-mode .card:nth-child(10)::before { content: '10'; }
-body.excel-mode .card:nth-child(11)::before { content: '11'; }
-body.excel-mode .card:nth-child(12)::before { content: '12'; }
-body.excel-mode .card:nth-child(13)::before { content: '13'; }
-body.excel-mode .card:nth-child(14)::before { content: '14'; }
-body.excel-mode .card:nth-child(15)::before { content: '15'; }
+body.excel-mode .card:nth-child(1)::before  { content: ‘1’; }
+body.excel-mode .card:nth-child(2)::before  { content: ‘2’; }
+body.excel-mode .card:nth-child(3)::before  { content: ‘3’; }
+body.excel-mode .card:nth-child(4)::before  { content: ‘4’; }
+body.excel-mode .card:nth-child(5)::before  { content: ‘5’; }
+body.excel-mode .card:nth-child(6)::before  { content: ‘6’; }
+body.excel-mode .card:nth-child(7)::before  { content: ‘7’; }
+body.excel-mode .card:nth-child(8)::before  { content: ‘8’; }
+body.excel-mode .card:nth-child(9)::before  { content: ‘9’; }
+body.excel-mode .card:nth-child(10)::before { content: ‘10’; }
+body.excel-mode .card:nth-child(11)::before { content: ‘11’; }
+body.excel-mode .card:nth-child(12)::before { content: ‘12’; }
+body.excel-mode .card:nth-child(13)::before { content: ‘13’; }
+body.excel-mode .card:nth-child(14)::before { content: ‘14’; }
+body.excel-mode .card:nth-child(15)::before { content: ‘15’; }
 /* 입력 → 셀 */
 body.excel-mode input, body.excel-mode textarea {
-  border: 1px solid #bbb !important;
-  border-radius: 0 !important;
-  height: 24px !important;
-  padding: 1px 4px !important;
-  font-size: 11px !important;
-  font-family: 'Calibri','Arial',sans-serif !important;
-  background: #fff !important;
-  box-shadow: none !important;
+border: 1px solid #bbb !important;
+border-radius: 0 !important;
+height: 24px !important;
+padding: 1px 4px !important;
+font-size: 11px !important;
+font-family: ‘Calibri’,‘Arial’,sans-serif !important;
+background: #fff !important;
+box-shadow: none !important;
 }
 body.excel-mode input:focus, body.excel-mode textarea:focus {
-  border: 2px solid #0070C0 !important;
-  box-shadow: none !important;
-  background: #fff !important;
-  outline: none !important;
+border: 2px solid #0070C0 !important;
+box-shadow: none !important;
+background: #fff !important;
+outline: none !important;
 }
 body.excel-mode textarea { height: auto !important; min-height: 48px !important; }
 body.excel-mode input[type=date] { height: 24px !important; }
 /* 버튼 */
 body.excel-mode .bp {
-  background: #217346 !important;
-  color: #fff !important;
-  border: 1px solid #185a2e !important;
-  border-radius: 1px !important;
-  font-size: 11px !important;
-  padding: 4px 12px !important;
-  height: auto !important;
-  font-family: 'Calibri','Arial',sans-serif !important;
+background: #217346 !important;
+color: #fff !important;
+border: 1px solid #185a2e !important;
+border-radius: 1px !important;
+font-size: 11px !important;
+padding: 4px 12px !important;
+height: auto !important;
+font-family: ‘Calibri’,‘Arial’,sans-serif !important;
 }
 body.excel-mode .bg {
-  background: #f2f2f2 !important;
-  border: 1px solid #bbb !important;
-  border-radius: 1px !important;
-  font-size: 11px !important;
-  padding: 4px 10px !important;
-  color: #333 !important;
+background: #f2f2f2 !important;
+border: 1px solid #bbb !important;
+border-radius: 1px !important;
+font-size: 11px !important;
+padding: 4px 10px !important;
+color: #333 !important;
 }
 body.excel-mode .bt, body.excel-mode .bd {
-  font-size: 11px !important;
-  padding: 2px 5px !important;
+font-size: 11px !important;
+padding: 2px 5px !important;
 }
 /* 칩 → 셀 드롭다운 */
 body.excel-mode .chip {
-  border: 1px solid #bbb !important;
-  border-radius: 0 !important;
-  font-size: 11px !important;
-  padding: 3px 7px !important;
-  background: #f9f9f9 !important;
-  color: #333 !important;
+border: 1px solid #bbb !important;
+border-radius: 0 !important;
+font-size: 11px !important;
+padding: 3px 7px !important;
+background: #f9f9f9 !important;
+color: #333 !important;
 }
 body.excel-mode .chip.on {
-  background: #d6e4bc !important;
-  color: #217346 !important;
-  border-color: #217346 !important;
+background: #d6e4bc !important;
+color: #217346 !important;
+border-color: #217346 !important;
 }
 /* 레이블 */
 body.excel-mode .lbl {
-  font-size: 10px !important;
-  color: #555 !important;
-  font-family: 'Calibri','Arial',sans-serif !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.3px !important;
+font-size: 10px !important;
+color: #555 !important;
+font-family: ‘Calibri’,‘Arial’,sans-serif !important;
+text-transform: uppercase !important;
+letter-spacing: 0.3px !important;
 }
 /* 아코디언 */
 body.excel-mode [data-gkey] {
-  border-radius: 0 !important;
-  background: #e2efda !important;
-  border: 1px solid #a8c08a !important;
-  padding-left: 32px !important;
+border-radius: 0 !important;
+background: #e2efda !important;
+border: 1px solid #a8c08a !important;
+padding-left: 32px !important;
 }
 /* 통계 */
 body.excel-mode .stat-card {
-  border: 1px solid #bbb !important;
-  border-radius: 0 !important;
-  background: #f2f8ee !important;
+border: 1px solid #bbb !important;
+border-radius: 0 !important;
+background: #f2f8ee !important;
 }
 body.excel-mode .stat-grid {
-  border-top: 1px solid #bbb !important;
-  border-left: 1px solid #bbb !important;
+border-top: 1px solid #bbb !important;
+border-left: 1px solid #bbb !important;
 }
 body.excel-mode .stat-card {
-  border-top: none !important;
-  border-left: none !important;
+border-top: none !important;
+border-left: none !important;
 }
 /* day-card */
 body.excel-mode .day-card {
-  border: 1px solid #a8c08a !important;
-  border-left: 3px solid #217346 !important;
-  margin: 4px 0 !important;
-  border-radius: 0 !important;
-  padding-left: 32px !important;
+border: 1px solid #a8c08a !important;
+border-left: 3px solid #217346 !important;
+margin: 4px 0 !important;
+border-radius: 0 !important;
+padding-left: 32px !important;
 }
 /* 엑셀 토글 버튼 */
 body.excel-mode #excel-toggle-btn {
-  color: #fff !important;
-  border-color: rgba(255,255,255,0.5) !important;
-  background: rgba(255,255,255,0.15) !important;
+color: #fff !important;
+border-color: rgba(255,255,255,0.5) !important;
+background: rgba(255,255,255,0.15) !important;
 }
 /* 텍스트 */
 body.excel-mode p, body.excel-mode span {
-  font-family: 'Calibri','Arial',sans-serif !important;
-  font-size: 12px !important;
+font-family: ‘Calibri’,‘Arial’,sans-serif !important;
+font-size: 12px !important;
 }
 /* 셀 선택 시 이름 상자 (좌상단 셀 주소) */
 body.excel-mode .content::before {
-  content: 'A1';
-  display: block;
-  background: #f2f2f2;
-  border: 1px solid #bbb;
-  border-top: none;
-  padding: 2px 8px;
-  font-size: 11px;
-  font-family: 'Calibri','Arial',sans-serif;
-  color: #333;
-  width: 60px;
+content: ‘A1’;
+display: block;
+background: #f2f2f2;
+border: 1px solid #bbb;
+border-top: none;
+padding: 2px 8px;
+font-size: 11px;
+font-family: ‘Calibri’,‘Arial’,sans-serif;
+color: #333;
+width: 60px;
 }
 </style>
+
 </head>
 <body>
 <div id="s-loading" class="loading">
@@ -443,24 +445,15 @@ body.excel-mode .content::before {
 </div>
 <div id="s-trip">
   <div class="trip-hd">
-    <div class="bw" style="max-width:600px;margin:0 auto">
-      <div style="flex:1;min-width:0;margin-right:10px">
+    <div class="bw" style="max-width:600px;margin:0 auto;gap:10px">
+      <button onclick="go('home')" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:4px 6px 4px 0;flex-shrink:0;display:flex;align-items:center"><i class="ti ti-chevron-left" style="font-size:22px"></i></button>
+      <div style="flex:1;min-width:0">
         <h2 id="trip-name" style="font-size:18px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></h2>
         <p id="trip-dates" style="font-size:12px;color:var(--muted);margin-top:2px"></p>
         <p id="trip-me" style="font-size:12px;color:var(--muted);margin-top:2px"></p>
       </div>
-      <div style="display:flex;gap:6px;flex-shrink:0">
-        <button onclick="toggleCode()" style="background:var(--AX);border:1.5px solid var(--AL);border-radius:var(--r);padding:9px 12px;font-size:13px;font-weight:700;cursor:pointer;color:var(--A);font-family:inherit"><i class="ti ti-share"></i></button>
-        <button onclick="go('home')" style="background:transparent;border:1.5px solid var(--border);border-radius:var(--r);padding:9px 12px;font-size:13px;cursor:pointer;color:var(--muted);font-family:inherit"><i class="ti ti-home"></i></button>
-        <button id="excel-toggle-btn" onclick="toggleExcelMode()" style="background:transparent;border:1.5px solid var(--border);border-radius:var(--r);padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;color:#217346;font-family:inherit" title="엑셀 모드">📊</button>
-      </div>
     </div>
-    <div id="code-panel" style="display:none;max-width:600px;margin:8px auto 0;background:var(--AX);border:1.5px solid var(--AL);border-radius:var(--r);padding:10px 14px">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <div><p style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">여행 코드</p><p id="share-code" style="font-size:18px;font-weight:900;letter-spacing:6px;color:var(--A)"></p></div>
-        <button class="copy-btn" style="flex:1;min-width:120px;padding:7px 12px;font-size:13px" onclick="copyCode()"><i class="ti ti-copy"></i>코드 복사</button>
-      </div>
-    </div>
+
   </div>
   <div class="tabs">
     <button class="tab on" data-tab="schedule" onclick="switchTab('schedule')"><i class="ti ti-calendar" style="font-size:14px"></i>일정</button>
@@ -806,15 +799,10 @@ function setNickPlaceholders() {
 }
 
 function toggleExcelMode(){
-  var isExcel = document.body.classList.toggle('excel-mode');
-  var btn = document.getElementById('excel-toggle-btn');
-  if(btn) {
-    btn.title = isExcel ? '기본 테마로 돌아가기' : '엑셀 모드';
-    btn.textContent = isExcel ? '🌿' : '📊';
-  }
-  // 탭 바 색상도 변경
-  var tabs = document.querySelector('.tabs');
-  if(tabs) tabs.style.setProperty('--tab-bg', isExcel ? '#217346' : '#fff');
+  document.body.classList.toggle('excel-mode');
+  // 설정 탭 다시 렌더 (ON/OFF 버튼 상태 반영)
+  var activeTab = (document.querySelector('.tab.on')||{}).dataset;
+  if(activeTab && activeTab.tab === 'settings') renderSettings();
 }
 
 function toggleCode(){var p=document.getElementById('code-panel');p.style.display=p.style.display==='none'?'block':'none';}
@@ -1043,8 +1031,9 @@ function renderExpenses(){
             +'<i class="ti ti-'+(CI[exp.cat]||'credit-card')+'" style="font-size:20px;color:var(--A);flex-shrink:0;padding-top:3px"></i>'
             +'<div style="min-width:0"><p style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+exp.title+'</p>'
             +(exp.origAmount?'<p style="font-size:11px;color:var(--muted);margin-top:2px">'+exp.origAmount.toLocaleString()+' '+exp.origCurrency+' → '+fmt(exp.amount)+'원</p>':'')
-            +'<p style="font-size:12px;color:var(--muted);margin-top:3px">'+(exp.paidBy==='individual'?'개별결제':getMemberName(exp.paidBy)+' 결제')+' · '+(exp.split||[]).length+'명 분담</p>'
+            +'<p style="font-size:12px;color:var(--muted);margin-top:3px">'+(exp.paidBy==='individual'?'개별결제':getMemberName(exp.paidBy)+' 결제')+'</p>'
             +'<p style="font-size:11px;color:var(--muted);margin-top:2px">1인당 '+fmt(Math.round(exp.amount/((exp.split||[]).length||1)))+'원</p>'
+
             +'</div></div>'
             +'<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'
             +'<span style="font-weight:900;font-size:15px;color:var(--A);white-space:nowrap">'+fmt(exp.amount)+'원</span>'
@@ -1307,7 +1296,19 @@ function renderSettings(){
       +'<button onclick="deleteTrip()" style="width:100%;padding:13px;background:transparent;border:1.5px solid var(--no);border-radius:var(--r);color:var(--no);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="ti ti-trash"></i>여행 삭제하기</button>'
       +'</div>';
   }
-  h+='<div style="margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border)"><button class="bg" style="width:100%" onclick="go(\'home\')"><i class="ti ti-home"></i>홈으로 돌아가기</button></div>';
+  // 공유하기 섹션
+  h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">공유하기</h3>';
+  h+='<div class="card">'
+    +'<p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:6px">여행 코드</p>'
+    +'<p style="font-size:28px;font-weight:900;letter-spacing:8px;color:var(--A);margin-bottom:12px">'+S.code+'</p>'
+    +'<button class="copy-btn" onclick="copyCode()"><i class="ti ti-copy"></i>코드 복사하기</button>'
+    +'</div>';
+  // 테마 섹션
+  h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">테마</h3>';
+  h+='<div class="card" style="display:flex;align-items:center;justify-content:space-between">'
+    +'<div><p style="font-weight:700;font-size:15px">📊 엑셀 모드</p><p style="font-size:12px;color:var(--muted);margin-top:3px">회사에서도 들키지 않게 😂</p></div>'
+    +'<button id="excel-toggle-btn" onclick="toggleExcelMode()" style="background:'+(document.body.classList.contains('excel-mode')?'#217346':'var(--border)')+';color:'+(document.body.classList.contains('excel-mode')?'#fff':'var(--muted)')+';border:none;border-radius:20px;padding:6px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s">'+(document.body.classList.contains('excel-mode')?'ON':'OFF')+'</button>'
+    +'</div>';
   el.innerHTML=h;
   updateSettingNights();
 }
@@ -1473,5 +1474,6 @@ function onDragEnd(e){
 }
 
 </script>
+
 </body>
 </html>
