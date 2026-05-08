@@ -903,7 +903,7 @@ function renderSchedule(){
       } else {
         h+='<div class="act-row" data-act-id="'+act.id+'">'
           +'<button onmousedown="startDrag(\''+day.id+'\',\''+act.id+'\',event)" ontouchstart="startDrag(\''+day.id+'\',\''+act.id+'\',event)" style="background:none;border:none;cursor:grab;padding:4px 2px;color:#ccc;font-size:18px;touch-action:none;flex-shrink:0;align-self:center"><i class="ti ti-grip-vertical"></i></button>'
-          +(act.time?'<span style="font-size:11px;color:var(--A);font-weight:700;min-width:38px;padding-top:3px;flex-shrink:0">'+act.time+'</span>':'')
+          +'<span style="font-size:11px;color:var(--A);font-weight:700;min-width:42px;padding-top:3px;flex-shrink:0;text-align:center">'+(act.time||'')+'</span>'
           +'<div style="flex:1;min-width:0"><p style="font-size:14px;font-weight:700">'+act.title+'</p>'
           +(act.location?'<p style="font-size:12px;color:var(--muted);margin-top:3px"><i class="ti ti-map-pin" style="font-size:11px;margin-right:2px"></i>'+act.location+'</p>':'')
           +(act.note?'<p style="font-size:12px;color:var(--muted);margin-top:2px">'+act.note+'</p>':'')
@@ -919,8 +919,8 @@ function renderSchedule(){
       h+='<div style="display:block;border-top:1px solid var(--border);padding-top:14px;margin-top:8px">'
         +'<p style="font-size:14px;font-weight:700;margin-bottom:12px">일정 추가</p>'
         +'<div class="col">'
-        +'<div><label class="lbl">시간 (선택)</label><input id="at-'+day.id+'" type="text" placeholder="00:00" inputmode="numeric" maxlength="5" oninput="fmtTime(this)" autocomplete="off"></div>'
         +'<div><label class="lbl">내용 *</label><input id="an-'+day.id+'" placeholder="한라산 등반" autocomplete="off"></div>'
+        +'<div><label class="lbl">시간 (선택)</label><input id="at-'+day.id+'" type="text" placeholder="00:00" inputmode="numeric" maxlength="5" oninput="fmtTime(this)" autocomplete="off"></div>'
         +'<div id="loc-field-'+day.id+'" style="display:'+(hasLoc?'block':'none')+'"><label class="lbl">장소</label><input id="al-'+day.id+'" placeholder="한라산 국립공원" autocomplete="off"></div>'
         +'<div id="note-field-'+day.id+'" style="display:'+(hasNote?'block':'none')+'"><label class="lbl">메모</label><input id="am-'+day.id+'" placeholder="준비물, 예약번호..." autocomplete="off"></div>'
         +((locBtn||noteBtn)?'<div style="display:flex;gap:8px">'+locBtn+noteBtn+'</div>':'')
@@ -1396,8 +1396,8 @@ function startDrag(dayId,actId,e){
   if(!act) return;
   dragState={dayId:dayId,actId:actId,act:act};dropTargetId=null;
   dragGhost=document.createElement('div');
-  dragGhost.style.cssText='position:fixed;z-index:9999;pointer-events:none;opacity:.9;width:260px;background:#fff;border:2px solid var(--A);border-radius:12px;padding:12px 16px;box-shadow:0 8px 28px rgba(0,0,0,.22);font-family:inherit;transform:rotate(2deg)';
-  dragGhost.innerHTML='<div style="display:flex;align-items:center;gap:8px">'+(act.time?'<span style="font-size:11px;color:var(--A);font-weight:700">'+act.time+'</span>':'')+'<span style="font-size:14px;font-weight:700">'+act.title+'</span></div>';
+  dragGhost.style.cssText='position:fixed;z-index:9999;pointer-events:none;opacity:.85;min-width:200px;max-width:320px;background:#fff;border:2px solid var(--A);border-radius:12px;padding:10px 14px;box-shadow:0 4px 16px rgba(0,0,0,.18);font-family:inherit;';
+  dragGhost.innerHTML='<div style="display:flex;align-items:center;gap:8px">'+(act.time?'<span style="font-size:12px;color:var(--A);font-weight:700;flex-shrink:0">'+act.time+'</span>':'')+'<span style="font-size:14px;font-weight:700">'+act.title+'</span></div>'+(act.location?'<p style="font-size:12px;color:#8A6B52;margin-top:4px">📍 '+act.location+'</p>':'');
   document.body.appendChild(dragGhost);
   document.querySelectorAll('.day-card').forEach(function(c){if(c.dataset.dropDay!==dayId){c.style.border='2px dashed var(--AL)';c.style.background='#fdf8ef';}});
   var pt=e.touches?e.touches[0]:e;posGhost(pt.clientX,pt.clientY);
@@ -1406,26 +1406,70 @@ function startDrag(dayId,actId,e){
 }
 function posGhost(x,y){
   if(!dragGhost) return;
-  dragGhost.style.left=(x-130)+'px';dragGhost.style.top=(y-24)+'px';
-  dragGhost.style.display='none';var el=document.elementFromPoint(x,y);dragGhost.style.display='';
-  var zone=el&&el.closest('[data-drop-day]');var newId=zone?zone.dataset.dropDay:null;
-  if(newId!==dropTargetId){
-    if(dropTargetId){var prev=document.querySelector('[data-drop-day="'+dropTargetId+'"]');if(prev&&dropTargetId!==dragState.dayId){prev.style.border='2px dashed var(--AL)';prev.style.background='#fdf8ef';}}
-    dropTargetId=newId;
-    if(dropTargetId&&dropTargetId!==dragState.dayId){var cur=document.querySelector('[data-drop-day="'+dropTargetId+'"]');if(cur){cur.style.border='2px solid var(--A)';cur.style.background='var(--AX)';}}
+  dragGhost.style.left=(x+16)+'px'; dragGhost.style.top=(y-16)+'px';
+  // 기존 플레이스홀더 제거
+  document.querySelectorAll('.drag-placeholder').forEach(function(p){p.remove();});
+  dragGhost.style.display='none';
+  var el=document.elementFromPoint(x,y);
+  dragGhost.style.display='';
+  var targetRow=el&&el.closest('.act-row');
+  var targetZone=el&&el.closest('[data-drop-day]');
+  var newDayId=targetZone?targetZone.dataset.dropDay:null;
+  // 이전 강조 제거
+  document.querySelectorAll('.day-card').forEach(function(c){c.style.border='';c.style.background='';});
+  if(newDayId&&newDayId!==dragState.dayId){
+    // 다른 날 카드 강조
+    var dayCard=document.querySelector('[data-drop-day="'+newDayId+'"]');
+    if(dayCard){dayCard.style.border='2px solid var(--A)';dayCard.style.background='var(--AX)';}
+  }
+  // 같은 날 내 플레이스홀더
+  if(targetRow&&targetRow.dataset.actId!==dragState.actId){
+    var ph=document.createElement('div');
+    ph.className='drag-placeholder';
+    ph.style.cssText='height:4px;background:var(--A);border-radius:2px;margin:2px 0;opacity:.8;';
+    targetRow.parentNode.insertBefore(ph,targetRow);
+    dropTargetId=newDayId||dragState.dayId;
+    dragState.dropBeforeActId=targetRow.dataset.actId;
+  } else {
+    dropTargetId=newDayId;
+    dragState.dropBeforeActId=null;
   }
 }
 function onDragMove(e){if(e.cancelable)e.preventDefault();var pt=e.touches?e.touches[0]:e;posGhost(pt.clientX,pt.clientY);}
 function onDragEnd(e){
   document.removeEventListener('touchmove',onDragMove);document.removeEventListener('mousemove',onDragMove);
   if(dragGhost){dragGhost.remove();dragGhost=null;}
+  document.querySelectorAll('.drag-placeholder').forEach(function(p){p.remove();});
   document.querySelectorAll('.day-card').forEach(function(c){c.style.border='';c.style.background='';});
-  if(dragState&&dropTargetId&&dropTargetId!==dragState.dayId){
-    var srcDay=S.trip.itinerary.find(function(d){return d.id===dragState.dayId;});
+  if(!dragState){return;}
+  var srcDay=S.trip.itinerary.find(function(d){return d.id===dragState.dayId;});
+  if(dropTargetId&&dropTargetId!==dragState.dayId){
+    // 다른 날로 이동
     var dstDay=S.trip.itinerary.find(function(d){return d.id===dropTargetId;});
-    if(srcDay&&dstDay){srcDay.activities=srcDay.activities.filter(function(a){return a.id!==dragState.actId;});dstDay.activities.push(dragState.act);dbSet('trip:'+S.code,S.trip);renderSchedule();showToast('일정을 이동했어요 ✈️');}
+    if(srcDay&&dstDay){
+      srcDay.activities=srcDay.activities.filter(function(a){return a.id!==dragState.actId;});
+      if(dragState.dropBeforeActId){
+        var bi=dstDay.activities.findIndex(function(a){return a.id===dragState.dropBeforeActId;});
+        if(bi>=0) dstDay.activities.splice(bi,0,dragState.act);
+        else dstDay.activities.push(dragState.act);
+      } else { dstDay.activities.push(dragState.act); }
+      dbSet('trip:'+S.code,S.trip); renderSchedule(); showToast('일정을 이동했어요 ✈️');
+    }
+  } else if(dragState.dropBeforeActId&&dragState.dropBeforeActId!==dragState.actId){
+    // 같은 날 내 순서 변경
+    if(srcDay){
+      var acts=srcDay.activities;
+      var fi=acts.findIndex(function(a){return a.id===dragState.actId;});
+      var ti=acts.findIndex(function(a){return a.id===dragState.dropBeforeActId;});
+      if(fi>=0&&ti>=0){
+        acts.splice(fi,1);
+        var ni=acts.findIndex(function(a){return a.id===dragState.dropBeforeActId;});
+        acts.splice(ni,0,dragState.act);
+        dbSet('trip:'+S.code,S.trip); renderSchedule(); showToast('순서를 변경했어요');
+      }
+    }
   }
-  dragState=null;dropTargetId=null;
+  dragState=null; dropTargetId=null;
 }
 
 </script>
