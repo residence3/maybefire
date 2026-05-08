@@ -74,103 +74,198 @@ input[type=password]{letter-spacing:.1em}
 body.excel-mode {
   font-family: 'Calibri', 'Arial', sans-serif !important;
   background: #fff !important;
+  color: #000 !important;
 }
+/* 탭바 - 엑셀 리본 */
 body.excel-mode .tabs {
   background: #217346 !important;
-  border-bottom: none !important;
+  border-bottom: 2px solid #185a2e !important;
+  padding: 0 4px !important;
 }
 body.excel-mode .tab {
   color: #fff !important;
-  font-size: 12px !important;
+  font-size: 11px !important;
+  font-family: 'Calibri','Arial',sans-serif !important;
   border-bottom: none !important;
-  padding: 6px 4px !important;
+  padding: 8px 12px !important;
+  border-radius: 0 !important;
 }
 body.excel-mode .tab.on {
   background: #fff !important;
   color: #217346 !important;
-  border-bottom: none !important;
+  font-weight: 700 !important;
 }
+/* 헤더 */
 body.excel-mode .trip-hd {
   background: #f2f2f2 !important;
-  border-bottom: 2px solid #bbb !important;
-}
-body.excel-mode #trip-name {
-  font-family: 'Calibri', 'Arial', sans-serif !important;
-  font-size: 14px !important;
-  color: #000 !important;
-}
-body.excel-mode #trip-dates, body.excel-mode #trip-me {
-  color: #555 !important;
-  font-size: 11px !important;
-}
-body.excel-mode .content {
-  padding: 0 !important;
-}
-body.excel-mode .card {
-  border-radius: 0 !important;
-  border: 1px solid #bbb !important;
-  margin-bottom: 0 !important;
-  border-top: none !important;
+  border-bottom: 1px solid #bbb !important;
   padding: 6px 10px !important;
 }
-body.excel-mode .card:first-child {
-  border-top: 1px solid #bbb !important;
+body.excel-mode #trip-name {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #000 !important;
+  font-family: 'Calibri','Arial',sans-serif !important;
 }
+body.excel-mode #trip-dates, body.excel-mode #trip-me {
+  font-size: 11px !important;
+  color: #666 !important;
+}
+/* 컨텐츠 영역 - 그리드 배경 */
+body.excel-mode .content {
+  background: #fff !important;
+  padding: 0 !important;
+}
+/* 카드 → 엑셀 행 */
+body.excel-mode .card {
+  background: #fff !important;
+  border: none !important;
+  border-bottom: 1px solid #d0d7be !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 6px 8px !important;
+  box-shadow: none !important;
+}
+body.excel-mode .card:nth-child(even) {
+  background: #f2f8ee !important;
+}
+/* 섹션 헤더 → 엑셀 컬럼 헤더 */
 body.excel-mode h3 {
-  font-size: 12px !important;
-  font-weight: bold !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
   color: #000 !important;
   background: #d6e4bc !important;
-  padding: 4px 8px !important;
-  border: 1px solid #bbb !important;
-  margin-bottom: 0 !important;
+  padding: 5px 8px !important;
+  border: 1px solid #a8c08a !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0 !important;
 }
+/* 그리드 컬럼 라인 효과 */
+body.excel-mode .bw {
+  border-bottom: 1px solid #e0e0e0 !important;
+}
+/* 입력 → 엑셀 셀 */
+body.excel-mode input, body.excel-mode textarea {
+  border: 2px solid #217346 !important;
+  border-radius: 0 !important;
+  height: 28px !important;
+  padding: 2px 6px !important;
+  font-size: 12px !important;
+  font-family: 'Calibri','Arial',sans-serif !important;
+  background: #fff !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+body.excel-mode input:focus, body.excel-mode textarea:focus {
+  border: 2px solid #0070C0 !important;
+  box-shadow: 0 0 0 1px #0070C0 !important;
+  background: #f0f7ff !important;
+}
+body.excel-mode textarea {
+  height: auto !important;
+  min-height: 60px !important;
+}
+body.excel-mode input[type=date] {
+  height: 28px !important;
+}
+/* 버튼 → 엑셀 스타일 */
+body.excel-mode .bp {
+  background: #217346 !important;
+  color: #fff !important;
+  border: 1px solid #185a2e !important;
+  border-radius: 2px !important;
+  font-size: 12px !important;
+  padding: 5px 14px !important;
+  font-family: 'Calibri','Arial',sans-serif !important;
+  font-weight: 700 !important;
+}
+body.excel-mode .bp:hover { background: #185a2e !important; }
+body.excel-mode .bg {
+  background: #f2f2f2 !important;
+  border: 1px solid #bbb !important;
+  border-radius: 2px !important;
+  font-size: 12px !important;
+  padding: 5px 12px !important;
+  font-family: 'Calibri','Arial',sans-serif !important;
+  color: #333 !important;
+}
+/* 칩 → 엑셀 셀 선택 */
 body.excel-mode .chip {
+  border: 1px solid #bbb !important;
   border-radius: 0 !important;
   font-size: 11px !important;
   padding: 4px 8px !important;
-  border: 1px solid #bbb !important;
+  background: #f2f2f2 !important;
+  color: #333 !important;
 }
 body.excel-mode .chip.on {
   background: #d6e4bc !important;
   color: #217346 !important;
   border-color: #217346 !important;
+  font-weight: 700 !important;
 }
-body.excel-mode input, body.excel-mode textarea {
-  border-radius: 0 !important;
-  border: 1px solid #bbb !important;
-  font-size: 12px !important;
-  height: 26px !important;
-  padding: 2px 6px !important;
-  font-family: 'Calibri', 'Arial', sans-serif !important;
-}
-body.excel-mode .bp {
-  border-radius: 0 !important;
-  background: #217346 !important;
-  color: #fff !important;
-  font-size: 12px !important;
-  padding: 5px 12px !important;
-  font-family: 'Calibri', 'Arial', sans-serif !important;
-}
-body.excel-mode .bg {
-  border-radius: 0 !important;
-  font-size: 12px !important;
-  padding: 5px 12px !important;
-}
-body.excel-mode .day-card {
-  border-left: 3px solid #217346 !important;
-}
-body.excel-mode p, body.excel-mode span, body.excel-mode label {
-  font-size: 12px !important;
-  font-family: 'Calibri', 'Arial', sans-serif !important;
-}
+/* 일정 행 */
 body.excel-mode .act-row {
-  border-top: 1px solid #e0e0e0 !important;
+  border: none !important;
+  border-bottom: 1px solid #e0e0e0 !important;
   padding: 4px 0 !important;
+  background: transparent !important;
+}
+body.excel-mode .act-row:nth-child(even) {
+  background: #f7fbf3 !important;
+}
+/* 일정 날짜 카드 */
+body.excel-mode .day-card {
+  border: 1px solid #a8c08a !important;
+  border-left: 3px solid #217346 !important;
+  margin: 6px 0 !important;
+  border-radius: 0 !important;
+}
+/* 레이블 */
+body.excel-mode .lbl {
+  font-size: 10px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  color: #666 !important;
+  font-family: 'Calibri','Arial',sans-serif !important;
+}
+/* 에러 */
+body.excel-mode .err {
+  border-radius: 0 !important;
+  border-left: 3px solid #cc0000 !important;
+  background: #fff0f0 !important;
+}
+/* 아코디언 헤더 */
+body.excel-mode [data-gkey] {
+  border-radius: 0 !important;
+  background: #d6e4bc !important;
+  border: 1px solid #a8c08a !important;
+}
+/* 통계 카드 */
+body.excel-mode .stat-card {
+  border: 1px solid #bbb !important;
+  border-radius: 0 !important;
+  background: #f2f8ee !important;
+}
+/* 전체 텍스트 */
+body.excel-mode p, body.excel-mode span:not(.ti):not([class*="ti-"]) {
+  font-family: 'Calibri','Arial',sans-serif !important;
+}
+/* 엑셀 그리드 라인 배경 효과 */
+body.excel-mode #tab-schedule,
+body.excel-mode #tab-expenses,
+body.excel-mode #tab-settings {
+  background-image: linear-gradient(#e8f0e0 1px, transparent 1px);
+  background-size: 100% 28px;
+  background-color: #fff !important;
 }
 body.excel-mode #excel-toggle-btn {
-  background: #217346 !important;
-  color: #fff !important;
+  background: #fff !important;
+  color: #217346 !important;
+  border-color: #fff !important;
+  font-weight: 700 !important;
 }
 </style>
 </head>
@@ -236,7 +331,7 @@ body.excel-mode #excel-toggle-btn {
       </div>
       <p id="nights-badge" style="display:none;font-size:13px;color:var(--A);text-align:right;margin-top:6px"></p>
     </div>
-    <div><label class="lbl">내 닉네임 <span style="font-weight:400;color:var(--muted)">(이 여행에서 사용)</span></label><input id="inp-creator-nick" placeholder="철수귀요미" oninput="this.value=this.value.replace(/\s/g,'').slice(0,10)" autocomplete="off"></div>
+    <div><label class="lbl">내 닉네임 <span style="font-weight:400;color:var(--muted)">(이 여행에서 사용)</span></label><input id="inp-creator-nick" placeholder="닉네임" oninput="this.value=this.value.replace(/\s/g,'').slice(0,10)" autocomplete="off"></div>
     <button class="bp" onclick="doCreate()">여행 만들기 <i class="ti ti-arrow-right"></i></button>
   </div>
 </div>
@@ -260,7 +355,7 @@ body.excel-mode #excel-toggle-btn {
       <button class="copy-btn" style="margin-top:8px" onclick="copyCode()"><i class="ti ti-copy"></i>코드 공유하기</button>
     </div>
     <div id="err-nick" class="err"></div>
-    <div><label class="lbl">닉네임</label><input id="inp-nick" placeholder="철수귀요미" oninput="this.value=this.value.replace(/\s/g,'').slice(0,10)" autocomplete="off" autocorrect="off"></div>
+    <div><label class="lbl">닉네임</label><input id="inp-nick" placeholder="닉네임" oninput="this.value=this.value.replace(/\s/g,'').slice(0,10)" autocomplete="off" autocorrect="off"></div>
     <button class="bp" onclick="doSetNick()">입장하기 <i class="ti ti-arrow-right"></i></button>
   </div>
 </div>
@@ -407,6 +502,7 @@ function go(screen) {
   el.style.display=screen==='trip'?'block':'flex';
   if(screen==='trip') window.scrollTo(0,0);
   if(screen==='home') loadMyTrips();
+  if(screen==='nick'||screen==='create') setNickPlaceholders();
 }
 
 auth.onAuthStateChanged(function(user) {
@@ -549,7 +645,7 @@ async function doCreate() {
   if(btn){btn.disabled=true;btn.textContent='저장 중...';}
   var c=mkCode();
   var t={name:name,code:c,startDate:startDate,endDate:endDate,members:[],itinerary:[],expenses:[],createdAt:Date.now(),createdBy:S.user.uid};
-  t.members.push({uid:S.user.uid,nickname:nick});
+  t.members.push({uid:S.user.uid,nickname:nick,email:S.user.email||''});
   t=autoPopulateDays(t);
   await dbSet('trip:'+c,t);
   var patch={}; patch[c]={nickname:nick,joinedAt:Date.now()};
@@ -590,7 +686,7 @@ async function doSetNick() {
     var exists=members.find(function(m){return (typeof m==='object'?m.nickname:m)===nick&&(typeof m==='object'?m.uid!==S.user.uid:true);});
     if(exists) throw new Error('이미 사용 중인 닉네임이에요');
     var myMember=members.find(function(m){return typeof m==='object'&&m.uid===S.user.uid;});
-    if(!myMember) members.push({uid:S.user.uid,nickname:nick});
+    if(!myMember) members.push({uid:S.user.uid,nickname:nick,email:S.user.email||''});
     t.members=members; t=autoPopulateDays(t); t.itinerary=t.itinerary||[]; t.expenses=t.expenses||[];
     await dbSet('trip:'+S.pendingCode,t);
     var patch={}; patch[S.pendingCode]={nickname:nick,joinedAt:Date.now()};
@@ -606,6 +702,25 @@ function copyCode() {
   var txt='같이 가자! 여행 코드: '+code+'\n"코드로 참여하기"를 누르고 코드를 입력해줘 👉 '+(location.origin+location.pathname).replace(/\/$/,'');
   if(navigator.clipboard){navigator.clipboard.writeText(txt).then(function(){showToast('코드가 복사됐어요! 📋');});}
   else{var el=document.createElement('textarea');el.value=txt;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);showToast('코드가 복사됐어요! 📋');}
+}
+
+var FUNNY_NICKS = [
+  '버스놓친사람','비행기못탄사람','지도못읽는사람','길치여행자',
+  '사진만찍는사람','맛집헌터','쇼핑중독자','면세점털이범',
+  '숙소에만있고싶다','현지인척하는사람','짐만많은여행자','여권잃어버림',
+  '환전안한사람','선크림발랐나','우산챙긴사람','멀미하는중',
+  '낮잠전문가','야경러버','해돋이기상조','현지음식도전가',
+  '기념품수집가','카페투어전문','온천마니아','자유여행고수',
+  '패키지여행파','캐리어가득채움','공항러너','환승맛집탐방'
+];
+function randomNickPlaceholder() {
+  return FUNNY_NICKS[Math.floor(Math.random() * FUNNY_NICKS.length)];
+}
+function setNickPlaceholders() {
+  ['inp-nick','inp-creator-nick'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.placeholder = randomNickPlaceholder();
+  });
 }
 
 function toggleExcelMode(){
@@ -632,8 +747,8 @@ function renderTrip(){
   document.getElementById('trip-dates').textContent=t.startDate?(t.endDate?t.startDate+' ~ '+t.endDate:t.startDate):'';
   document.getElementById('trip-me').innerHTML='<i class="ti ti-user" style="font-size:11px;margin-right:3px"></i>'+S.me;
   document.getElementById('share-code').textContent=S.code;
-  var activeTab=(document.querySelector('.tab.on')||{}).dataset&&document.querySelector('.tab.on').dataset.tab||'schedule';
-  renderTabSafe(activeTab);
+  // 항상 일정 탭 먼저
+  switchTab('schedule');
 }
 function renderTabSafe(n){
   if(n==='schedule') renderSchedule();
@@ -1062,7 +1177,9 @@ function renderSettings(){
       +'<div style="flex:1;min-width:0"><p style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:6px">'+nick
       +(nick===S.me?' <span style="font-size:12px;color:var(--A);font-weight:700">나</span>':'')
       +(isHost?' <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#1DA1F2;border-radius:50%;flex-shrink:0"><i class="ti ti-check" style="font-size:10px;color:#fff"></i></span>':'')
-      +'</p></div></div>';
+      +'</p>'
+      +((typeof m==='object'&&m.email)?'<p style="font-size:12px;color:var(--muted);margin-top:2px">'+m.email+'</p>':'')
+      +'</div></div>';
   });
   h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">방 정보</h3>';
   h+='<div class="card">';
