@@ -1305,7 +1305,7 @@ function renderExpenses(){
             +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'
             +'<div style="display:flex;gap:10px;align-items:center;flex:1;min-width:0">'
             +'<button onmousedown="startExpDrag(event,\'' + exp.id + '\',\'' + gkey + '\')" ontouchstart="startExpDrag(event,\'' + exp.id + '\',\'' + gkey + '\')" style="background:none;border:none;cursor:grab;padding:4px 2px;color:#ccc;font-size:16px;touch-action:none;flex-shrink:0;align-self:center"><i class="ti ti-grip-vertical"></i></button>'
-            '<i class="ti ti-'+(CI[exp.cat]||'credit-card')+'" style="font-size:20px;color:var(--A);flex-shrink:0"></i>'
+            +'<i class="ti ti-'+(CI[exp.cat]||'credit-card')+'" style="font-size:20px;color:var(--A);flex-shrink:0"></i>'
             +'<div style="min-width:0"><p style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+exp.title+'</p>'
             +(exp.origAmount?'<p style="font-size:11px;color:var(--muted);margin-top:2px">'+exp.origAmount.toLocaleString()+' '+exp.origCurrency+' → '+fmt(exp.amount)+'원</p>':'')
             +'<p style="font-size:12px;color:var(--muted);margin-top:3px">'+(exp.paidBy==='individual'?'개별결제':getMemberName(exp.paidBy)+' 결제')+'</p>'
