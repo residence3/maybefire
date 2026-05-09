@@ -1349,6 +1349,40 @@ function renderExpenses(){
   } catch(err){el.innerHTML='<div class="card" style="border-color:var(--no)"><p style="color:var(--no);font-weight:700">오류: '+err.message+'</p></div>';console.error('renderExpenses:',err);}
 }
 
+var settleSlideIdx = 0;
+
+function slideSettle(dir) {
+  var slider = document.getElementById('settle-slider');
+  if (!slider) return;
+  settleSlideIdx = Math.max(0, Math.min(1, settleSlideIdx + dir));
+  slider.style.transform = 'translateX(-' + settleSlideIdx * 100 + '%)';
+  ['dot-0','dot-1'].forEach(function(id, i) {
+    var d = document.getElementById(id);
+    if (d) d.style.background = i === settleSlideIdx ? 'var(--A)' : 'var(--border)';
+  });
+}
+
+// 모바일 스와이프
+var settleTouchX = null;
+document.addEventListener('touchstart', function(e) {
+  var slider = document.getElementById('settle-slider');
+  if (slider && e.target.closest('#settle-panel')) settleTouchX = e.touches[0].clientX;
+}, true);
+document.addEventListener('touchend', function(e) {
+  if (settleTouchX === null) return;
+  var dx = e.changedTouches[0].clientX - settleTouchX;
+  if (Math.abs(dx) > 40) slideSettle(dx < 0 ? 1 : -1);
+  settleTouchX = null;
+}, true);
+
+async function toggleSettleItem(key) {
+  if (!S.trip.settleChecked) S.trip.settleChecked = {};
+  if (S.trip.settleChecked[key]) delete S.trip.settleChecked[key];
+  else S.trip.settleChecked[key] = true;
+  await dbSet('trip:' + S.code, S.trip);
+  renderExpenses();
+}
+
 function toggleSettle(){
   settleOpen=!settleOpen;
   renderExpenses();
