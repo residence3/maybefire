@@ -1681,24 +1681,88 @@ function sendNotif(nickname, text) {
   }
 }
 
+var chatAllMsgs = [];
+var chatLoadedIdx = 0;
+var chatPageSize = 30;
+var chatLoadingMore = false;
+
+async function loadChatHistory(code) {
+  try {
+    var token = await getToken();
+    var r = await fetch(FB + '/chat_' + code + '.json?auth=' + token);
+    if (!r.ok) return;
+    var data = await r.json();
+    if (!data) return;
+    chatAllMsgs = Object.values(data).sort(function(a,b){return a.ts-b.ts;});
+    chatAllMsgs.forEach(function(m){ chatSeenIds[m.id] = true; });
+    var container = document.getElementById('chat-msgs');
+    if (!container) return;
+    container.innerHTML = '';
+    // 최근 30개만 먼저 표시
+    var startIdx = Math.max(0, chatAllMsgs.length - chatPageSize);
+    chatLoadedIdx = startIdx;
+    if (startIdx > 0) {
+      var loadMore = document.createElement('div');
+      loadMore.id = 'chat-load-more';
+      loadMore.style.cssText = 'text-align:center;padding:8px;font-size:12px;color:var(--muted);cursor:pointer;font-weight:700';
+      loadMore.textContent = '▲ 이전 메시지 보기';
+      loadMore.onclick = loadMoreChat;
+      container.appendChild(loadMore);
+    }
+    chatAllMsgs.slice(startIdx).forEach(function(m) {
+      container.appendChild(renderChatMsg(m, m.nickname === S.me));
+    });
+    container.scrollTop = container.scrollHeight;
+    // 스크롤 상단 감지
+    container.addEventListener('scroll', function() {
+      if (container.scrollTop < 60 && chatLoadedIdx > 0 && !chatLoadingMore) {
+        loadMoreChat();
+      }
+    });
+  } catch(e) {}
+}
+
+function loadMoreChat() {
+  var container = document.getElementById('chat-msgs');
+  if (!container || chatLoadedIdx <= 0 || chatLoadingMore) return;
+  chatLoadingMore = true;
+  var prevHeight = container.scrollHeight;
+  var newStartIdx = Math.max(0, chatLoadedIdx - chatPageSize);
+  var msgsToAdd = chatAllMsgs.slice(newStartIdx, chatLoadedIdx);
+  chatLoadedIdx = newStartIdx;
+  var loadMoreBtn = document.getElementById('chat-load-more');
+  // 오래된 메시지를 맨 위에 삽입
+  var insertAfter = loadMoreBtn || container.firstChild;
+  msgsToAdd.reverse().forEach(function(m) {
+    var el = renderChatMsg(m, m.nickname === S.me);
+    if (loadMoreBtn) container.insertBefore(el, loadMoreBtn.nextSibling);
+    else container.insertBefore(el, container.firstChild);
+  });
+  // 더 없으면 버튼 제거
+  if (newStartIdx <= 0 && loadMoreBtn) loadMoreBtn.remove();
+  // 스크롤 위치 유지
+  container.scrollTop = container.scrollHeight - prevHeight;
+  chatLoadingMore = false;
+}
+
 function startChatSync(code) {
   if (chatListener) clearInterval(chatListener);
   requestNotifPerm();
-  var lastTs = Date.now() - 60000;
-  var seenIds = chatSeenIds;
+  // 입장 시 전체 히스토리 로드
+  loadChatHistory(code);
+  var lastTs = Date.now();
   chatListener = setInterval(async function() {
     if (!S.code) return;
     try {
       var token = await getToken();
-      // orderBy 없이 전체 가져와서 클라이언트 필터링
       var r = await fetch(FB + '/chat_' + code + '.json?auth=' + token);
       if (!r.ok) return;
       var data = await r.json();
       if (!data) return;
       var msgs = Object.values(data).sort(function(a,b){return a.ts-b.ts;});
-      var newMsgs = msgs.filter(function(m){ return m.ts > lastTs && !seenIds[m.id]; });
+      var newMsgs = msgs.filter(function(m){ return m.ts > lastTs && !chatSeenIds[m.id]; });
       if (!newMsgs.length) return;
-      newMsgs.forEach(function(m) { seenIds[m.id] = true; });
+      newMsgs.forEach(function(m) { chatSeenIds[m.id] = true; });
       lastTs = newMsgs[newMsgs.length-1].ts;
       var container = document.getElementById('chat-msgs');
       if (!container) return;
@@ -1716,7 +1780,7 @@ function startChatSync(code) {
       });
       if (chatOpen) container.scrollTop = container.scrollHeight;
     } catch(e) { console.error('chat sync error:', e); }
-  }, 1500);
+  }, 2000);
 }
 
 function stopChatSync() {
