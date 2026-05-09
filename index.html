@@ -411,14 +411,14 @@ body.excel-mode .content::before {
 }
 @media(max-width:599px){
   .chat-win{
-    bottom:0;left:12px;right:12px;
-    height:50vh;
-    border-radius:20px 20px 0 0;
+    bottom:80px;right:12px;left:12px;
+    height:55vh;
+    border-radius:16px;
     position:fixed;
-    max-height:50vh;
+    max-height:55vh;
     transform:translateZ(0);
   }
-  .chat-bubble{bottom:20px;right:16px;}
+  .chat-bubble{bottom:16px;right:16px;}
   .chat-msgs{flex:1;overflow-y:auto;min-height:0;overscroll-behavior:contain;}
   .chat-inp input{font-size:16px!important;}
 }
@@ -1113,8 +1113,9 @@ function stopSync(){if(syncTimer){clearInterval(syncTimer);syncTimer=null;}}
 function renderSchedule(){
   var el=document.getElementById('tab-schedule');
   var days=(S.trip&&S.trip.itinerary)?S.trip.itinerary:[];
-  var h='<div class="bw" style="margin-bottom:8px"><h3 style="font-size:17px;font-weight:900">여행 일정</h3><button class="bt" onclick="toggleDF()"><i class="ti ti-plus"></i> 날 추가</button></div>'
-    +(days.length>1?'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">'+days.map(function(d,i){return '<button onclick="document.querySelector(\"[data-drop-day=\''+d.id+'\"]\").scrollIntoView({behavior:\'smooth\',block:\'start\'})" style="min-width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;padding:0 8px">'+(i+1)+'</button>';}).join('')+'</div>':'')
+  var h='<div class="bw" style="margin-bottom:12px">'
+    +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><h3 style="font-size:17px;font-weight:900">여행 일정</h3><span id="day-jump-btns"></span></div>'
+    +'<button class="bt" onclick="toggleDF()"><i class="ti ti-plus"></i> 날 추가</button></div>'
     +'<div id="day-form" class="card" style="display:'+(openDayForm?'block':'none')+'">'
     +'<p style="font-size:15px;font-weight:700;margin-bottom:14px">새 날 추가</p>'
     +'<div class="col"><div><label class="lbl">날 이름</label><input id="df-label" placeholder="'+(days.length+1)+'일차" autocomplete="off"></div>'
@@ -1181,6 +1182,22 @@ function renderSchedule(){
     h+='</div>';
   });
   el.innerHTML=h;
+  // 퀵점프 버튼 동적 삽입
+  var jumpWrap = document.getElementById('day-jump-btns');
+  if(jumpWrap && days.length > 1) {
+    days.forEach(function(d, i) {
+      var btn = document.createElement('button');
+      btn.textContent = String(i+1);
+      btn.style.cssText = 'min-width:26px;height:26px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;padding:0 6px';
+      btn.onclick = (function(dayId){
+        return function(){
+          var target = document.querySelector('[data-drop-day="'+dayId+'"]');
+          if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+        };
+      })(d.id);
+      jumpWrap.appendChild(btn);
+    });
+  }
 }
 
 function toggleDF(){openDayForm=!openDayForm;renderSchedule();}
