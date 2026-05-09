@@ -410,8 +410,24 @@ body.excel-mode .content::before {
   .chat-bubble{bottom:20px;right:20px;}
 }
 @media(max-width:599px){
-  .chat-win{bottom:0;left:0;right:0;height:72vh;border-radius:20px 20px 0 0;}
+  .chat-win{
+    bottom:0;left:0;right:0;
+    height:60vh;
+    border-radius:20px 20px 0 0;
+    position:fixed;
+    max-height:60vh;
+  }
   .chat-bubble{bottom:20px;right:16px;}
+  .chat-msgs{flex:1;overflow-y:auto;min-height:0;}
+}
+/* 키보드 올라왔을 때 대응 */
+@supports(height:100dvh){
+  @media(max-width:599px){
+    .chat-win{
+      height:60dvh;
+      max-height:60dvh;
+    }
+  }
 }
 .chat-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
@@ -1496,8 +1512,24 @@ function toggleChat() {
     updateChatBadge();
     var msgs = document.getElementById('chat-msgs');
     if (msgs) setTimeout(function(){ msgs.scrollTop = msgs.scrollHeight; }, 50);
-    document.getElementById('chat-input').focus();
+    var inp = document.getElementById('chat-input');
+    if (inp) setTimeout(function(){ inp.focus(); }, 100);
   }
+}
+
+// 모바일 키보드 대응 - visualViewport
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', function() {
+    var win = document.getElementById('chat-win');
+    if (!win || win.style.display === 'none') return;
+    if (window.innerWidth < 600) {
+      var vvh = window.visualViewport.height;
+      win.style.maxHeight = Math.min(vvh * 0.85, vvh - 20) + 'px';
+      win.style.height = Math.min(vvh * 0.85, vvh - 20) + 'px';
+      var msgs = document.getElementById('chat-msgs');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    }
+  });
 }
 
 function updateChatBadge() {
@@ -1549,34 +1581,37 @@ function startChatSync(code) {
   if (chatListener) clearInterval(chatListener);
   requestNotifPerm();
   var lastTs = Date.now() - 60000;
+  var seenIds = {};
   chatListener = setInterval(async function() {
     if (!S.code) return;
-    var token = await getToken();
-    var r = await fetch(FB + '/chat_' + code + '.json?auth=' + token + '&orderBy="ts"&startAt=' + lastTs);
-    if (!r.ok) return;
-    var data = await r.json();
-    if (!data) return;
-    var msgs = Object.values(data).sort(function(a,b){return a.ts-b.ts;});
-    var newMsgs = msgs.filter(function(m){ return m.ts > lastTs; });
-    if (!newMsgs.length) return;
-    lastTs = newMsgs[newMsgs.length-1].ts;
-    var container = document.getElementById('chat-msgs');
-    if (!container) return;
-    newMsgs.forEach(function(m) {
-      var isMe = m.nickname === S.me;
-      container.appendChild(renderChatMsg(m, isMe));
-      if (!isMe) {
-        if (!chatOpen) {
-          chatUnread++;
-          updateChatBadge();
-          // 토스트 알림 (앱 안에 있을 때)
-          showToast('💬 ' + m.nickname + ': ' + (m.text.length > 20 ? m.text.slice(0,20)+'...' : m.text));
+    try {
+      var token = await getToken();
+      // orderBy 없이 전체 가져와서 클라이언트 필터링
+      var r = await fetch(FB + '/chat_' + code + '.json?auth=' + token);
+      if (!r.ok) return;
+      var data = await r.json();
+      if (!data) return;
+      var msgs = Object.values(data).sort(function(a,b){return a.ts-b.ts;});
+      var newMsgs = msgs.filter(function(m){ return m.ts > lastTs && !seenIds[m.id]; });
+      if (!newMsgs.length) return;
+      newMsgs.forEach(function(m) { seenIds[m.id] = true; });
+      lastTs = newMsgs[newMsgs.length-1].ts;
+      var container = document.getElementById('chat-msgs');
+      if (!container) return;
+      newMsgs.forEach(function(m) {
+        var isMe = m.nickname === S.me;
+        container.appendChild(renderChatMsg(m, isMe));
+        if (!isMe) {
+          if (!chatOpen) {
+            chatUnread++;
+            updateChatBadge();
+            showToast('💬 ' + m.nickname + ': ' + (m.text.length > 20 ? m.text.slice(0,20)+'...' : m.text));
+          }
+          sendNotif(m.nickname, m.text);
         }
-        // 브라우저 알림 (탭 밖에 있을 때)
-        sendNotif(m.nickname, m.text);
-      }
-    });
-    if (chatOpen) container.scrollTop = container.scrollHeight;
+      });
+      if (chatOpen) container.scrollTop = container.scrollHeight;
+    } catch(e) { console.error('chat sync error:', e); }
   }, 2000);
 }
 
@@ -1596,9 +1631,9 @@ function showChatBubble(show) {
   <span class="badge" id="chat-badge"></span>
 </button>
 <div class="chat-win" id="chat-win">
-  <div class="chat-hd">
+  <div class="chat-hd" onclick="toggleChat()" style="cursor:pointer">
     <span style="font-weight:900;font-size:14px"><i class="ti ti-message-circle" style="margin-right:6px;color:var(--A)"></i>실시간 채팅</span>
-    <button class="bt" onclick="toggleChat()" style="padding:4px"><i class="ti ti-x"></i></button>
+    <div style="width:32px;height:4px;background:var(--border);border-radius:2px;margin:0 4px"></div>
   </div>
   <div class="chat-msgs" id="chat-msgs"></div>
   <div class="chat-inp">
