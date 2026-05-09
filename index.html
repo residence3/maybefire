@@ -405,7 +405,7 @@ body.excel-mode .content::before {
 <body>
 <div id="s-loading" class="loading">
   <div class="plane-loader">
-    <i class="ti ti-plane-departure plane" style="font-size:44px;color:var(--A)"></i>
+    <i class="ti ti-plane plane" style="font-size:44px;color:var(--A)"></i>
 
   </div>
 </div>
@@ -449,7 +449,7 @@ body.excel-mode .content::before {
     <button class="bt" onclick="go('home')" style="align-self:flex-start;padding-left:0"><i class="ti ti-arrow-left"></i>뒤로</button>
     <h2 style="font-size:24px;font-weight:900">새 여행 만들기</h2>
     <div id="err-create" class="err"></div>
-    <div><label class="lbl">여행 이름</label><input id="inp-tname" placeholder="제주도 여름 여행" maxlength="10" autocomplete="off"></div>
+    <div><label class="lbl">여행 이름</label><input id="inp-tname" placeholder="제주도 여름 여행" maxlength="15" autocomplete="off"></div>
     <div>
       <label class="lbl">여행 날짜</label>
       <div class="date-range">
@@ -1353,7 +1353,7 @@ function renderSettings(){
     h+='<div class="col" style="margin-bottom:14px">'
       +'<div style="display:flex;align-items:center;justify-content:space-between"><label class="lbl" style="margin:0">여행 이름</label>'
       +'<button class="bt" style="font-size:12px;color:var(--no)" onclick="editingName=false;renderSettings()">취소</button></div>'
-      +'<input id="set-name" value="'+(S.trip.name||'')+'" maxlength="10" autocomplete="off">'
+      +'<input id="set-name" value="'+(S.trip.name||'')+'" maxlength="15" autocomplete="off">'
       +'<button class="bp" style="padding:10px" onclick="saveName()">저장</button></div>';
   } else {
     h+='<div class="bw" style="padding:4px 0;margin-bottom:12px">'
