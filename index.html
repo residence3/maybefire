@@ -7,7 +7,115 @@
 <title>같이 가자 ✈️</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+// ══ 채팅 ══
+var chatOpen = false;
+var chatListener = null;
+var chatUnread = 0;
+var lastChatCount = 0;
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  var win = document.getElementById('chat-win');
+  win.style.display = chatOpen ? 'flex' : 'none';
+  if (chatOpen) {
+    chatUnread = 0;
+    updateChatBadge();
+    var msgs = document.getElementById('chat-msgs');
+    if (msgs) setTimeout(function(){ msgs.scrollTop = msgs.scrollHeight; }, 50);
+    document.getElementById('chat-input').focus();
+  }
+}
+
+function updateChatBadge() {
+  var badge = document.getElementById('chat-badge');
+  if (!badge) return;
+  badge.style.display = chatUnread > 0 && !chatOpen ? 'flex' : 'none';
+  badge.textContent = chatUnread > 9 ? '9+' : chatUnread;
+}
+
+async function sendChat() {
+  var inp = document.getElementById('chat-input');
+  var text = inp.value.trim();
+  if (!text || !S.code || !S.me) return;
+  inp.value = '';
+  var msg = { id: uid(), nickname: S.me, text: text, ts: Date.now() };
+  var token = await getToken();
+  await fetch(FB + '/chat_' + S.code + '/' + msg.id + '.json?auth=' + token, {
+    method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(msg)
+  });
+}
+
+function renderChatMsg(msg, isMe) {
+  var div = document.createElement('div');
+  div.className = 'chat-msg ' + (isMe ? 'me' : 'other');
+  var t = new Date(msg.ts);
+  var timeStr = t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
+  if (!isMe) div.innerHTML = '<div class="sender">' + msg.nickname + '</div>';
+  div.innerHTML += '<div>' + msg.text.replace(/</g,'&lt;') + '</div>';
+  div.innerHTML += '<div class="time">' + timeStr + '</div>';
+  return div;
+}
+
+function requestNotifPerm() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function sendNotif(nickname, text) {
+  if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+    new Notification('💬 ' + nickname, {
+      body: text,
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><text y="28" font-size="28">✈️</text></svg>'
+    });
+  }
+}
+
+function startChatSync(code) {
+  if (chatListener) clearInterval(chatListener);
+  requestNotifPerm();
+  var lastTs = Date.now() - 60000;
+  chatListener = setInterval(async function() {
+    if (!S.code) return;
+    var token = await getToken();
+    var r = await fetch(FB + '/chat_' + code + '.json?auth=' + token + '&orderBy="ts"&startAt=' + lastTs);
+    if (!r.ok) return;
+    var data = await r.json();
+    if (!data) return;
+    var msgs = Object.values(data).sort(function(a,b){return a.ts-b.ts;});
+    var newMsgs = msgs.filter(function(m){ return m.ts > lastTs; });
+    if (!newMsgs.length) return;
+    lastTs = newMsgs[newMsgs.length-1].ts;
+    var container = document.getElementById('chat-msgs');
+    if (!container) return;
+    newMsgs.forEach(function(m) {
+      var isMe = m.nickname === S.me;
+      container.appendChild(renderChatMsg(m, isMe));
+      if (!isMe) {
+        if (!chatOpen) {
+          chatUnread++;
+          updateChatBadge();
+          // 토스트 알림 (앱 안에 있을 때)
+          showToast('💬 ' + m.nickname + ': ' + (m.text.length > 20 ? m.text.slice(0,20)+'...' : m.text));
+        }
+        // 브라우저 알림 (탭 밖에 있을 때)
+        sendNotif(m.nickname, m.text);
+      }
+    });
+    if (chatOpen) container.scrollTop = container.scrollHeight;
+  }, 2000);
+}
+
+function stopChatSync() {
+  if (chatListener) { clearInterval(chatListener); chatListener = null; }
+}
+
+function showChatBubble(show) {
+  var b = document.getElementById('chat-bubble');
+  if (b) b.style.display = show ? 'flex' : 'none';
+}
+</script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -69,9 +177,9 @@ input[type=password]{letter-spacing:.1em}
 #s-loading{display:flex}
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 @keyframes takeoff{
-  0%{transform:translate(0,0);opacity:1;}
-  70%{transform:translate(50px,-50px);opacity:.7;}
-  100%{transform:translate(90px,-90px);opacity:0;}
+  0%{transform:translate(0,0) rotate(-45deg);opacity:1;}
+  70%{transform:translate(50px,-50px) rotate(-45deg);opacity:.7;}
+  100%{transform:translate(90px,-90px) rotate(-45deg);opacity:0;}
 }
 @keyframes taxiIn{
   0%{transform:translate(-20px,10px) rotate(-5deg);opacity:0;}
@@ -400,6 +508,29 @@ body.excel-mode .content::before {
   color: #333;
   width: 60px;
 }
+/* ── 채팅 ── */
+.chat-bubble{position:fixed;bottom:24px;right:20px;z-index:100;width:48px;height:48px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:transform .15s}
+.chat-bubble:active{transform:scale(.92)}
+.chat-bubble .badge{position:absolute;top:-2px;right:-2px;background:#e53e3e;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;display:none}
+.chat-win{position:fixed;z-index:200;background:var(--card);border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,.15);display:none;flex-direction:column}
+@media(min-width:600px){
+  .chat-win{bottom:84px;right:20px;width:320px;height:440px;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.18);}
+  .chat-bubble{bottom:20px;right:20px;}
+}
+@media(max-width:599px){
+  .chat-win{bottom:0;left:0;right:0;height:72vh;border-radius:20px 20px 0 0;}
+  .chat-bubble{bottom:20px;right:16px;}
+}
+.chat-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.chat-msg{max-width:75%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5;word-break:break-word}
+.chat-msg.me{align-self:flex-end;background:var(--A);color:#412402;border-bottom-right-radius:4px}
+.chat-msg.other{align-self:flex-start;background:var(--AX);border:1px solid var(--AL);border-bottom-left-radius:4px}
+.chat-msg .sender{font-size:10px;font-weight:700;margin-bottom:2px;opacity:.7}
+.chat-msg .time{font-size:10px;opacity:.6;margin-top:2px;text-align:right}
+.chat-inp{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+.chat-inp input{height:38px;border-radius:20px;font-size:13px}
+.chat-inp button{width:38px;height:38px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#412402}
 </style>
 </head>
 <body>
@@ -628,7 +759,7 @@ function go(screen) {
   var el=document.getElementById('s-'+screen); if(!el) return;
   el.style.display=screen==='trip'?'block':'flex';
   if(screen==='trip') window.scrollTo(0,0);
-  if(screen==='home') loadMyTrips();
+  if(screen==='home') { loadMyTrips(); stopChatSync(); showChatBubble(false); var cw=document.getElementById('chat-win'); if(cw) cw.style.display='none'; chatOpen=false; }
   if(screen==='nick'||screen==='create') setNickPlaceholders();
 }
 
@@ -727,7 +858,7 @@ async function enterTrip(code) {
       var t=await dbGet('trip:'+code);
       if(!t){showToast('여행 데이터를 불러오지 못했어요.');return;}
       S.trip=normalizeTripData(t); S.code=code; S.me=myInfo.nickname;
-      switchTab('schedule'); renderTrip(); go('trip'); startSync(code);
+      switchTab('schedule'); renderTrip(); go('trip'); startSync(code); startChatSync(code); showChatBubble(true);
     } else {
       S.pendingCode=code;
       document.getElementById('disp-code').textContent=code;
@@ -785,7 +916,7 @@ async function doCreate() {
   if(btn){btn.disabled=false;btn.innerHTML='여행 만들기 <i class="ti ti-arrow-right"></i>';}
   showErr('err-create','');
   S.trip=normalizeTripData(t); S.code=c; S.me=nick;
-  switchTab('schedule'); renderTrip(); go('trip'); startSync(c);
+  switchTab('schedule'); renderTrip(); go('trip'); startSync(c); startChatSync(c); showChatBubble(true);
 }
 
 async function doJoin() {
@@ -824,7 +955,7 @@ async function doSetNick() {
     var patch={}; patch[S.pendingCode]={nickname:nick,joinedAt:Date.now()};
     await dbPatch('user-trips:'+S.user.uid,patch);
     S.trip=normalizeTripData(t); S.code=S.pendingCode; S.me=nick;
-    switchTab('schedule'); renderTrip(); go('trip'); startSync(S.code);
+    switchTab('schedule'); renderTrip(); go('trip'); startSync(S.code); startChatSync(S.code); showChatBubble(true);
   } catch(e) { showErr('err-nick',e.message||'오류가 발생했어요'); }
   finally { if(btn){btn.disabled=false;btn.innerHTML='입장하기 <i class="ti ti-arrow-right"></i>';} }
 }
@@ -859,6 +990,147 @@ async function setTripIcon(icon){
   S.trip.icon = icon;
   await dbSet('trip:'+S.code, S.trip);
   renderSettings();
+}
+
+function renderSettings(){
+  var el=document.getElementById('tab-settings');
+  if(!el) return;
+  var members=getMembers();
+  var isCreator=S.trip&&S.trip.createdBy&&S.user&&S.trip.createdBy===S.user.uid;
+  var creatorUid=S.trip&&S.trip.createdBy;
+  var h='';
+
+  // 멤버 목록
+  h+='<h3 style="font-size:17px;font-weight:900;margin-bottom:14px">멤버 '+members.length+'명</h3>';
+  members.forEach(function(m){
+    var nick=typeof m==='object'?m.nickname:m;
+    var mUid=typeof m==='object'?m.uid:null;
+    var email=typeof m==='object'?m.email:'';
+    var isHost=creatorUid&&mUid&&mUid===creatorUid;
+    h+='<div class="card" style="display:flex;align-items:center;gap:12px">'
+      +'<div class="av">'+nick[0].toUpperCase()+'</div>'
+      +'<div style="flex:1;min-width:0">'
+      +'<p style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:6px">'+nick
+      +(nick===S.me?' <span style="font-size:12px;color:var(--A);font-weight:700">나</span>':'')
+      +(isHost?' <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#1DA1F2;border-radius:50%;flex-shrink:0"><i class="ti ti-check" style="font-size:10px;color:#fff"></i></span>':'')
+      +'</p>'
+      +(email?'<p style="font-size:11px;color:var(--muted);margin-top:2px">'+email+'</p>':'')
+      +'</div></div>';
+  });
+
+  // 방 정보
+  h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">방 정보</h3>';
+  h+='<div class="card">';
+  if(editingName){
+    h+='<div class="col" style="margin-bottom:14px">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between"><label class="lbl" style="margin:0">여행 이름</label>'
+      +'<button class="bt" style="font-size:12px;color:var(--no)" onclick="editingName=false;renderSettings()">취소</button></div>'
+      +'<input id="set-name" value="'+(S.trip.name||'')+'" maxlength="15" autocomplete="off">'
+      +'<button class="bp" style="padding:10px" onclick="saveName()">저장</button></div>';
+  } else {
+    h+='<div class="bw" style="padding:4px 0;margin-bottom:12px">'
+      +'<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 이름</p>'
+      +'<p style="font-size:16px;font-weight:900">'+(S.trip.name||'')+'</p></div>'
+      +(isCreator?'<button class="bt" onclick="editingName=true;renderSettings()"><i class="ti ti-pencil" style="font-size:16px"></i></button>':'')
+      +'</div>';
+  }
+  if(editingDate){
+    h+='<div class="col" style="padding-top:12px;border-top:1px solid var(--border)">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between"><label class="lbl" style="margin:0">여행 날짜</label>'
+      +'<button class="bt" style="font-size:12px;color:var(--no)" onclick="editingDate=false;renderSettings()">취소</button></div>'
+      +'<div class="date-range"><div class="date-range-row">'
+      +'<div><div style="font-size:11px;font-weight:700;color:var(--muted);padding:8px 12px 0">시작일</div>'
+      +'<input id="set-start" type="date" value="'+(S.trip.startDate||'')+'" onchange="updateSettingNights()"></div>'
+      +'<div class="date-range-div"></div>'
+      +'<div><div style="font-size:11px;font-weight:700;color:var(--muted);padding:8px 12px 0">종료일</div>'
+      +'<input id="set-end" type="date" value="'+(S.trip.endDate||'')+'" onchange="updateSettingNights()"></div>'
+      +'</div></div>'
+      +'<p id="set-nights" style="font-size:13px;color:var(--A);text-align:right"></p>'
+      +'<button class="bp" style="padding:10px" onclick="saveDate()">저장</button></div>';
+  } else {
+    var d=S.trip.startDate?(S.trip.endDate?S.trip.startDate+' ~ '+S.trip.endDate:S.trip.startDate):'날짜 미정';
+    h+='<div class="bw" style="padding-top:12px;border-top:1px solid var(--border)">'
+      +'<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 날짜</p>'
+      +'<p style="font-size:15px;font-weight:700">'+d+'</p></div>'
+      +(isCreator?'<button class="bt" onclick="editingDate=true;renderSettings()"><i class="ti ti-pencil" style="font-size:16px"></i></button>':'')
+      +'</div>';
+    h+='<div class="bw" style="padding-top:12px;border-top:1px solid var(--border);gap:12px">'
+      +'<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 코드</p>'
+      +'<p style="font-size:22px;font-weight:900;letter-spacing:6px;color:var(--A)">'+S.code+'</p></div>'
+      +'<button class="copy-btn" style="flex-shrink:0;width:auto;padding:8px 14px;font-size:13px;white-space:nowrap" onclick="copyCode()"><i class="ti ti-copy"></i>복사</button>'
+      +'</div>';
+  }
+  h+='</div>';
+
+  // 방 아이콘
+  var ICON_MAP2={plane:'ti-plane',beach:'ti-beach',mountain:'ti-mountain',map:'ti-map',luggage:'ti-luggage',ship:'ti-ship',train:'ti-train',tent:'ti-tent',world:'ti-world',building:'ti-building-castle',backpack:'ti-backpack',motorbike:'ti-motorbike'};
+  var curIcon2=S.trip.icon||'plane';
+  h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">방 아이콘</h3>';
+  h+='<div class="card"><div style="display:flex;flex-wrap:wrap;gap:8px">';
+  Object.keys(ICON_MAP2).forEach(function(id){
+    var isOn=curIcon2===id;
+    h+='<button onclick="setTripIcon(\''+id+'\')" style="width:44px;height:44px;border-radius:10px;border:2px solid '+(isOn?'var(--A)':'var(--border)')+';background:'+(isOn?'var(--AX)':'transparent')+';cursor:pointer;display:flex;align-items:center;justify-content:center">'
+      +'<i class="ti '+ICON_MAP2[id]+'" style="font-size:20px;color:'+(isOn?'var(--A)':'var(--muted)')+'"></i></button>';
+  });
+  h+='</div></div>';
+
+  // 테마
+  var curTheme=localStorage.getItem('app-theme')||'default';
+  var themes=[{id:'default',label:'기본',icon:'ti-sun'},{id:'dark',label:'다크',icon:'ti-moon'},{id:'blue',label:'블루',icon:'ti-swim'},{id:'excel',label:'엑셀',icon:'ti-table'}];
+  h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">테마</h3>';
+  h+='<div class="card"><div style="display:flex;gap:8px">';
+  themes.forEach(function(t){
+    var isOn=curTheme===t.id;
+    h+='<button onclick="setTheme(\''+t.id+'\')" style="flex:1;padding:12px 4px;border:1.5px solid '+(isOn?'var(--A)':'var(--border)')+';background:'+(isOn?'var(--AX)':'transparent')+';border-radius:var(--r);cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:6px">'
+      +'<i class="ti '+t.icon+'" style="font-size:20px;color:'+(isOn?'var(--A)':'var(--muted)')+'"></i>'
+      +'<span style="font-size:11px;font-weight:700;color:'+(isOn?'var(--A)':'var(--muted)')+'">'+t.label+'</span>'
+      +'</button>';
+  });
+  h+='</div></div>';
+
+  // 위험 구역 (방장만)
+  if(isCreator){
+    h+='<div style="margin-top:2rem">'
+      +'<div class="card" style="border-color:var(--no)">'
+      +'<p style="font-size:14px;font-weight:900;color:var(--no);margin-bottom:6px"><i class="ti ti-alert-triangle" style="margin-right:6px"></i>위험 구역</p>'
+      +'<p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">여행을 삭제하면 모든 일정과 비용 데이터가 영구적으로 사라져요.</p>'
+      +'<button onclick="confirmDeleteTrip()" style="width:100%;padding:12px;background:transparent;border:1.5px solid var(--no);border-radius:var(--r);color:var(--no);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="ti ti-trash"></i>여행 삭제하기</button>'
+      +'</div></div>';
+  }
+
+  el.innerHTML=h;
+  updateSettingNights();
+}
+
+var editingName=false, editingDate=false;
+
+function updateSettingNights(){
+  var s=(document.getElementById('set-start')||{}).value;
+  var e=(document.getElementById('set-end')||{}).value;
+  var badge=document.getElementById('set-nights'); if(!badge) return;
+  if(s&&e&&new Date(e)>=new Date(s)){
+    var n=Math.round((new Date(e)-new Date(s))/86400000);
+    badge.textContent=n===0?'당일치기':(n+'박 '+(n+1)+'일');
+  } else badge.textContent='';
+}
+
+async function saveName(){
+  var name=(document.getElementById('set-name')||{}).value;
+  if(name) name=name.trim();
+  if(!name) return showToast('여행 이름을 입력해주세요');
+  S.trip.name=name;
+  await dbSet('trip:'+S.code,S.trip);
+  editingName=false; renderTrip(); showToast('저장됐어요 ✅');
+}
+
+async function saveDate(){
+  var s=(document.getElementById('set-start')||{}).value;
+  var e=(document.getElementById('set-end')||{}).value;
+  if(!s||!e) return showToast('날짜를 선택해주세요');
+  if(new Date(e)<new Date(s)) return showToast('종료일이 시작일보다 빨라요');
+  S.trip.startDate=s; S.trip.endDate=e;
+  await dbSet('trip:'+S.code,S.trip);
+  editingDate=false; renderTrip(); showToast('저장됐어요 ✅');
 }
 
 function setTheme(theme){
@@ -1173,9 +1445,28 @@ function renderSettlePanel(){
 }
 
 function renderSettlePanelHTML(){
+  var savedIdx = settleSlideIdx;
+  setTimeout(function(){
+    var slider=document.getElementById('settle-slider');
+    if(slider && savedIdx>0){
+      slider.style.transition='none';
+      slider.style.transform='translateX(-'+savedIdx*100+'%)';
+      ['dot-0','dot-1'].forEach(function(id,i){
+        var d=document.getElementById(id);
+        if(d) d.style.background=i===savedIdx?'var(--A)':'var(--border)';
+      });
+    }
+  },0);
+
   var nicks=getNicks();
   var exps=S.trip.expenses||[];
   var checked=S.trip.settleChecked||{};
+  var catColors={'식비':'#f97316','숙박':'#8b5cf6','교통':'#0ea5e9','관광':'#10b981','쇼핑':'#ec4899','기타':'#f59e0b'};
+  var catIcons={'식비':'tools-kitchen-2','숙박':'bed','교통':'car','관광':'camera','쇼핑':'shopping-cart','기타':'dots'};
+  var catTotals={};
+  exps.forEach(function(e){ catTotals[e.cat||'기타']=(catTotals[e.cat||'기타']||0)+e.amount; });
+  var catList=Object.keys(catTotals).sort(function(a,b){return catTotals[b]-catTotals[a];});
+
   // 잔액 계산
   var bal={};
   nicks.forEach(function(n){bal[n]=0;});
@@ -1208,56 +1499,65 @@ function renderSettlePanelHTML(){
   nicks.forEach(function(n){paid[n]=0;});
   exps.forEach(function(e){if(e.paidBy&&e.paidBy!=='individual') paid[e.paidBy]=(paid[e.paidBy]||0)+e.amount;});
 
-  var catTotals={};
-  var catColors={'식비':'#f97316','숙박':'#8b5cf6','교통':'#0ea5e9','관광':'#10b981','쇼핑':'#ec4899','기타':'#f59e0b'};
-  exps.forEach(function(e){ catTotals[e.cat||'기타']=(catTotals[e.cat||'기타']||0)+e.amount; });
-  var catList=Object.keys(catTotals).sort(function(a,b){return catTotals[b]-catTotals[a];});
-  var maxCat=catList.length?catTotals[catList[0]]:1;
-
   var h='<div class="card" style="border-color:var(--A)">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
     +'<p style="font-size:15px;font-weight:900">정산 결과</p>'
     +'<button class="bt" onclick="toggleSettle()" style="color:var(--muted);font-size:12px"><i class="ti ti-x"></i></button>'
     +'</div>';
-  // 슬라이더 패널 (정산 요약 / 카테고리 분석)
+
+  // 슬라이더
   h+='<div style="position:relative;overflow:hidden;margin-bottom:14px">'
-    +'<div id="settle-slider" style="display:flex;transition:transform .3s ease;will-change:transform">'
-    // 패널 1: 정산 요약 (stat-grid)
+    +'<div id="settle-slider" style="display:flex;transition:transform .3s ease">'
+    // 패널1: 요약
     +'<div style="min-width:100%;box-sizing:border-box">'
     +'<div class="stat-grid" style="margin-bottom:0">'
     +'<div class="stat-card"><div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:3px">총 지출</div><div style="font-size:14px;font-weight:900;color:var(--A)">'+fmt(total)+'원</div></div>'
     +'<div class="stat-card"><div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:3px">인원</div><div style="font-size:14px;font-weight:900;color:var(--A)">'+nicks.length+'명</div></div>'
     +'<div class="stat-card"><div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:3px">1인당</div><div style="font-size:14px;font-weight:900;color:var(--A)">'+fmt(Math.round(total/nicks.length))+'원</div></div>'
     +'</div></div>'
-    // 패널 2: 카테고리별 지출 바 차트
-    +'<div style="min-width:100%;box-sizing:border-box;padding:4px 0">';
-  var catIcons={'식비':'tools-kitchen-2','숙박':'bed','교통':'car','관광':'camera','쇼핑':'shopping-cart','기타':'dots'};
+    // 패널2: 카테고리 누적 바
+    +'<div style="min-width:100%;box-sizing:border-box;padding:2px 0">';
+
+  // 누적 바
+  h+='<div style="height:26px;border-radius:8px;overflow:hidden;display:flex;margin-bottom:12px">';
+  catList.forEach(function(cat){
+    var pct=(catTotals[cat]/total)*100;
+    h+='<div style="height:100%;width:'+pct+'%;background:'+(catColors[cat]||'#888')+'"></div>';
+  });
+  h+='</div>';
+
+  // 범례
   catList.forEach(function(cat){
     var pct=Math.round((catTotals[cat]/total)*100);
     var color=catColors[cat]||'#888';
-    h+='<div style="margin-bottom:8px">'
-      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">'
-      +'<span style="font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px">'
-      +(cat==='기타'?'<span style="font-size:12px">🎸</span>':'<i class="ti ti-'+catIcons[cat]+'" style="font-size:13px;color:'+color+'"></i>')
-      +cat+'</span>'
-      +'<span style="font-size:12px;font-weight:700;color:'+color+'">'+fmt(catTotals[cat])+'원 <span style="color:var(--muted);font-weight:400">('+pct+'%)</span></span>'
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">'
+      +'<div style="display:flex;align-items:center;gap:6px">'
+      +'<div style="width:10px;height:10px;border-radius:2px;background:'+color+';flex-shrink:0"></div>'
+      +(cat==='기타'?'<span style="font-size:12px">🎸</span>':'<i class="ti ti-'+catIcons[cat]+'" style="font-size:12px;color:'+color+'"></i>')
+      +'<span style="font-size:12px;font-weight:700">'+cat+'</span>'
       +'</div>'
-      +'<div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden">'
-      +'<div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:4px;transition:width .6s ease"></div>'
-      +'</div></div>';
+      +'<span style="font-size:12px;color:var(--muted)">'+fmt(catTotals[cat])+'원 · '+pct+'%</span>'
+      +'</div>';
   });
-  h+='</div>'
-    +'</div>'
-    // 화살표 버튼 (컴퓨터용)
-    +'<button onclick="slideSettle(-1)" style="position:absolute;left:0;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:50%;width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);z-index:2"><i class="ti ti-chevron-left"></i></button>'
-    +'<button onclick="slideSettle(1)" style="position:absolute;right:0;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:50%;width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);z-index:2"><i class="ti ti-chevron-right"></i></button>'
-    // 점 인디케이터
-    +'<div style="display:flex;justify-content:center;gap:5px;margin-top:8px">'
-    +'<div id="dot-0" style="width:6px;height:6px;border-radius:50%;background:var(--A);transition:all .3s"></div>'
-    +'<div id="dot-1" style="width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .3s"></div>'
-    +'</div>'
-    +'</div>';
 
+  h+='</div></div>'
+    // 화살표
+    +'<button onclick="slideSettle(-1)" style="position:absolute;left:0;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:50%;width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);z-index:2"><i class="ti ti-chevron-left" style="font-size:11px"></i></button>'
+    +'<button onclick="slideSettle(1)" style="position:absolute;right:0;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:50%;width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);z-index:2"><i class="ti ti-chevron-right" style="font-size:11px"></i></button>'
+    +'<div style="display:flex;justify-content:center;gap:5px;margin-top:8px">'
+    +'<div id="dot-0" style="width:6px;height:6px;border-radius:50%;background:var(--A)"></div>'
+    +'<div id="dot-1" style="width:6px;height:6px;border-radius:50%;background:var(--border)"></div>'
+    +'</div></div>';
+
+  h+='<p style="font-size:12px;font-weight:700;color:var(--muted);margin-top:12px;margin-bottom:6px">멤버별 현황</p>';
+  nicks.forEach(function(n){
+    var mp=paid[n]||0, diff=mp-total/nicks.length;
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-top:1px solid var(--border)">'
+      +'<span style="font-size:13px;font-weight:700">'+n+'</span>'
+      +'<div style="text-align:right"><span style="font-size:12px;color:var(--A);font-weight:700">'+fmt(mp)+'원 결제</span>'
+      +'<span style="font-size:11px;color:'+(diff>=0?'var(--ok)':'var(--no)')+';margin-left:8px">'+(diff>=0?'+'+fmt(Math.round(diff))+'원 받아야 함':fmt(Math.round(diff))+'원 내야 함')+'</span></div>'
+      +'</div>';
+  });
   if(!txns.length){
     h+='<div style="text-align:center;padding:1rem 0"><i class="ti ti-circle-check" style="font-size:32px;color:var(--ok);display:block;margin-bottom:6px"></i><p style="font-weight:900;color:var(--ok)">정산 완료!</p></div>';
   } else {
@@ -1277,388 +1577,25 @@ function renderSettlePanelHTML(){
     var allDone=txns.every(function(tx){return checked[tx.from+'_'+tx.to+'_'+tx.amount];});
     if(allDone) h+='<p style="text-align:center;font-size:13px;color:var(--ok);font-weight:700;padding-top:8px">🎉 전체 송금 완료!</p>';
   }
-  // 멤버별 현황
-  h+='<p style="font-size:12px;font-weight:700;color:var(--muted);margin-top:12px;margin-bottom:6px">멤버별 현황</p>';
-  nicks.forEach(function(n){
-    var mp=paid[n]||0, diff=mp-total/nicks.length;
-    h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-top:1px solid var(--border)">'
-      +'<span style="font-size:13px;font-weight:700">'+n+'</span>'
-      +'<div style="text-align:right"><span style="font-size:12px;color:var(--A);font-weight:700">'+fmt(mp)+'원 결제</span>'
-      +'<span style="font-size:11px;color:'+(diff>=0?'var(--ok)':'var(--no)')+';margin-left:8px">'+(diff>=0?'+'+fmt(Math.round(diff))+'원 받아야 함':fmt(Math.round(diff))+'원 내야 함')+'</span></div>'
-      +'</div>';
-  });
   h+='</div>';
   return h;
 }
-
-async function toggleSettleItem(key){
-  if(!S.trip.settleChecked) S.trip.settleChecked={};
-  if(S.trip.settleChecked[key]) delete S.trip.settleChecked[key];
-  else S.trip.settleChecked[key]=true;
-  await dbSet('trip:'+S.code,S.trip);
-  renderExpenses();
-}
-
-var settleSlideIdx=0;
-function slideSettle(dir){
-  var slider=document.getElementById('settle-slider');
-  if(!slider) return;
-  settleSlideIdx=Math.max(0,Math.min(1,settleSlideIdx+dir));
-  slider.style.transform='translateX(-'+settleSlideIdx*100+'%)';
-  ['dot-0','dot-1'].forEach(function(id,i){
-    var d=document.getElementById(id);
-    if(d) d.style.background=i===settleSlideIdx?'var(--A)':'var(--border)';
-  });
-}
-// 모바일 스와이프
-var settleTouchX=null;
-document.addEventListener('touchstart',function(e){
-  if(e.target.closest('#settle-slider')) settleTouchX=e.touches[0].clientX;
-},true);
-document.addEventListener('touchend',function(e){
-  if(settleTouchX===null) return;
-  var dx=e.changedTouches[0].clientX-settleTouchX;
-  if(Math.abs(dx)>40) slideSettle(dx<0?1:-1);
-  settleTouchX=null;
-},true);
-
-function toggleExpGroup(key){openExpGroups[key]=openExpGroups[key]===false?true:false;renderExpenses();}
-
-function openEF(){
-  editExpId=null; var nicks=getNicks();
-  EF.open=true;EF.title='';EF.amount='';EF.paidBy=S.me||(nicks[0]||'');
-  EF.split=nicks.slice();EF.cat='식비';EF.dayId='';EF.currency='KRW';
-  renderExpenses();
-}
-
-function startEditExp(id){
-  var exp=(S.trip.expenses||[]).find(function(e){return e.id===id;});
-  if(!exp) return;
-  EF.open=true; EF.title=exp.title;
-  EF.amount=String(exp.origAmount||exp.amount);
-  EF.paidBy=exp.paidBy; EF.split=(exp.split||[]).slice();
-  EF.cat=exp.cat||'식비'; EF.dayId=exp.dayId||''; EF.currency=exp.origCurrency||'KRW';
-  editExpId=id; renderExpenses();
-}
-
-function cancelEditExp(){editExpId=null;EF.open=false;renderExpenses();}
-
-async function saveEditExp(){
-  var tEl=document.getElementById('ef-t'), aEl=document.getElementById('ef-a');
-  var title=(tEl&&tEl.value.trim())||(EF.title?EF.title.trim():'');
-  var rawAmt=EF.amount||(aEl?aEl.value.replace(/[^0-9]/g,''):'');
-  var a=parseFloat(rawAmt);
-  if(!title||isNaN(a)||a<=0) return;
-  var nicks=getNicks();
-  var krwAmt=EF.currency==='KRW'?a:(rateCache[EF.currency]?Math.round(a*rateCache[EF.currency]):a);
-  var idx=S.trip.expenses.findIndex(function(e){return e.id===editExpId;});
-  if(idx>=0){S.trip.expenses[idx]={id:editExpId,title:title,amount:krwAmt,origAmount:EF.currency!=='KRW'?a:null,origCurrency:EF.currency!=='KRW'?EF.currency:null,paidBy:EF.paidBy,split:EF.split.length?EF.split.slice():nicks,cat:EF.cat,dayId:EF.dayId};}
-  await dbSet('trip:'+S.code,S.trip);
-  editExpId=null;EF.open=false;renderExpenses();showToast('수정됐어요 ✅');
-}
-
-function toggleSplit(n){
-  var amt=document.getElementById('ef-a'); if(amt)EF.amount=amt.value.replace(/[^0-9]/g,'');
-  var idx=EF.split.indexOf(n); if(idx>=0)EF.split.splice(idx,1);else EF.split.push(n);
-  renderExpenses();
-}
-
-function addExp(){
-  var tEl=document.getElementById('ef-t'), aEl=document.getElementById('ef-a');
-  var title=(tEl&&tEl.value.trim())||(EF.title?EF.title.trim():'');
-  var rawAmt=EF.amount||(aEl?aEl.value.replace(/[^0-9]/g,''):'');
-  var a=parseFloat(rawAmt);
-  if(!title||isNaN(a)||a<=0) return;
-  var nicks=getNicks();
-  var krwAmt=EF.currency==='KRW'?a:(rateCache[EF.currency]?Math.round(a*rateCache[EF.currency]):a);
-  S.trip.expenses.push({id:uid(),title:title,amount:krwAmt,origAmount:EF.currency!=='KRW'?a:null,origCurrency:EF.currency!=='KRW'?EF.currency:null,paidBy:EF.paidBy,split:EF.split.length?EF.split.slice():nicks,cat:EF.cat,dayId:EF.dayId});
-  dbSet('trip:'+S.code,S.trip);EF.open=false;renderExpenses();
-}
-
-function removeExp(id){S.trip.expenses=S.trip.expenses.filter(function(e){return e.id!==id;});dbSet('trip:'+S.code,S.trip);renderExpenses();}
-
-async function fetchRate(currency){if(currency==='KRW'||rateCache[currency])return;try{var r=await fetch('https://open.er-api.com/v6/latest/'+currency);var d=await r.json();if(d.rates&&d.rates.KRW)rateCache[currency]=d.rates.KRW;}catch(e){}}
-
-function fmtInput(input){var raw=input.value.replace(/[^0-9]/g,'');var num=parseInt(raw,10);if(!raw){input.value='';EF.amount='';return;}input.value=num.toLocaleString('ko-KR');EF.amount=String(num);var p=document.getElementById('currency-preview');if(p)p.textContent=getCurrencyPreview();}
-
-function getCurrencyPreview(){var a=parseFloat(EF.amount);if(!a||EF.currency==='KRW'||!rateCache[EF.currency])return '';return '≈ '+fmt(Math.round(a*rateCache[EF.currency]))+'원';}
-
-function selectCurrency(code){EF.currency=code;if(code!=='KRW')fetchRate(code).then(function(){var p=document.getElementById('currency-preview');if(p)p.textContent=getCurrencyPreview();});renderExpenses();}
-
-function pickCustomCurrency(){var code=prompt('통화 코드를 입력해주세요 (예: THB, VND, GBP)');if(!code)return;code=code.trim().toUpperCase();if(!CURRENCIES.find(function(c){return c.code===code;}))CURRENCIES.push({code:code,label:code});selectCurrency(code);}
-
-// ══ 설정 탭 ══
-var editingName=false, editingDate=false;
-
-function renderSettings(){
-  var el=document.getElementById('tab-settings'); if(!el) return;
-  var members=getMembers();
-  var isCreator=S.trip&&S.trip.createdBy&&S.user&&S.trip.createdBy===S.user.uid;
-  var creatorUid=S.trip&&S.trip.createdBy;
-  var h='';
-  h+='<h3 style="font-size:17px;font-weight:900;margin-bottom:14px">멤버 '+members.length+'명</h3>';
-  members.forEach(function(m){
-    var nick=typeof m==='object'?m.nickname:m;
-    var mUid=typeof m==='object'?m.uid:null;
-    var isHost=creatorUid&&mUid&&mUid===creatorUid;
-    h+='<div class="card" style="display:flex;align-items:center;gap:12px">'
-      +'<div class="av">'+nick[0].toUpperCase()+'</div>'
-      +'<div style="flex:1;min-width:0"><p style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:6px">'+nick
-      +(nick===S.me?' <span style="font-size:12px;color:var(--A);font-weight:700">나</span>':'')
-      +(isHost?' <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#1DA1F2;border-radius:50%;flex-shrink:0"><i class="ti ti-check" style="font-size:10px;color:#fff"></i></span>':'')
-      +'</p>'
-      +((typeof m==='object'&&m.email)?'<p style="font-size:12px;color:var(--muted);margin-top:2px">'+m.email+'</p>':'')
-      +'</div></div>';
-  });
-  h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">방 정보</h3>';
-  h+='<div class="card">';
-  if(editingName){
-    h+='<div class="col" style="margin-bottom:14px">'
-      +'<div style="display:flex;align-items:center;justify-content:space-between"><label class="lbl" style="margin:0">여행 이름</label>'
-      +'<button class="bt" style="font-size:12px;color:var(--no)" onclick="editingName=false;renderSettings()">취소</button></div>'
-      +'<input id="set-name" value="'+(S.trip.name||'')+'" maxlength="15" autocomplete="off">'
-      +'<button class="bp" style="padding:10px" onclick="saveName()">저장</button></div>';
-  } else {
-    h+='<div class="bw" style="padding:4px 0;margin-bottom:12px">'
-      +'<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 이름</p><p style="font-size:16px;font-weight:900">'+(S.trip.name||'')+'</p></div>'
-      +(isCreator?'<button class="bt" onclick="editingName=true;renderSettings()"><i class="ti ti-pencil" style="font-size:16px"></i></button>':'')
-      +'</div>';
-  }
-  if(editingDate){
-    h+='<div class="col" style="padding-top:12px;border-top:1px solid var(--border)">'
-      +'<div style="display:flex;align-items:center;justify-content:space-between"><label class="lbl" style="margin:0">여행 날짜</label>'
-      +'<button class="bt" style="font-size:12px;color:var(--no)" onclick="editingDate=false;renderSettings()">취소</button></div>'
-      +'<div class="date-range"><div class="date-range-row">'
-      +'<div><div style="font-size:11px;font-weight:700;color:var(--muted);padding:8px 12px 0">시작일</div><input id="set-start" type="date" value="'+(S.trip.startDate||'')+'" onchange="updateSettingNights()"></div>'
-      +'<div class="date-range-div"></div>'
-      +'<div><div style="font-size:11px;font-weight:700;color:var(--muted);padding:8px 12px 0">종료일</div><input id="set-end" type="date" value="'+(S.trip.endDate||'')+'" onchange="updateSettingNights()"></div>'
-      +'</div></div>'
-      +'<p id="set-nights" style="font-size:13px;color:var(--A);text-align:right"></p>'
-      +'<button class="bp" style="padding:10px" onclick="saveDate()">저장</button>'
-      +'</div>';
-  } else {
-    var d=S.trip.startDate?(S.trip.endDate?S.trip.startDate+' ~ '+S.trip.endDate:S.trip.startDate):'날짜 미정';
-    h+='<div class="bw" style="padding-top:12px;border-top:1px solid var(--border)">'
-      +'<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 날짜</p><p style="font-size:15px;font-weight:700">'+d+'</p></div>'
-      +(isCreator?'<button class="bt" onclick="editingDate=true;renderSettings()"><i class="ti ti-pencil" style="font-size:16px"></i></button>':'')
-      +'</div>';
-    // 코드 공유 - 날짜 아래
-    h+='<div class="bw" style="padding-top:12px;border-top:1px solid var(--border);gap:12px">'
-      +'<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 코드</p>'
-      +'<p style="font-size:22px;font-weight:900;letter-spacing:6px;color:var(--A)">'+S.code+'</p></div>'
-      +'<button class="copy-btn" style="flex-shrink:0;width:auto;padding:8px 14px;font-size:13px;white-space:nowrap" onclick="copyCode()"><i class="ti ti-copy"></i>복사</button>'
-      +'</div>';
-  }
-  h+='</div>';
-  // 방 아이콘 선택
-  var ICON_MAP2={plane:'ti-plane',beach:'ti-beach',mountain:'ti-mountain',map:'ti-map',luggage:'ti-luggage',ship:'ti-ship',train:'ti-train',tent:'ti-tent',world:'ti-world',building:'ti-building-castle',backpack:'ti-backpack',motorbike:'ti-motorbike'};
-  var curIcon2=S.trip.icon||'plane';
-  h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">방 아이콘</h3>';
-  h+='<div class="card"><div style="display:flex;flex-wrap:wrap;gap:8px">';
-  Object.keys(ICON_MAP2).forEach(function(id){
-    var isOn=curIcon2===id;
-    h+='<button onclick="setTripIcon(\''+id+'\')" style="width:44px;height:44px;border-radius:10px;border:2px solid '+(isOn?'var(--A)':'var(--border)')+';background:'+(isOn?'var(--AX)':'transparent')+';cursor:pointer;display:flex;align-items:center;justify-content:center">'
-      +'<i class="ti '+ICON_MAP2[id]+'" style="font-size:20px;color:'+(isOn?'var(--A)':'var(--muted)')+';"></i></button>';
-  });
-  h+='</div></div>';
-
-  // 테마 선택
-  var curTheme = localStorage.getItem('app-theme')||'default';
-  var themes=[
-    {id:'default',label:'기본',icon:'ti-sun'},
-    {id:'dark',label:'다크',icon:'ti-moon'},
-    {id:'blue',label:'블루',icon:'ti-swim'},
-    {id:'excel',label:'엑셀',icon:'ti-table'}
-  ];
-  h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">테마</h3>';
-  h+='<div class="card"><div style="display:flex;gap:8px">';
-  themes.forEach(function(t){
-    var isOn=curTheme===t.id;
-    h+='<button onclick="setTheme(\''+t.id+'\')" style="flex:1;padding:12px 4px;border:1.5px solid '+(isOn?'var(--A)':'var(--border)')+';background:'+(isOn?'var(--AX)':'transparent')+';border-radius:var(--r);cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:6px">'
-      +'<i class="ti '+t.icon+'" style="font-size:20px;color:'+(isOn?'var(--A)':'var(--muted)')+'"></i>'
-      +'<span style="font-size:11px;font-weight:700;color:'+(isOn?'var(--A)':'var(--muted)')+'">' +t.label+'</span>'
-      +'</button>';
-  });
-  h+='</div></div>';
-  // 위험 구역 (방장만, 맨 아래)
-  if (isCreator) {
-    h += '<div style="margin-top:2rem">'
-      + '<div class="card" style="border-color:var(--no)">'
-      + '<p style="font-size:14px;font-weight:900;color:var(--no);margin-bottom:6px"><i class="ti ti-alert-triangle" style="margin-right:6px"></i>위험 구역</p>'
-      + '<p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">여행을 삭제하면 모든 일정과 비용 데이터가 영구적으로 사라져요.</p>'
-      + '<button onclick="confirmDeleteTrip()" style="width:100%;padding:12px;background:transparent;border:1.5px solid var(--no);border-radius:var(--r);color:var(--no);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px"><i class="ti ti-trash"></i>여행 삭제하기</button>'
-      + '</div></div>';
-  }
-  el.innerHTML=h;
-  updateSettingNights();
-}
-
-function updateSettingNights(){var s=(document.getElementById('set-start')||{}).value,e=(document.getElementById('set-end')||{}).value,badge=document.getElementById('set-nights');if(!badge)return;if(s&&e&&new Date(e)>=new Date(s)){var n=Math.round((new Date(e)-new Date(s))/86400000);badge.textContent=n===0?'당일치기':(n+'박 '+(n+1)+'일');}else badge.textContent='';}
-
-async function saveName(){var name=(document.getElementById('set-name')||{}).value;if(name)name=name.trim();if(!name)return showToast('여행 이름을 입력해주세요');S.trip.name=name;await dbSet('trip:'+S.code,S.trip);editingName=false;renderTrip();showToast('저장됐어요 ✅');}
-
-async function saveDate(){var s=(document.getElementById('set-start')||{}).value,e=(document.getElementById('set-end')||{}).value;if(!s||!e)return showToast('날짜를 선택해주세요');if(new Date(e)<new Date(s))return showToast('종료일이 시작일보다 빨라요');S.trip.startDate=s;S.trip.endDate=e;await dbSet('trip:'+S.code,S.trip);editingDate=false;renderTrip();showToast('저장됐어요 ✅');}
-
-function confirmDeleteTrip(){
-  if(confirm('정말로 이 여행을 삭제할까요?\n\n모든 일정, 비용 데이터가 영구적으로 사라져요.')) {
-    deleteTrip();
-  }
-}
-
-async function deleteTrip(){
-  if(!confirm('정말로 이 여행을 삭제할까요? 모든 데이터가 사라져요.')) return;
-  try{
-    var code=S.code, myUid=S.user.uid;
-    await fetch(FB+'/trip_'+code+'.json?auth='+(await getToken()),{method:'DELETE'});
-    var members=getMembers();
-    for(var i=0;i<members.length;i++){var m=members[i];var mUid=typeof m==='object'?m.uid:null;if(mUid){var tok=await getToken();await fetch(FB+'/user-trips_'+mUid+'/'+code+'.json?auth='+tok,{method:'DELETE'});}}
-    var myTok=await getToken();await fetch(FB+'/user-trips_'+myUid+'/'+code+'.json?auth='+myTok,{method:'DELETE'});
-    stopSync();S.trip=null;S.code='';S.me='';showToast('여행이 삭제됐어요');go('home');
-  }catch(e){showToast('삭제 실패: '+(e.message||e));}
-}
-
-// ══ 지출 드래그 앤 드롭 ══
-function startExpDrag(e, expId, gkey) {
-  e.preventDefault(); e.stopPropagation();
-  var exp = (S.trip.expenses||[]).find(function(ex){return ex.id===expId;});
-  if(!exp) return;
-  expDragState = {expId:expId, gkey:gkey};
-  expDragGhost = document.createElement('div');
-  expDragGhost.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;opacity:.9;background:#fff;border:2px solid var(--A);border-radius:12px;padding:10px 14px;box-shadow:0 4px 20px rgba(0,0,0,.2);font-family:inherit;white-space:nowrap;transform:rotate(1deg);font-size:14px;font-weight:700;color:var(--text)';
-  expDragGhost.textContent = exp.title + ' · ' + Math.round(exp.amount).toLocaleString('ko-KR') + '원';
-  document.body.appendChild(expDragGhost);
-  var pt = e.touches?e.touches[0]:e;
-  expDragGhost.style.left=(pt.clientX-60)+'px'; expDragGhost.style.top=(pt.clientY-20)+'px';
-  if(e.touches){document.addEventListener('touchmove',onExpDragMove,{passive:false});document.addEventListener('touchend',onExpDragEnd,{once:true});}
-  else{document.addEventListener('mousemove',onExpDragMove);document.addEventListener('mouseup',onExpDragEnd,{once:true});}
-}
-function onExpDragMove(e){
-  if(e.cancelable) e.preventDefault();
-  var pt=e.touches?e.touches[0]:e;
-  if(expDragGhost){expDragGhost.style.left=(pt.clientX-60)+'px';expDragGhost.style.top=(pt.clientY-20)+'px';}
-  // 드롭 대상 강조
-  if(expDragGhost) expDragGhost.style.display='none';
-  var el=document.elementFromPoint(pt.clientX,pt.clientY);
-  if(expDragGhost) expDragGhost.style.display='';
-  var card=el&&el.closest('[data-exp-id]');
-  document.querySelectorAll('[data-exp-id]').forEach(function(c){c.style.outline='';});
-  if(card&&card.dataset.expId!==expDragState.expId&&card.dataset.expGkey===expDragState.gkey){
-    card.style.outline='2px solid var(--A)';
-  }
-}
-function onExpDragEnd(e){
-  document.removeEventListener('touchmove',onExpDragMove);
-  document.removeEventListener('mousemove',onExpDragMove);
-  if(expDragGhost){expDragGhost.remove();expDragGhost=null;}
-  document.querySelectorAll('[data-exp-id]').forEach(function(c){c.style.outline='';});
-  if(!expDragState) return;
-  var pt=e.touches?e.changedTouches[0]:e;
-  var el=document.elementFromPoint(pt.clientX,pt.clientY);
-  var targetCard=el&&el.closest('[data-exp-id]');
-  if(targetCard&&targetCard.dataset.expId!==expDragState.expId&&targetCard.dataset.expGkey===expDragState.gkey){
-    var targetId=targetCard.dataset.expId;
-    var exps=S.trip.expenses;
-    // 같은 그룹 내 순서 변경
-    var srcIdx=exps.findIndex(function(ex){return ex.id===expDragState.expId;});
-    var tgtIdx=exps.findIndex(function(ex){return ex.id===targetId;});
-    if(srcIdx>=0&&tgtIdx>=0){
-      var item=exps.splice(srcIdx,1)[0];
-      var newTgt=exps.findIndex(function(ex){return ex.id===targetId;});
-      exps.splice(newTgt,0,item);
-      dbSet('trip:'+S.code,S.trip);
-      renderExpenses();
-      showToast('순서를 변경했어요');
-    }
-  }
-  expDragState=null;
-}
-
-// ══ 드래그 앤 드롭 ══
-var dragState=null,dragGhost=null,dropTargetId=null;
-var expDragState=null,expDragGhost=null;
-function startDrag(dayId,actId,e){
-  e.preventDefault();e.stopPropagation();
-  var day=S.trip.itinerary.find(function(d){return d.id===dayId;});
-  var act=day&&day.activities.find(function(a){return a.id===actId;});
-  if(!act) return;
-  dragState={dayId:dayId,actId:actId,act:act};dropTargetId=null;
-  dragGhost=document.createElement('div');
-  dragGhost.style.cssText='position:fixed;z-index:9999;pointer-events:none;opacity:.85;min-width:200px;max-width:320px;background:#fff;border:2px solid var(--A);border-radius:12px;padding:10px 14px;box-shadow:0 4px 16px rgba(0,0,0,.18);font-family:inherit;';
-  dragGhost.innerHTML='<div style="display:flex;align-items:center;gap:8px">'+(act.time?'<span style="font-size:12px;color:var(--A);font-weight:700;flex-shrink:0">'+act.time+'</span>':'')+'<span style="font-size:14px;font-weight:700">'+act.title+'</span></div>'+(act.location?'<p style="font-size:12px;color:#8A6B52;margin-top:4px">📍 '+act.location+'</p>':'');
-  document.body.appendChild(dragGhost);
-  document.querySelectorAll('.day-card').forEach(function(c){if(c.dataset.dropDay!==dayId){c.style.border='2px dashed var(--AL)';c.style.background='#fdf8ef';}});
-  var pt=e.touches?e.touches[0]:e;posGhost(pt.clientX,pt.clientY);
-  if(e.touches){document.addEventListener('touchmove',onDragMove,{passive:false});document.addEventListener('touchend',onDragEnd,{once:true});}
-  else{document.addEventListener('mousemove',onDragMove);document.addEventListener('mouseup',onDragEnd,{once:true});}
-}
-function posGhost(x,y){
-  if(!dragGhost) return;
-  dragGhost.style.left=(x+16)+'px'; dragGhost.style.top=(y-16)+'px';
-  // 기존 플레이스홀더 제거
-  document.querySelectorAll('.drag-placeholder').forEach(function(p){p.remove();});
-  dragGhost.style.display='none';
-  var el=document.elementFromPoint(x,y);
-  dragGhost.style.display='';
-  var targetRow=el&&el.closest('.act-row');
-  var targetZone=el&&el.closest('[data-drop-day]');
-  var newDayId=targetZone?targetZone.dataset.dropDay:null;
-  // 이전 강조 제거
-  document.querySelectorAll('.day-card').forEach(function(c){c.style.border='';c.style.background='';});
-  if(newDayId&&newDayId!==dragState.dayId){
-    // 다른 날 카드 강조
-    var dayCard=document.querySelector('[data-drop-day="'+newDayId+'"]');
-    if(dayCard){dayCard.style.border='2px solid var(--A)';dayCard.style.background='var(--AX)';}
-  }
-  // 같은 날 내 플레이스홀더
-  if(targetRow&&targetRow.dataset.actId!==dragState.actId){
-    var ph=document.createElement('div');
-    ph.className='drag-placeholder';
-    ph.style.cssText='height:4px;background:var(--A);border-radius:2px;margin:2px 0;opacity:.8;';
-    targetRow.parentNode.insertBefore(ph,targetRow);
-    dropTargetId=newDayId||dragState.dayId;
-    dragState.dropBeforeActId=targetRow.dataset.actId;
-  } else {
-    dropTargetId=newDayId;
-    dragState.dropBeforeActId=null;
-  }
-}
-function onDragMove(e){if(e.cancelable)e.preventDefault();var pt=e.touches?e.touches[0]:e;posGhost(pt.clientX,pt.clientY);}
-function onDragEnd(e){
-  document.removeEventListener('touchmove',onDragMove);document.removeEventListener('mousemove',onDragMove);
-  if(dragGhost){dragGhost.remove();dragGhost=null;}
-  document.querySelectorAll('.drag-placeholder').forEach(function(p){p.remove();});
-  document.querySelectorAll('.day-card').forEach(function(c){c.style.border='';c.style.background='';});
-  if(!dragState){return;}
-  var srcDay=S.trip.itinerary.find(function(d){return d.id===dragState.dayId;});
-  if(dropTargetId&&dropTargetId!==dragState.dayId){
-    // 다른 날로 이동
-    var dstDay=S.trip.itinerary.find(function(d){return d.id===dropTargetId;});
-    if(srcDay&&dstDay){
-      srcDay.activities=srcDay.activities.filter(function(a){return a.id!==dragState.actId;});
-      if(dragState.dropBeforeActId){
-        var bi=dstDay.activities.findIndex(function(a){return a.id===dragState.dropBeforeActId;});
-        if(bi>=0) dstDay.activities.splice(bi,0,dragState.act);
-        else dstDay.activities.push(dragState.act);
-      } else { dstDay.activities.push(dragState.act); }
-      dbSet('trip:'+S.code,S.trip); renderSchedule(); showToast('일정을 이동했어요');
-    }
-  } else if(dragState.dropBeforeActId&&dragState.dropBeforeActId!==dragState.actId){
-    // 같은 날 내 순서 변경
-    if(srcDay){
-      var acts=srcDay.activities;
-      var fi=acts.findIndex(function(a){return a.id===dragState.actId;});
-      var ti=acts.findIndex(function(a){return a.id===dragState.dropBeforeActId;});
-      if(fi>=0&&ti>=0){
-        acts.splice(fi,1);
-        var ni=acts.findIndex(function(a){return a.id===dragState.dropBeforeActId;});
-        acts.splice(ni,0,dragState.act);
-        dbSet('trip:'+S.code,S.trip); renderSchedule(); showToast('순서를 변경했어요');
-      }
-    }
-  }
-  dragState=null; dropTargetId=null;
-}
-
 </script>
+<!-- 채팅 -->
+<button class="chat-bubble" id="chat-bubble" onclick="toggleChat()">
+  <i class="ti ti-message-circle" style="font-size:22px;color:#412402"></i>
+  <span class="badge" id="chat-badge"></span>
+</button>
+<div class="chat-win" id="chat-win">
+  <div class="chat-hd">
+    <span style="font-weight:900;font-size:14px"><i class="ti ti-message-circle" style="margin-right:6px;color:var(--A)"></i>실시간 채팅</span>
+    <button class="bt" onclick="toggleChat()" style="padding:4px"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="chat-msgs" id="chat-msgs"></div>
+  <div class="chat-inp">
+    <input id="chat-input" placeholder="메시지를 입력하세요..." autocomplete="off" onkeydown="if(event.key==='Enter')sendChat()">
+    <button onclick="sendChat()"><i class="ti ti-send" style="font-size:16px"></i></button>
+  </div>
+</div>
 </body>
 </html>
