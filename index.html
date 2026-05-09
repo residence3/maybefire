@@ -7,115 +7,7 @@
 <title>같이 가자 ✈️</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
-// ══ 채팅 ══
-var chatOpen = false;
-var chatListener = null;
-var chatUnread = 0;
-var lastChatCount = 0;
-
-function toggleChat() {
-  chatOpen = !chatOpen;
-  var win = document.getElementById('chat-win');
-  win.style.display = chatOpen ? 'flex' : 'none';
-  if (chatOpen) {
-    chatUnread = 0;
-    updateChatBadge();
-    var msgs = document.getElementById('chat-msgs');
-    if (msgs) setTimeout(function(){ msgs.scrollTop = msgs.scrollHeight; }, 50);
-    document.getElementById('chat-input').focus();
-  }
-}
-
-function updateChatBadge() {
-  var badge = document.getElementById('chat-badge');
-  if (!badge) return;
-  badge.style.display = chatUnread > 0 && !chatOpen ? 'flex' : 'none';
-  badge.textContent = chatUnread > 9 ? '9+' : chatUnread;
-}
-
-async function sendChat() {
-  var inp = document.getElementById('chat-input');
-  var text = inp.value.trim();
-  if (!text || !S.code || !S.me) return;
-  inp.value = '';
-  var msg = { id: uid(), nickname: S.me, text: text, ts: Date.now() };
-  var token = await getToken();
-  await fetch(FB + '/chat_' + S.code + '/' + msg.id + '.json?auth=' + token, {
-    method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(msg)
-  });
-}
-
-function renderChatMsg(msg, isMe) {
-  var div = document.createElement('div');
-  div.className = 'chat-msg ' + (isMe ? 'me' : 'other');
-  var t = new Date(msg.ts);
-  var timeStr = t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
-  if (!isMe) div.innerHTML = '<div class="sender">' + msg.nickname + '</div>';
-  div.innerHTML += '<div>' + msg.text.replace(/</g,'&lt;') + '</div>';
-  div.innerHTML += '<div class="time">' + timeStr + '</div>';
-  return div;
-}
-
-function requestNotifPerm() {
-  if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
-  }
-}
-
-function sendNotif(nickname, text) {
-  if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
-    new Notification('💬 ' + nickname, {
-      body: text,
-      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><text y="28" font-size="28">✈️</text></svg>'
-    });
-  }
-}
-
-function startChatSync(code) {
-  if (chatListener) clearInterval(chatListener);
-  requestNotifPerm();
-  var lastTs = Date.now() - 60000;
-  chatListener = setInterval(async function() {
-    if (!S.code) return;
-    var token = await getToken();
-    var r = await fetch(FB + '/chat_' + code + '.json?auth=' + token + '&orderBy="ts"&startAt=' + lastTs);
-    if (!r.ok) return;
-    var data = await r.json();
-    if (!data) return;
-    var msgs = Object.values(data).sort(function(a,b){return a.ts-b.ts;});
-    var newMsgs = msgs.filter(function(m){ return m.ts > lastTs; });
-    if (!newMsgs.length) return;
-    lastTs = newMsgs[newMsgs.length-1].ts;
-    var container = document.getElementById('chat-msgs');
-    if (!container) return;
-    newMsgs.forEach(function(m) {
-      var isMe = m.nickname === S.me;
-      container.appendChild(renderChatMsg(m, isMe));
-      if (!isMe) {
-        if (!chatOpen) {
-          chatUnread++;
-          updateChatBadge();
-          // 토스트 알림 (앱 안에 있을 때)
-          showToast('💬 ' + m.nickname + ': ' + (m.text.length > 20 ? m.text.slice(0,20)+'...' : m.text));
-        }
-        // 브라우저 알림 (탭 밖에 있을 때)
-        sendNotif(m.nickname, m.text);
-      }
-    });
-    if (chatOpen) container.scrollTop = container.scrollHeight;
-  }, 2000);
-}
-
-function stopChatSync() {
-  if (chatListener) { clearInterval(chatListener); chatListener = null; }
-}
-
-function showChatBubble(show) {
-  var b = document.getElementById('chat-bubble');
-  if (b) b.style.display = show ? 'flex' : 'none';
-}
-</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -857,6 +749,14 @@ async function enterTrip(code) {
     if(myInfo&&myInfo.nickname) {
       var t=await dbGet('trip:'+code);
       if(!t){showToast('여행 데이터를 불러오지 못했어요.');return;}
+      // 기존 멤버 이메일 자동 업데이트
+      var members=t.members||[];
+      if(!Array.isArray(members)) members=Object.values(members);
+      var myMember=members.find(function(m){return typeof m==='object'&&m.uid===S.user.uid;});
+      if(myMember && !myMember.email && S.user.email) {
+        myMember.email = S.user.email;
+        await dbSet('trip:'+code, t);
+      }
       S.trip=normalizeTripData(t); S.code=code; S.me=myInfo.nickname;
       switchTab('schedule'); renderTrip(); go('trip'); startSync(code); startChatSync(code); showChatBubble(true);
     } else {
@@ -1030,7 +930,7 @@ function renderSettings(){
   } else {
     h+='<div class="bw" style="padding:4px 0;margin-bottom:12px">'
       +'<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 이름</p>'
-      +'<p style="font-size:16px;font-weight:900">'+(S.trip.name||'')+'</p></div>'
+      +'<p style="font-size:15px;font-weight:700">'+(S.trip.name||'')+'</p></div>'
       +(isCreator?'<button class="bt" onclick="editingName=true;renderSettings()"><i class="ti ti-pencil" style="font-size:16px"></i></button>':'')
       +'</div>';
   }
@@ -1076,7 +976,7 @@ function renderSettings(){
 
   // 테마
   var curTheme=localStorage.getItem('app-theme')||'default';
-  var themes=[{id:'default',label:'기본',icon:'ti-sun'},{id:'dark',label:'다크',icon:'ti-moon'},{id:'blue',label:'블루',icon:'ti-swim'},{id:'excel',label:'엑셀',icon:'ti-table'}];
+  var themes=[{id:'default',label:'기본',icon:'ti-sun'},{id:'dark',label:'다크',icon:'ti-moon'},{id:'blue',label:'블루',icon:'ti-ripple'},{id:'excel',label:'엑셀',icon:'ti-table'}];
   h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">테마</h3>';
   h+='<div class="card"><div style="display:flex;gap:8px">';
   themes.forEach(function(t){
@@ -1326,7 +1226,7 @@ function saveEditAct(dayId,actId,key){
 
 // ══ 비용 탭 ══
 var CURRENCIES=[{code:'KRW',label:'₩ 원'},{code:'JPY',label:'¥ 엔'},{code:'CNY',label:'¥ 위안'},{code:'USD',label:'$ 달러'},{code:'EUR',label:'€ 유로'}];
-var CI={'식비':'tools-kitchen-2','숙박':'bed','교통':'car','관광':'camera','쇼핑':'shopping-cart','기타':'guitar'};
+var CI={'식비':'tools-kitchen-2','숙박':'bed','교통':'car','관광':'camera','쇼핑':'shopping-cart','기타':'music'};
 
 function renderExpenses(){
   if(EF.open){var f=document.activeElement;if(f&&(f.tagName==='INPUT'||f.tagName==='TEXTAREA'))return;}
@@ -1462,7 +1362,7 @@ function renderSettlePanelHTML(){
   var exps=S.trip.expenses||[];
   var checked=S.trip.settleChecked||{};
   var catColors={'식비':'#f97316','숙박':'#8b5cf6','교통':'#0ea5e9','관광':'#10b981','쇼핑':'#ec4899','기타':'#f59e0b'};
-  var catIcons={'식비':'tools-kitchen-2','숙박':'bed','교통':'car','관광':'camera','쇼핑':'shopping-cart','기타':'dots'};
+  var catIcons={'식비':'tools-kitchen-2','숙박':'bed','교통':'car','관광':'camera','쇼핑':'shopping-cart','기타':'music'};
   var catTotals={};
   exps.forEach(function(e){ catTotals[e.cat||'기타']=(catTotals[e.cat||'기타']||0)+e.amount; });
   var catList=Object.keys(catTotals).sort(function(a,b){return catTotals[b]-catTotals[a];});
@@ -1580,6 +1480,115 @@ function renderSettlePanelHTML(){
   h+='</div>';
   return h;
 }
+
+// ══ 채팅 ══
+var chatOpen = false;
+var chatListener = null;
+var chatUnread = 0;
+var lastChatCount = 0;
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  var win = document.getElementById('chat-win');
+  win.style.display = chatOpen ? 'flex' : 'none';
+  if (chatOpen) {
+    chatUnread = 0;
+    updateChatBadge();
+    var msgs = document.getElementById('chat-msgs');
+    if (msgs) setTimeout(function(){ msgs.scrollTop = msgs.scrollHeight; }, 50);
+    document.getElementById('chat-input').focus();
+  }
+}
+
+function updateChatBadge() {
+  var badge = document.getElementById('chat-badge');
+  if (!badge) return;
+  badge.style.display = chatUnread > 0 && !chatOpen ? 'flex' : 'none';
+  badge.textContent = chatUnread > 9 ? '9+' : chatUnread;
+}
+
+async function sendChat() {
+  var inp = document.getElementById('chat-input');
+  var text = inp.value.trim();
+  if (!text || !S.code || !S.me) return;
+  inp.value = '';
+  var msg = { id: uid(), nickname: S.me, text: text, ts: Date.now() };
+  var token = await getToken();
+  await fetch(FB + '/chat_' + S.code + '/' + msg.id + '.json?auth=' + token, {
+    method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(msg)
+  });
+}
+
+function renderChatMsg(msg, isMe) {
+  var div = document.createElement('div');
+  div.className = 'chat-msg ' + (isMe ? 'me' : 'other');
+  var t = new Date(msg.ts);
+  var timeStr = t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
+  if (!isMe) div.innerHTML = '<div class="sender">' + msg.nickname + '</div>';
+  div.innerHTML += '<div>' + msg.text.replace(/</g,'&lt;') + '</div>';
+  div.innerHTML += '<div class="time">' + timeStr + '</div>';
+  return div;
+}
+
+function requestNotifPerm() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function sendNotif(nickname, text) {
+  if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+    new Notification('💬 ' + nickname, {
+      body: text,
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><text y="28" font-size="28">✈️</text></svg>'
+    });
+  }
+}
+
+function startChatSync(code) {
+  if (chatListener) clearInterval(chatListener);
+  requestNotifPerm();
+  var lastTs = Date.now() - 60000;
+  chatListener = setInterval(async function() {
+    if (!S.code) return;
+    var token = await getToken();
+    var r = await fetch(FB + '/chat_' + code + '.json?auth=' + token + '&orderBy="ts"&startAt=' + lastTs);
+    if (!r.ok) return;
+    var data = await r.json();
+    if (!data) return;
+    var msgs = Object.values(data).sort(function(a,b){return a.ts-b.ts;});
+    var newMsgs = msgs.filter(function(m){ return m.ts > lastTs; });
+    if (!newMsgs.length) return;
+    lastTs = newMsgs[newMsgs.length-1].ts;
+    var container = document.getElementById('chat-msgs');
+    if (!container) return;
+    newMsgs.forEach(function(m) {
+      var isMe = m.nickname === S.me;
+      container.appendChild(renderChatMsg(m, isMe));
+      if (!isMe) {
+        if (!chatOpen) {
+          chatUnread++;
+          updateChatBadge();
+          // 토스트 알림 (앱 안에 있을 때)
+          showToast('💬 ' + m.nickname + ': ' + (m.text.length > 20 ? m.text.slice(0,20)+'...' : m.text));
+        }
+        // 브라우저 알림 (탭 밖에 있을 때)
+        sendNotif(m.nickname, m.text);
+      }
+    });
+    if (chatOpen) container.scrollTop = container.scrollHeight;
+  }, 2000);
+}
+
+function stopChatSync() {
+  if (chatListener) { clearInterval(chatListener); chatListener = null; }
+}
+
+function showChatBubble(show) {
+  var b = document.getElementById('chat-bubble');
+  if (b) b.style.display = show ? 'flex' : 'none';
+}
+
 </script>
 <!-- 채팅 -->
 <button class="chat-bubble" id="chat-bubble" onclick="toggleChat()">
