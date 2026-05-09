@@ -1208,16 +1208,56 @@ function renderSettlePanelHTML(){
   nicks.forEach(function(n){paid[n]=0;});
   exps.forEach(function(e){if(e.paidBy&&e.paidBy!=='individual') paid[e.paidBy]=(paid[e.paidBy]||0)+e.amount;});
 
+  var catTotals={};
+  var catColors={'식비':'#f97316','숙박':'#8b5cf6','교통':'#0ea5e9','관광':'#10b981','쇼핑':'#ec4899','기타':'#f59e0b'};
+  exps.forEach(function(e){ catTotals[e.cat||'기타']=(catTotals[e.cat||'기타']||0)+e.amount; });
+  var catList=Object.keys(catTotals).sort(function(a,b){return catTotals[b]-catTotals[a];});
+  var maxCat=catList.length?catTotals[catList[0]]:1;
+
   var h='<div class="card" style="border-color:var(--A)">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
     +'<p style="font-size:15px;font-weight:900">정산 결과</p>'
     +'<button class="bt" onclick="toggleSettle()" style="color:var(--muted);font-size:12px"><i class="ti ti-x"></i></button>'
-    +'</div>'
-    +'<div class="stat-grid" style="margin-bottom:12px">'
+    +'</div>';
+  // 슬라이더 패널 (정산 요약 / 카테고리 분석)
+  h+='<div style="position:relative;overflow:hidden;margin-bottom:14px">'
+    +'<div id="settle-slider" style="display:flex;transition:transform .3s ease;will-change:transform">'
+    // 패널 1: 정산 요약 (stat-grid)
+    +'<div style="min-width:100%;box-sizing:border-box">'
+    +'<div class="stat-grid" style="margin-bottom:0">'
     +'<div class="stat-card"><div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:3px">총 지출</div><div style="font-size:14px;font-weight:900;color:var(--A)">'+fmt(total)+'원</div></div>'
     +'<div class="stat-card"><div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:3px">인원</div><div style="font-size:14px;font-weight:900;color:var(--A)">'+nicks.length+'명</div></div>'
     +'<div class="stat-card"><div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:3px">1인당</div><div style="font-size:14px;font-weight:900;color:var(--A)">'+fmt(Math.round(total/nicks.length))+'원</div></div>'
+    +'</div></div>'
+    // 패널 2: 카테고리별 지출 바 차트
+    +'<div style="min-width:100%;box-sizing:border-box;padding:4px 0">';
+  var catIcons={'식비':'tools-kitchen-2','숙박':'bed','교통':'car','관광':'camera','쇼핑':'shopping-cart','기타':'dots'};
+  catList.forEach(function(cat){
+    var pct=Math.round((catTotals[cat]/total)*100);
+    var color=catColors[cat]||'#888';
+    h+='<div style="margin-bottom:8px">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">'
+      +'<span style="font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px">'
+      +(cat==='기타'?'<span style="font-size:12px">🎸</span>':'<i class="ti ti-'+catIcons[cat]+'" style="font-size:13px;color:'+color+'"></i>')
+      +cat+'</span>'
+      +'<span style="font-size:12px;font-weight:700;color:'+color+'">'+fmt(catTotals[cat])+'원 <span style="color:var(--muted);font-weight:400">('+pct+'%)</span></span>'
+      +'</div>'
+      +'<div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden">'
+      +'<div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:4px;transition:width .6s ease"></div>'
+      +'</div></div>';
+  });
+  h+='</div>'
+    +'</div>'
+    // 화살표 버튼 (컴퓨터용)
+    +'<button onclick="slideSettle(-1)" style="position:absolute;left:0;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:50%;width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);z-index:2"><i class="ti ti-chevron-left"></i></button>'
+    +'<button onclick="slideSettle(1)" style="position:absolute;right:0;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:50%;width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);z-index:2"><i class="ti ti-chevron-right"></i></button>'
+    // 점 인디케이터
+    +'<div style="display:flex;justify-content:center;gap:5px;margin-top:8px">'
+    +'<div id="dot-0" style="width:6px;height:6px;border-radius:50%;background:var(--A);transition:all .3s"></div>'
+    +'<div id="dot-1" style="width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .3s"></div>'
+    +'</div>'
     +'</div>';
+
   if(!txns.length){
     h+='<div style="text-align:center;padding:1rem 0"><i class="ti ti-circle-check" style="font-size:32px;color:var(--ok);display:block;margin-bottom:6px"></i><p style="font-weight:900;color:var(--ok)">정산 완료!</p></div>';
   } else {
@@ -1258,6 +1298,29 @@ async function toggleSettleItem(key){
   await dbSet('trip:'+S.code,S.trip);
   renderExpenses();
 }
+
+var settleSlideIdx=0;
+function slideSettle(dir){
+  var slider=document.getElementById('settle-slider');
+  if(!slider) return;
+  settleSlideIdx=Math.max(0,Math.min(1,settleSlideIdx+dir));
+  slider.style.transform='translateX(-'+settleSlideIdx*100+'%)';
+  ['dot-0','dot-1'].forEach(function(id,i){
+    var d=document.getElementById(id);
+    if(d) d.style.background=i===settleSlideIdx?'var(--A)':'var(--border)';
+  });
+}
+// 모바일 스와이프
+var settleTouchX=null;
+document.addEventListener('touchstart',function(e){
+  if(e.target.closest('#settle-slider')) settleTouchX=e.touches[0].clientX;
+},true);
+document.addEventListener('touchend',function(e){
+  if(settleTouchX===null) return;
+  var dx=e.changedTouches[0].clientX-settleTouchX;
+  if(Math.abs(dx)>40) slideSettle(dx<0?1:-1);
+  settleTouchX=null;
+},true);
 
 function toggleExpGroup(key){openExpGroups[key]=openExpGroups[key]===false?true:false;renderExpenses();}
 
