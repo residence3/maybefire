@@ -966,8 +966,8 @@ function renderSchedule(){
           +'</div></div></div>';
       } else {
         h+='<div class="act-row" data-act-id="'+act.id+'">'
-          +(act.time?'':'<span style="width:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center"><i class="ti ti-grip-vertical" onmousedown="startDrag(\''+day.id+'\',\''+act.id+'\',event)" ontouchstart="startDrag(\''+day.id+'\',\''+act.id+'\',event)" style="color:#ccc;font-size:16px;cursor:grab;touch-action:none"></i></span>')
-          +'<span style="font-size:11px;color:var(--A);font-weight:700;width:40px;flex-shrink:0;text-align:right;padding-right:8px;padding-top:3px">'+(act.time||'')+'</span>'
+          +'<span style="width:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center">'+(act.time?'':'<i class="ti ti-grip-vertical" onmousedown="startDrag(\''+day.id+'\',\''+act.id+'\',event)" ontouchstart="startDrag(\''+day.id+'\',\''+act.id+'\',event)" style="color:#ccc;font-size:16px;cursor:grab;touch-action:none"></i>')+'</span>'
+          +'<span style="font-size:11px;color:var(--A);font-weight:700;width:40px;flex-shrink:0;text-align:right;padding-right:8px">'+(act.time||'')+'</span>'
           +'<div style="flex:1;min-width:0"><p style="font-size:14px;font-weight:700">'+act.title+'</p>'
           +(act.location?'<p style="font-size:12px;color:var(--muted);margin-top:3px"><i class="ti ti-map-pin" style="font-size:11px;margin-right:2px"></i>'+act.location+'</p>':'')
           +(act.note?'<p style="font-size:12px;color:var(--muted);margin-top:2px">'+act.note+'</p>':'')
