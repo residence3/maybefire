@@ -944,7 +944,7 @@ function renderSettings(){
       +'<input id="set-name" value="'+(S.trip.name||'')+'" maxlength="15" autocomplete="off">'
       +'<button class="bp" style="padding:10px" onclick="saveName()">저장</button></div>';
   } else {
-    h+='<div class="bw" style="padding:4px 0;margin-bottom:12px">'
+    h+='<div class="bw" style="padding:4px 0;margin-bottom:8px">'
       +'<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 이름</p>'
       +'<p style="font-size:15px;font-weight:700">'+(S.trip.name||'')+'</p></div>'
       +(isCreator?'<button class="bt" onclick="editingName=true;renderSettings()"><i class="ti ti-pencil" style="font-size:16px"></i></button>':'')
@@ -965,7 +965,7 @@ function renderSettings(){
       +'<button class="bp" style="padding:10px" onclick="saveDate()">저장</button></div>';
   } else {
     var d=S.trip.startDate?(S.trip.endDate?S.trip.startDate+' ~ '+S.trip.endDate:S.trip.startDate):'날짜 미정';
-    h+='<div class="bw" style="padding-top:12px;border-top:1px solid var(--border)">'
+    h+='<div class="bw" style="padding-top:8px;border-top:1px solid var(--border)">'
       +'<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 날짜</p>'
       +'<p style="font-size:15px;font-weight:700">'+d+'</p></div>'
       +(isCreator?'<button class="bt" onclick="editingDate=true;renderSettings()"><i class="ti ti-pencil" style="font-size:16px"></i></button>':'')
@@ -1349,6 +1349,60 @@ function renderExpenses(){
   } catch(err){el.innerHTML='<div class="card" style="border-color:var(--no)"><p style="color:var(--no);font-weight:700">오류: '+err.message+'</p></div>';console.error('renderExpenses:',err);}
 }
 
+function startEditExp(id) {
+  var exp = (S.trip.expenses||[]).find(function(e){return e.id===id;});
+  if (!exp) return;
+  EF.open = true; EF.title = exp.title;
+  EF.amount = String(exp.origAmount || exp.amount);
+  EF.paidBy = exp.paidBy; EF.split = (exp.split||[]).slice();
+  EF.cat = exp.cat || '식비'; EF.dayId = exp.dayId || ''; EF.currency = exp.origCurrency || 'KRW';
+  editExpId = id; renderExpenses();
+}
+function cancelEditExp() { editExpId = null; EF.open = false; renderExpenses(); }
+async function saveEditExp() {
+  var tEl = document.getElementById('ef-t'), aEl = document.getElementById('ef-a');
+  var title = (tEl && tEl.value.trim()) || (EF.title ? EF.title.trim() : '');
+  var rawAmt = EF.amount || (aEl ? aEl.value.replace(/[^0-9]/g,'') : '');
+  var a = parseFloat(rawAmt);
+  if (!title || isNaN(a) || a <= 0) return;
+  var nicks = getNicks();
+  var krwAmt = EF.currency === 'KRW' ? a : (rateCache[EF.currency] ? Math.round(a * rateCache[EF.currency]) : a);
+  var idx = S.trip.expenses.findIndex(function(e){return e.id===editExpId;});
+  if (idx >= 0) S.trip.expenses[idx] = {id:editExpId,title:title,amount:krwAmt,origAmount:EF.currency!=='KRW'?a:null,origCurrency:EF.currency!=='KRW'?EF.currency:null,paidBy:EF.paidBy,split:EF.split.length?EF.split.slice():nicks,cat:EF.cat,dayId:EF.dayId};
+  await dbSet('trip:'+S.code,S.trip);
+  editExpId=null; EF.open=false; renderExpenses(); showToast('수정됐어요 ✅');
+}
+function removeExp(id) {
+  S.trip.expenses = S.trip.expenses.filter(function(e){return e.id!==id;});
+  dbSet('trip:'+S.code,S.trip); renderExpenses();
+}
+function openEF() {
+  editExpId=null; var nicks=getNicks();
+  EF.open=true; EF.title=''; EF.amount='';
+  EF.paidBy=S.me||(nicks[0]||''); EF.split=nicks.slice();
+  EF.cat='식비'; EF.dayId=''; EF.currency='KRW';
+  renderExpenses();
+}
+function toggleSplit(n) {
+  var amt=document.getElementById('ef-a'); if(amt) EF.amount=amt.value.replace(/[^0-9]/g,'');
+  var idx=EF.split.indexOf(n); if(idx>=0) EF.split.splice(idx,1); else EF.split.push(n);
+  renderExpenses();
+}
+function addExp() {
+  var tEl=document.getElementById('ef-t'), aEl=document.getElementById('ef-a');
+  var title=(tEl&&tEl.value.trim())||(EF.title?EF.title.trim():'');
+  var rawAmt=EF.amount||(aEl?aEl.value.replace(/[^0-9]/g,''):'');
+  var a=parseFloat(rawAmt); if(!title||isNaN(a)||a<=0) return;
+  var nicks=getNicks();
+  var krwAmt=EF.currency==='KRW'?a:(rateCache[EF.currency]?Math.round(a*rateCache[EF.currency]):a);
+  S.trip.expenses.push({id:uid(),title:title,amount:krwAmt,origAmount:EF.currency!=='KRW'?a:null,origCurrency:EF.currency!=='KRW'?EF.currency:null,paidBy:EF.paidBy,split:EF.split.length?EF.split.slice():nicks,cat:EF.cat,dayId:EF.dayId});
+  dbSet('trip:'+S.code,S.trip); EF.open=false; renderExpenses();
+}
+async function fetchRate(currency){if(currency==='KRW'||rateCache[currency])return;try{var r=await fetch('https://open.er-api.com/v6/latest/'+currency);var d=await r.json();if(d.rates&&d.rates.KRW)rateCache[currency]=d.rates.KRW;}catch(e){}}
+function fmtInput(input){var raw=input.value.replace(/[^0-9]/g,'');var num=parseInt(raw,10);if(!raw){input.value='';EF.amount='';return;}input.value=num.toLocaleString('ko-KR');EF.amount=String(num);var p=document.getElementById('currency-preview');if(p)p.textContent=getCurrencyPreview();}
+function getCurrencyPreview(){var a=parseFloat(EF.amount);if(!a||EF.currency==='KRW'||!rateCache[EF.currency])return '';return '≈ '+fmt(Math.round(a*rateCache[EF.currency]))+'원';}
+function selectCurrency(code){EF.currency=code;if(code!=='KRW')fetchRate(code).then(function(){var p=document.getElementById('currency-preview');if(p)p.textContent=getCurrencyPreview();});renderExpenses();}
+function pickCustomCurrency(){var code=prompt('통화 코드를 입력해주세요 (예: THB, VND, GBP)');if(!code)return;code=code.trim().toUpperCase();if(!CURRENCIES.find(function(c){return c.code===code;}))CURRENCIES.push({code:code,label:code});selectCurrency(code);}
 var settleSlideIdx = 0;
 
 function slideSettle(dir) {
