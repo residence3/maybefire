@@ -411,29 +411,20 @@ body.excel-mode .content::before {
 }
 @media(max-width:599px){
   .chat-win{
-    bottom:0;left:0;right:0;
-    height:60vh;
+    bottom:0;left:12px;right:12px;
+    height:55vh;
     border-radius:20px 20px 0 0;
     position:fixed;
-    max-height:60vh;
+    max-height:55vh;
   }
   .chat-bubble{bottom:20px;right:16px;}
   .chat-msgs{flex:1;overflow-y:auto;min-height:0;}
 }
-/* 키보드 올라왔을 때 대응 */
-@supports(height:100dvh){
-  @media(max-width:599px){
-    .chat-win{
-      height:60dvh;
-      max-height:60dvh;
-    }
-  }
-}
 .chat-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
 .chat-msg{max-width:75%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5;word-break:break-word}
-.chat-msg.me{align-self:flex-end;background:var(--A);color:#412402;border-bottom-right-radius:4px}
-.chat-msg.other{align-self:flex-start;background:var(--AX);border:1px solid var(--AL);border-bottom-left-radius:4px}
+.chat-msg.me{align-self:flex-end;background:#7a4e0d;color:#fff;border-bottom-right-radius:4px}
+.chat-msg.other{align-self:flex-start;background:#f0e8d8;border:1px solid var(--bm);color:#2d1a00;border-bottom-left-radius:4px}
 .chat-msg .sender{font-size:10px;font-weight:700;margin-bottom:2px;opacity:.7}
 .chat-msg .time{font-size:10px;opacity:.6;margin-top:2px;text-align:right}
 .chat-inp{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
@@ -972,7 +963,7 @@ function renderSettings(){
       +'</div>';
     h+='<div class="bw" style="padding-top:12px;border-top:1px solid var(--border);gap:12px">'
       +'<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 코드</p>'
-      +'<p style="font-size:22px;font-weight:900;letter-spacing:6px;color:var(--A)">'+S.code+'</p></div>'
+      +'<p style="font-size:15px;font-weight:700;letter-spacing:4px;color:var(--A)">'+S.code+'</p></div>'
       +'<button class="copy-btn" style="flex-shrink:0;width:auto;padding:8px 14px;font-size:13px;white-space:nowrap" onclick="copyCode()"><i class="ti ti-copy"></i>복사</button>'
       +'</div>';
   }
@@ -1553,7 +1544,7 @@ function renderSettlePanelHTML(){
     +'<div id="dot-1" style="width:6px;height:6px;border-radius:50%;background:var(--border)"></div>'
     +'</div></div>';
 
-  h+='<p style="font-size:12px;font-weight:700;color:var(--muted);margin-top:12px;margin-bottom:6px">멤버별 현황</p>';
+  h+='<p style="font-size:13px;font-weight:900;color:var(--text);margin-top:16px;margin-bottom:8px">멤버별 결제내역</p>';
   nicks.forEach(function(n){
     var mp=paid[n]||0, diff=mp-total/nicks.length;
     h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-top:1px solid var(--border)">'
@@ -1562,6 +1553,7 @@ function renderSettlePanelHTML(){
       +'<span style="font-size:11px;color:'+(diff>=0?'var(--ok)':'var(--no)')+';margin-left:8px">'+(diff>=0?'+'+fmt(Math.round(diff))+'원 받아야 함':fmt(Math.round(diff))+'원 내야 함')+'</span></div>'
       +'</div>';
   });
+  h+='<p style="font-size:13px;font-weight:900;color:var(--text);margin-top:16px;margin-bottom:8px">멤버별 정산</p>';
   if(!txns.length){
     h+='<div style="text-align:center;padding:1rem 0"><i class="ti ti-circle-check" style="font-size:32px;color:var(--ok);display:block;margin-bottom:6px"></i><p style="font-weight:900;color:var(--ok)">정산 완료!</p></div>';
   } else {
@@ -1572,10 +1564,10 @@ function renderSettlePanelHTML(){
         +'<div style="width:24px;height:24px;border-radius:50%;flex-shrink:0;border:2px solid '+(done?'var(--ok)':'var(--border)')+';background:'+(done?'var(--ok)':'transparent')+';display:flex;align-items:center;justify-content:center">'
         +(done?'<i class="ti ti-check" style="color:#fff;font-size:11px"></i>':'')
         +'</div>'
-        +'<span style="font-weight:700;font-size:14px'+(done?';color:var(--muted)':'')+'">'+tx.from+'</span>'
+        +'<span style="font-weight:700;font-size:13px'+(done?';color:var(--muted)':'')+'">'+tx.from+'</span>'
         +'<i class="ti ti-arrow-right" style="color:var(--muted);font-size:13px"></i>'
-        +'<span style="font-weight:700;font-size:14px'+(done?';color:var(--muted)':'')+'">'+tx.to+'</span>'
-        +'<span style="margin-left:auto;font-weight:900;color:'+(done?'var(--muted)':'var(--A)')+';font-size:15px">'+fmt(tx.amount)+'원</span>'
+        +'<span style="font-weight:700;font-size:13px'+(done?';color:var(--muted)':'')+'">'+tx.to+'</span>'
+        +'<span style="margin-left:auto;font-weight:900;color:'+(done?'var(--muted)':'var(--A)')+';font-size:13px">'+fmt(tx.amount)+'원</span>'
         +'</div>';
     });
     var allDone=txns.every(function(tx){return checked[tx.from+'_'+tx.to+'_'+tx.amount];});
@@ -1587,6 +1579,7 @@ function renderSettlePanelHTML(){
 
 // ══ 채팅 ══
 var chatOpen = false;
+var chatSeenIds = {};
 var chatListener = null;
 var chatUnread = 0;
 var lastChatCount = 0;
@@ -1632,7 +1625,15 @@ async function sendChat() {
   var text = inp.value.trim();
   if (!text || !S.code || !S.me) return;
   inp.value = '';
+  inp.focus(); // 키보드 유지
   var msg = { id: uid(), nickname: S.me, text: text, ts: Date.now() };
+  chatSeenIds[msg.id] = true; // 중복 방지
+  // 내 메시지 즉시 표시 (로컬)
+  var container = document.getElementById('chat-msgs');
+  if (container) {
+    container.appendChild(renderChatMsg(msg, true));
+    container.scrollTop = container.scrollHeight;
+  }
   var token = await getToken();
   await fetch(FB + '/chat_' + S.code + '/' + msg.id + '.json?auth=' + token, {
     method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(msg)
@@ -1669,7 +1670,7 @@ function startChatSync(code) {
   if (chatListener) clearInterval(chatListener);
   requestNotifPerm();
   var lastTs = Date.now() - 60000;
-  var seenIds = {};
+  var seenIds = chatSeenIds;
   chatListener = setInterval(async function() {
     if (!S.code) return;
     try {
@@ -1700,7 +1701,7 @@ function startChatSync(code) {
       });
       if (chatOpen) container.scrollTop = container.scrollHeight;
     } catch(e) { console.error('chat sync error:', e); }
-  }, 2000);
+  }, 1500);
 }
 
 function stopChatSync() {
@@ -1719,11 +1720,11 @@ function showChatBubble(show) {
   <span class="badge" id="chat-badge"></span>
 </button>
 <div class="chat-win" id="chat-win">
-  <div onclick="toggleChat()" style="cursor:pointer;padding:10px 16px 0;display:flex;justify-content:center">
-    <div style="width:36px;height:4px;background:var(--bm);border-radius:4px"></div>
-  </div>
   <div class="chat-hd">
     <span style="font-weight:900;font-size:14px"><i class="ti ti-message-circle" style="margin-right:6px;color:var(--A)"></i>실시간 채팅</span>
+    <div onclick="toggleChat()" style="cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center">
+      <div style="width:28px;height:4px;background:var(--bm);border-radius:4px"></div>
+    </div>
   </div>
   <div class="chat-msgs" id="chat-msgs"></div>
   <div class="chat-inp">
