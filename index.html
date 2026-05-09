@@ -427,9 +427,9 @@ body.excel-mode .content::before {
 .chat-row{display:flex;flex-direction:column;gap:2px}
 .chat-row.me{align-items:flex-end}
 .chat-row.other{align-items:flex-start}
-.chat-row-inner{display:flex;align-items:flex-end;gap:6px}
+.chat-row-inner{display:flex;align-items:flex-end;gap:3px}
 .chat-row.me .chat-row-inner{flex-direction:row-reverse}
-.chat-msg{max-width:75%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5;word-break:break-word}
+.chat-msg{max-width:75%;padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5;word-break:break-word}
 .chat-msg.me{background:#7a4e0d;color:#fff;border-bottom-right-radius:4px}
 .chat-msg.other{background:#f0e8d8;border:1px solid var(--bm);color:#2d1a00;border-bottom-left-radius:4px}
 .chat-msg .sender{font-size:10px;font-weight:700;margin-bottom:2px;opacity:.7}
@@ -1305,7 +1305,7 @@ function renderExpenses(){
             +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'
             +'<div style="display:flex;gap:10px;align-items:center;flex:1;min-width:0">'
             +'<button onmousedown="startExpDrag(event,\'' + exp.id + '\',\'' + gkey + '\')" ontouchstart="startExpDrag(event,\'' + exp.id + '\',\'' + gkey + '\')" style="background:none;border:none;cursor:grab;padding:4px 2px;color:#ccc;font-size:16px;touch-action:none;flex-shrink:0;align-self:center"><i class="ti ti-grip-vertical"></i></button>'
-            +(exp.cat==='기타'?'<span style="font-size:18px;flex-shrink:0;padding-top:2px">🎸</span>':'<i class="ti ti-'+(CI[exp.cat]||'credit-card')+'" style="font-size:20px;color:var(--A);flex-shrink:0"></i>')
+            '<i class="ti ti-'+(CI[exp.cat]||'credit-card')+'" style="font-size:20px;color:var(--A);flex-shrink:0"></i>'
             +'<div style="min-width:0"><p style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+exp.title+'</p>'
             +(exp.origAmount?'<p style="font-size:11px;color:var(--muted);margin-top:2px">'+exp.origAmount.toLocaleString()+' '+exp.origCurrency+' → '+fmt(exp.amount)+'원</p>':'')
             +'<p style="font-size:12px;color:var(--muted);margin-top:3px">'+(exp.paidBy==='individual'?'개별결제':getMemberName(exp.paidBy)+' 결제')+'</p>'
@@ -1334,7 +1334,7 @@ function renderExpenses(){
     var cc=el.querySelector('#currency-chips');
     if(cc){CURRENCIES.forEach(function(c){var b=document.createElement('button');b.className='chip'+(c.code===EF.currency?' on':'');b.textContent=c.label;b.onclick=function(){selectCurrency(c.code);};cc.appendChild(b);});var pb=document.createElement('button');pb.className='chip';pb.innerHTML='<i class="ti ti-plus"></i> 기타';pb.onclick=pickCustomCurrency;cc.appendChild(pb);}
     var catC=el.querySelector('#cat-chips');
-    if(catC){['식비','숙박','교통','관광','쇼핑','기타'].forEach(function(c){var b=document.createElement('button');b.className='chip'+(EF.cat===c?' on':'');b.innerHTML=(c==='기타'?'<span style="font-size:13px">🎸</span>':'<i class="ti ti-'+CI[c]+'" style="font-size:14px"></i>')+c;b.onclick=function(){EF.cat=c;renderExpenses();};catC.appendChild(b);});}
+    if(catC){['식비','숙박','교통','관광','쇼핑','기타'].forEach(function(c){var b=document.createElement('button');b.className='chip'+(EF.cat===c?' on':'');b.innerHTML='<i class="ti ti-'+CI[c]+'" style="font-size:14px"></i>'+c;b.onclick=function(){EF.cat=c;renderExpenses();};catC.appendChild(b);});}
     var pc=el.querySelector('#paidby-chips');
     if(pc){
       var indBtn=document.createElement('button');indBtn.className='chip'+(EF.paidBy==='individual'?' on':'');indBtn.innerHTML='<i class="ti ti-users" style="font-size:12px"></i>개별결제';indBtn.onclick=function(){EF.paidBy='individual';renderExpenses();};pc.appendChild(indBtn);
@@ -1500,7 +1500,7 @@ function renderSettlePanelHTML(){
   nicks.forEach(function(n){paid[n]=0;});
   exps.forEach(function(e){if(e.paidBy&&e.paidBy!=='individual') paid[e.paidBy]=(paid[e.paidBy]||0)+e.amount;});
 
-  var h='<div class="card" style="border-color:var(--A)">'
+  var h='<div class="card">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
     +'<h3 style="font-size:15px;font-weight:900;color:var(--A)">정산 결과</h3>'
     +'<button class="bt" onclick="toggleSettle()" style="color:var(--muted);font-size:12px"><i class="ti ti-x"></i></button>'
@@ -1534,7 +1534,7 @@ function renderSettlePanelHTML(){
     h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">'
       +'<div style="display:flex;align-items:center;gap:6px">'
       +'<div style="width:10px;height:10px;border-radius:2px;background:'+color+';flex-shrink:0"></div>'
-      +(cat==='기타'?'<span style="font-size:12px">🎸</span>':'<i class="ti ti-'+catIcons[cat]+'" style="font-size:12px;color:'+color+'"></i>')
+      +'<i class="ti ti-'+catIcons[cat]+'" style="font-size:12px;color:'+color+'"></i>'
       +'<span style="font-size:12px;font-weight:700">'+cat+'</span>'
       +'</div>'
       +'<span style="font-size:12px;color:var(--muted)">'+fmt(catTotals[cat])+'원 · '+pct+'%</span>'
@@ -1567,8 +1567,8 @@ function renderSettlePanelHTML(){
       var key=tx.from+'_'+tx.to+'_'+tx.amount;
       var done=!!checked[key];
       h+='<div data-skey="'+key+'" onclick="toggleSettleItem(this.dataset.skey)" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--border);cursor:pointer'+(done?';opacity:.6':'') +'">'
-        +'<div style="width:24px;height:24px;border-radius:50%;flex-shrink:0;border:2px solid '+(done?'var(--ok)':'var(--border)')+';background:'+(done?'var(--ok)':'transparent')+';display:flex;align-items:center;justify-content:center">'
-        +(done?'<i class="ti ti-check" style="color:#fff;font-size:11px"></i>':'')
+        +'<div style="width:18px;height:18px;border-radius:50%;flex-shrink:0;border:1.5px solid '+(done?'var(--ok)':'var(--border)')+';background:'+(done?'var(--ok)':'transparent')+';display:flex;align-items:center;justify-content:center">'
+        +(done?'<i class="ti ti-check" style="color:#fff;font-size:9px"></i>':'')
         +'</div>'
         +'<span style="font-weight:700;font-size:13px'+(done?';color:var(--muted)':'')+'">'+tx.from+'</span>'
         +'<i class="ti ti-arrow-right" style="color:var(--muted);font-size:13px"></i>'
