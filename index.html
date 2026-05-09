@@ -1631,14 +1631,16 @@ function showChatBubble(show) {
   <span class="badge" id="chat-badge"></span>
 </button>
 <div class="chat-win" id="chat-win">
-  <div class="chat-hd" onclick="toggleChat()" style="cursor:pointer">
+  <div onclick="toggleChat()" style="cursor:pointer;padding:10px 16px 0;display:flex;justify-content:center">
+    <div style="width:36px;height:4px;background:var(--bm);border-radius:4px"></div>
+  </div>
+  <div class="chat-hd">
     <span style="font-weight:900;font-size:14px"><i class="ti ti-message-circle" style="margin-right:6px;color:var(--A)"></i>실시간 채팅</span>
-    <div style="width:32px;height:4px;background:var(--border);border-radius:2px;margin:0 4px"></div>
   </div>
   <div class="chat-msgs" id="chat-msgs"></div>
   <div class="chat-inp">
     <input id="chat-input" placeholder="메시지를 입력하세요..." autocomplete="off" onkeydown="if(event.key==='Enter')sendChat()">
-    <button onclick="sendChat()"><i class="ti ti-send" style="font-size:16px"></i></button>
+    <button onclick="sendChat()"><i class="ti ti-arrow-up" style="font-size:16px;font-weight:900"></i></button>
   </div>
 </div>
 </body>
