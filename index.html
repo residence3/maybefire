@@ -413,10 +413,10 @@ body.excel-mode .content::before {
   <div class="fw col">
     <div style="text-align:center;margin-bottom:1rem">
       <i class="ti ti-plane-departure" style="font-size:48px;color:var(--A);display:block;margin-bottom:12px"></i>
-      <h1 style="font-size:28px;font-weight:900;letter-spacing:-1px">같이 가자</h1>
-      <p style="color:var(--muted);font-size:14px;margin-top:6px;line-height:1.7">친구들과 여행 일정과 비용 정산을<br>한 곳에서 관리해요</p>
+      <h1 style="font-size:28px;font-weight:900;letter-spacing:-1px">같이 가자!</h1>
+      <p style="color:var(--muted);font-size:14px;margin-top:6px;line-height:1.7">여행 일정과 비용 정산을<br>한 곳에서 관리해요.</p>
     </div>
-    <div style="display:flex;background:#f5f0ea;border-radius:var(--r);padding:4px;gap:4px">
+    <div style="display:flex;background:#e8ddd0;border-radius:var(--r);padding:4px;gap:4px">
       <button id="tab-login-btn" onclick="setAuthTab('login')" style="flex:1;padding:10px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;background:var(--A);color:#412402">로그인</button>
       <button id="tab-signup-btn" onclick="setAuthTab('signup')" style="flex:1;padding:10px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;background:transparent;color:var(--muted)">회원가입</button>
     </div>
@@ -720,7 +720,6 @@ card.innerHTML='<div style="width:46px;height:46px;border-radius:14px;background
 }
 
 async function enterTrip(code) {
-  showToast('입장 중...');
   try {
     var myTrips=await dbGet('user-trips:'+S.user.uid)||{};
     var myInfo=myTrips[code];
@@ -967,8 +966,8 @@ function renderSchedule(){
           +'</div></div></div>';
       } else {
         h+='<div class="act-row" data-act-id="'+act.id+'">'
-          +(act.time?'':'<button onmousedown="startDrag(\''+day.id+'\',\''+act.id+'\',event)" ontouchstart="startDrag(\''+day.id+'\',\''+act.id+'\',event)" style="background:none;border:none;cursor:grab;padding:0;width:36px;color:#ccc;font-size:18px;touch-action:none;flex-shrink:0;align-self:center;display:flex;justify-content:center"><i class="ti ti-grip-vertical"></i></button>')
-          +'<span style="font-size:11px;color:var(--A);font-weight:700;width:36px;flex-shrink:0;text-align:center;padding-top:3px">'+(act.time||'')+'</span>'
+          +(act.time?'':'<span style="width:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center"><i class="ti ti-grip-vertical" onmousedown="startDrag(\''+day.id+'\',\''+act.id+'\',event)" ontouchstart="startDrag(\''+day.id+'\',\''+act.id+'\',event)" style="color:#ccc;font-size:16px;cursor:grab;touch-action:none"></i></span>')
+          +'<span style="font-size:11px;color:var(--A);font-weight:700;width:40px;flex-shrink:0;text-align:right;padding-right:8px;padding-top:3px">'+(act.time||'')+'</span>'
           +'<div style="flex:1;min-width:0"><p style="font-size:14px;font-weight:700">'+act.title+'</p>'
           +(act.location?'<p style="font-size:12px;color:var(--muted);margin-top:3px"><i class="ti ti-map-pin" style="font-size:11px;margin-right:2px"></i>'+act.location+'</p>':'')
           +(act.note?'<p style="font-size:12px;color:var(--muted);margin-top:2px">'+act.note+'</p>':'')
@@ -1092,7 +1091,7 @@ function renderExpenses(){
   }
 
   if(!EF.open){
-    h+='<button onclick="openEF()" style="width:100%;border:2px dashed var(--border);background:transparent;border-radius:var(--r);padding:11px 14px;color:var(--A);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;margin-bottom:14px"><i class="ti ti-plus"></i>지출 추가</button>';
+    h+='<button onclick="openEF()" style="width:100%;border:2px dashed var(--border);background:transparent;border-radius:var(--r);padding:11px 14px;color:var(--A);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:14px"><i class="ti ti-plus"></i>지출 추가</button>';
   }
   if(!EF.open&&exps.length>0){
     var groups={}, groupOrder=[];
@@ -1117,11 +1116,11 @@ function renderExpenses(){
         +'</div>';
       if(isOpen){
         gexps.forEach(function(exp){
-          h+='<div class="card" data-exp-id="'+exp.id+'" data-exp-gkey="'+gkey+'" style="margin-top:4px;margin-bottom:0">'
-            +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
-            +'<div style="display:flex;gap:10px;align-items:flex-start;flex:1;min-width:0">'
+          h+='<div class="card" data-exp-id="'+exp.id+'" data-exp-gkey="'+gkey+'" style="margin-top:4px;margin-bottom:0;padding:10px 14px">'
+            +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'
+            +'<div style="display:flex;gap:10px;align-items:center;flex:1;min-width:0">'
             +'<button onmousedown="startExpDrag(event,\'' + exp.id + '\',\'' + gkey + '\')" ontouchstart="startExpDrag(event,\'' + exp.id + '\',\'' + gkey + '\')" style="background:none;border:none;cursor:grab;padding:4px 2px;color:#ccc;font-size:16px;touch-action:none;flex-shrink:0;align-self:center"><i class="ti ti-grip-vertical"></i></button>'
-            +'<i class="ti ti-'+(CI[exp.cat]||'credit-card')+'" style="font-size:20px;color:var(--A);flex-shrink:0;padding-top:3px"></i>'
+            +(exp.cat==='기타'?'<span style="font-size:18px;flex-shrink:0;padding-top:2px">🎸</span>':'<i class="ti ti-'+(CI[exp.cat]||'credit-card')+'" style="font-size:20px;color:var(--A);flex-shrink:0"></i>')
             +'<div style="min-width:0"><p style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+exp.title+'</p>'
             +(exp.origAmount?'<p style="font-size:11px;color:var(--muted);margin-top:2px">'+exp.origAmount.toLocaleString()+' '+exp.origCurrency+' → '+fmt(exp.amount)+'원</p>':'')
             +'<p style="font-size:12px;color:var(--muted);margin-top:3px">'+(exp.paidBy==='individual'?'개별결제':getMemberName(exp.paidBy)+' 결제')+'</p>'
@@ -1150,7 +1149,7 @@ function renderExpenses(){
     var cc=el.querySelector('#currency-chips');
     if(cc){CURRENCIES.forEach(function(c){var b=document.createElement('button');b.className='chip'+(c.code===EF.currency?' on':'');b.textContent=c.label;b.onclick=function(){selectCurrency(c.code);};cc.appendChild(b);});var pb=document.createElement('button');pb.className='chip';pb.innerHTML='<i class="ti ti-plus"></i> 기타';pb.onclick=pickCustomCurrency;cc.appendChild(pb);}
     var catC=el.querySelector('#cat-chips');
-    if(catC){['식비','숙박','교통','관광','쇼핑','기타'].forEach(function(c){var b=document.createElement('button');b.className='chip'+(EF.cat===c?' on':'');b.innerHTML='<i class="ti ti-'+CI[c]+'"></i>'+c;b.onclick=function(){EF.cat=c;renderExpenses();};catC.appendChild(b);});}
+    if(catC){['식비','숙박','교통','관광','쇼핑','기타'].forEach(function(c){var b=document.createElement('button');b.className='chip'+(EF.cat===c?' on':'');b.innerHTML=(c==='기타'?'<span style="font-size:13px">🎸</span>':'<i class="ti ti-'+CI[c]+'" style="font-size:14px"></i>')+c;b.onclick=function(){EF.cat=c;renderExpenses();};catC.appendChild(b);});}
     var pc=el.querySelector('#paidby-chips');
     if(pc){
       var indBtn=document.createElement('button');indBtn.className='chip'+(EF.paidBy==='individual'?' on':'');indBtn.innerHTML='<i class="ti ti-users" style="font-size:12px"></i>개별결제';indBtn.onclick=function(){EF.paidBy='individual';renderExpenses();};pc.appendChild(indBtn);
@@ -1405,7 +1404,7 @@ function renderSettings(){
   var themes=[
     {id:'default',label:'기본',icon:'ti-sun'},
     {id:'dark',label:'다크',icon:'ti-moon'},
-    {id:'blue',label:'블루',icon:'ti-surfboard'},
+    {id:'blue',label:'블루',icon:'ti-swim'},
     {id:'excel',label:'엑셀',icon:'ti-table'}
   ];
   h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">테마</h3>';
