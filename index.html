@@ -1123,12 +1123,12 @@ function switchTab(n){
       var tabsH = tabs.offsetHeight;
       var atBottom = (window.innerHeight + y) >= document.body.scrollHeight - 10;
       if(y > lastY && y > 60 && !hidden) {
-        // 아래로 스크롤 → 숨김
-        hd.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
-        tabs.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
+        // 아래로 스크롤 → 제목바만 숨김, 탭은 유지
+        hd.style.transform = 'translateY(-' + hdH + 'px)';
+        tabs.style.transform = 'translateY(-' + hdH + 'px)';
         hidden = true;
-      } else if(y < lastY && hidden && !atBottom) {
-        // 위로 스크롤 → 보임 (맨 아래가 아닐 때만)
+      } else if(y < lastY && hidden) {
+        // 위로 스크롤 → 둘 다 보임
         hd.style.transform = '';
         tabs.style.transform = '';
         hidden = false;
