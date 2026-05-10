@@ -947,7 +947,7 @@ function renderSettings(){
       +'<input id="set-name" value="'+(S.trip.name||'')+'" maxlength="15" autocomplete="off">'
       +'<button class="bp" style="padding:10px" onclick="saveName()">저장</button></div>';
   } else {
-    h+='<div class="bw" style="padding:4px 0;margin-bottom:8px">'
+    h+='<div class="bw" style="padding:4px 0;margin-bottom:4px">'
       +'<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 이름</p>'
       +'<p style="font-size:15px;font-weight:700">'+(S.trip.name||'')+'</p></div>'
       +(isCreator?'<button class="bt" onclick="editingName=true;renderSettings()"><i class="ti ti-pencil" style="font-size:16px"></i></button>':'')
@@ -1602,14 +1602,13 @@ function renderSettlePanelHTML(){
 
   h+='</div></div>'
     // 화살표
-    +'<button onclick="slideSettle(-1)" style="position:absolute;left:0;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:50%;width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);z-index:2"><i class="ti ti-chevron-left" style="font-size:11px"></i></button>'
-    +'<button onclick="slideSettle(1)" style="position:absolute;right:0;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:50%;width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);z-index:2"><i class="ti ti-chevron-right" style="font-size:11px"></i></button>'
+
     +'<div style="display:flex;justify-content:center;gap:5px;margin-top:8px">'
     +'<div id="dot-0" style="width:6px;height:6px;border-radius:50%;background:var(--A)"></div>'
     +'<div id="dot-1" style="width:6px;height:6px;border-radius:50%;background:var(--border)"></div>'
     +'</div></div>';
 
-  h+='<h3 style="font-size:15px;font-weight:900;color:var(--A);margin-top:16px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--AL)">멤버별 결제내역</h3>';
+  h+='<h3 style="font-size:15px;font-weight:900;color:var(--A);margin-top:16px;margin-bottom:8px">멤버별 결제내역</h3>';
   nicks.forEach(function(n){
     var mp=paid[n]||0, diff=mp-total/nicks.length;
     h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-top:1px solid var(--border)">'
@@ -1618,7 +1617,7 @@ function renderSettlePanelHTML(){
       +'<span style="font-size:11px;color:'+(diff>=0?'var(--ok)':'var(--no)')+';margin-left:8px">'+(diff>=0?'+'+fmt(Math.round(diff))+'원 받아야 함':fmt(Math.round(diff))+'원 내야 함')+'</span></div>'
       +'</div>';
   });
-  h+='<h3 style="font-size:15px;font-weight:900;color:var(--A);margin-top:16px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--AL)">멤버별 정산</h3>';
+  h+='<h3 style="font-size:15px;font-weight:900;color:var(--A);margin-top:16px;margin-bottom:8px">멤버별 정산</h3>';
   if(!txns.length){
     h+='<div style="text-align:center;padding:1rem 0"><i class="ti ti-circle-check" style="font-size:32px;color:var(--ok);display:block;margin-bottom:6px"></i><p style="font-weight:900;color:var(--ok)">정산 완료!</p></div>';
   } else {
