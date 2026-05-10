@@ -1520,14 +1520,16 @@ function renderSettlePanelHTML(){
   var savedIdx = settleSlideIdx;
   setTimeout(function(){
     var slider=document.getElementById('settle-slider');
-    if(slider && savedIdx>0){
-      slider.style.transition='none';
-      slider.style.transform='translateX(-'+savedIdx*100+'%)';
-      ['dot-0','dot-1'].forEach(function(id,i){
-        var d=document.getElementById(id);
-        if(d) d.style.background=i===savedIdx?'var(--A)':'var(--border)';
-      });
-    }
+    if(!slider) return;
+    slider.style.transition='none';
+    slider.style.transform='translateX(-'+savedIdx*100+'%)';
+    ['dot-0','dot-1'].forEach(function(id,i){
+      var d=document.getElementById(id);
+      if(!d) return;
+      d.style.background = i===savedIdx?'var(--A)':'var(--border)';
+      d.style.width = i===savedIdx?'20px':'8px';
+      d.style.borderRadius = '4px';
+    });
   },0);
 
   var nicks=getNicks();
@@ -1616,8 +1618,8 @@ function renderSettlePanelHTML(){
     // 화살표
 
     +'<div style="display:flex;justify-content:center;gap:8px;margin-top:10px">'
-    +'<div id="dot-0" onclick="goSettle(0)" style="width:8px;height:8px;border-radius:50%;background:var(--A);cursor:pointer;transition:all .2s"></div>'
-    +'<div id="dot-1" onclick="goSettle(1)" style="width:8px;height:8px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .2s"></div>'
+    +'<div id="dot-0" onclick="goSettle(0)" style="width:20px;height:8px;border-radius:4px;background:var(--A);cursor:pointer;transition:all .2s"></div>'
+    +'<div id="dot-1" onclick="goSettle(1)" style="width:8px;height:8px;border-radius:4px;background:var(--border);cursor:pointer;transition:all .2s"></div>'
     +'</div></div>';
 
   h+='<h3 style="font-size:15px;font-weight:900;color:var(--A);margin-top:16px;margin-bottom:8px">멤버별 결제내역</h3>';
