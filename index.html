@@ -1121,13 +1121,19 @@ function switchTab(n){
       if(!hd || !tabs) { ticking=false; return; }
       var hdH = hd.offsetHeight;
       var tabsH = tabs.offsetHeight;
+      var atBottom = (window.innerHeight + y) >= document.body.scrollHeight - 10;
       if(y > lastY && y > 60 && !hidden) {
         // 아래로 스크롤 → 숨김
         hd.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
         tabs.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
         hidden = true;
-      } else if(y < lastY && hidden) {
-        // 위로 스크롤 → 보임
+      } else if(y < lastY && hidden && !atBottom) {
+        // 위로 스크롤 → 보임 (맨 아래가 아닐 때만)
+        hd.style.transform = '';
+        tabs.style.transform = '';
+        hidden = false;
+      } else if(atBottom && hidden) {
+        // 맨 아래 도달 → 둘 다 보임
         hd.style.transform = '';
         tabs.style.transform = '';
         hidden = false;
