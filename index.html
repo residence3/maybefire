@@ -36,7 +36,7 @@ input[type=password]{letter-spacing:.1em}
 .chip{border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer;font-weight:600;background:transparent;color:var(--muted);border:1.5px solid var(--border);display:inline-flex;align-items:center;gap:4px;transition:all .15s;font-family:inherit}
 .chip:active{transform:scale(.96)}
 .chip.on{background:var(--AX);color:var(--A);border-color:var(--A)}
-.tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;height:46px}
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;height:46px;transition:transform .25s ease}
 .tab{flex:1;border:none;background:none;padding:13px 4px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);border-bottom:2.5px solid transparent;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;font-family:inherit}
 .tab.on{color:var(--A);border-bottom-color:var(--A)}
 .page{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.25rem;background:var(--bg)}
@@ -52,7 +52,7 @@ input[type=password]{letter-spacing:.1em}
 .big-code{font-size:22px;font-weight:900;letter-spacing:5px;color:var(--A);margin:4px 0 2px;word-break:break-all}
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
 .stat-card{background:#f5f0ea;border-radius:var(--r);padding:12px 8px;text-align:center}
-.trip-hd{background:#fff;border-bottom:1px solid var(--border);padding:14px 18px;position:sticky;top:0;z-index:30}
+.trip-hd{background:#fff;border-bottom:1px solid var(--border);padding:14px 18px;position:sticky;top:0;z-index:30;transition:transform .25s ease}
 .content{padding:14px 14px 2rem;max-width:600px;margin:0 auto}
 .act-row{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--border);align-items:flex-start}
 .date-range{background:#fff;border:1.5px solid var(--border);border-radius:var(--rl);overflow:hidden}
@@ -404,6 +404,9 @@ body.excel-mode .content::before {
 .chat-bubble{position:fixed;bottom:24px;right:20px;z-index:100;width:48px;height:48px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:transform .15s}
 .chat-bubble:active{transform:scale(.92)}
 .chat-bubble .badge{position:absolute;top:-2px;right:-2px;background:#e53e3e;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;display:none}
+.chat-bubble .dot{position:absolute;top:-3px;right:-3px;width:12px;height:12px;background:#22c55e;border-radius:50%;display:none;border:2px solid #fff}
+@keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.chat-bubble .dot.active{display:block;animation:dotPulse 1.2s ease-in-out infinite}
 .chat-win{position:fixed;z-index:200;background:var(--card);border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,.15);display:none;flex-direction:column}
 @media(min-width:600px){
   .chat-win{bottom:84px;right:20px;width:320px;height:440px;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.18);}
@@ -548,11 +551,13 @@ body.excel-mode .content::before {
     <button class="tab on" data-tab="schedule" onclick="switchTab('schedule')"><i class="ti ti-calendar" style="font-size:14px"></i>일정</button>
     <button class="tab" data-tab="expenses" onclick="switchTab('expenses')"><i class="ti ti-credit-card" style="font-size:14px"></i>비용</button>
     <button class="tab" data-tab="settings" onclick="switchTab('settings')"><i class="ti ti-settings" style="font-size:14px"></i>설정</button>
+    <button class="tab chat-tab-btn" data-tab="chat" onclick="switchTab('chat')" id="chat-tab-btn" style="display:none;position:relative"><i class="ti ti-message-circle" style="font-size:14px"></i>채팅<span id="chat-tab-dot" style="display:none;position:absolute;top:6px;right:8px;width:7px;height:7px;background:#22c55e;border-radius:50%;border:1.5px solid #fff"></span></button>
   </div>
   <div class="content">
     <div id="tab-schedule" style="min-height:60vh"></div>
     <div id="tab-expenses" style="display:none;min-height:60vh"></div>
     <div id="tab-settings" style="display:none;min-height:60vh"></div>
+    <div id="tab-chat" style="display:none;min-height:60vh;display:flex;flex-direction:column;height:calc(100dvh - 100px)"></div>
   </div>
 </div>
 
@@ -1091,10 +1096,47 @@ function renderTabSafe(n){
 }
 function switchTab(n){
   document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('on',b.dataset.tab===n);});
-  ['schedule','expenses','settings'].forEach(function(t){var el=document.getElementById('tab-'+t);if(el)el.style.display=t===n?'block':'none';});
+  ['schedule','expenses','settings','chat'].forEach(function(t){
+    var el=document.getElementById('tab-'+t);
+    if(el) el.style.display=t===n?'block':'none';
+  });
   window.scrollTo(0,0);
-  renderTabSafe(n);
+  if(n==='chat') renderChatTab();
+  else renderTabSafe(n);
 }
+
+// ── 스크롤 숨김/보임 ──
+(function(){
+  var lastY = 0;
+  var ticking = false;
+  var hidden = false;
+
+  window.addEventListener('scroll', function(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      var y = window.scrollY;
+      var hd = document.querySelector('.trip-hd');
+      var tabs = document.querySelector('.tabs');
+      if(!hd || !tabs) { ticking=false; return; }
+      var hdH = hd.offsetHeight;
+      var tabsH = tabs.offsetHeight;
+      if(y > lastY && y > 60 && !hidden) {
+        // 아래로 스크롤 → 숨김
+        hd.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
+        tabs.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
+        hidden = true;
+      } else if(y < lastY && hidden) {
+        // 위로 스크롤 → 보임
+        hd.style.transform = '';
+        tabs.style.transform = '';
+        hidden = false;
+      }
+      lastY = y;
+      ticking = false;
+    });
+  }, {passive:true});
+})();
 
 function startSync(code){
   stopSync();
@@ -1182,19 +1224,19 @@ function renderSchedule(){
     h+='</div>';
   });
   el.innerHTML=h;
-  // 퀵점프 버튼 동적 삽입
+  // 퀵점프 버튼 동적 삽입 - DOM 순서 기준
   var jumpWrap = document.getElementById('day-jump-btns');
   if(jumpWrap && days.length > 1) {
-    days.forEach(function(d, i) {
+    var dayCards = document.querySelectorAll('[data-drop-day]');
+    dayCards.forEach(function(card, i) {
       var btn = document.createElement('button');
       btn.textContent = String(i+1);
       btn.style.cssText = 'min-width:26px;height:26px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;padding:0 6px';
-      btn.onclick = (function(dayId){
+      btn.onclick = (function(c){
         return function(){
-          var target = document.querySelector('[data-drop-day="'+dayId+'"]');
-          if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+          c.scrollIntoView({behavior:'smooth', block:'start'});
         };
-      })(d.id);
+      })(card);
       jumpWrap.appendChild(btn);
     });
   }
@@ -1614,6 +1656,7 @@ function toggleChat() {
   if (chatOpen) {
     chatUnread = 0;
     updateChatBadge();
+    var dot=document.getElementById('chat-dot'); if(dot) dot.classList.remove('active');
     var msgs = document.getElementById('chat-msgs');
     if (msgs) setTimeout(function(){ msgs.scrollTop = msgs.scrollHeight; }, 50);
     var inp = document.getElementById('chat-input');
@@ -1623,12 +1666,7 @@ function toggleChat() {
 
 
 
-function updateChatBadge() {
-  var badge = document.getElementById('chat-badge');
-  if (!badge) return;
-  badge.style.display = chatUnread > 0 && !chatOpen ? 'flex' : 'none';
-  badge.textContent = chatUnread > 9 ? '9+' : chatUnread;
-}
+function updateChatBadge() {}
 
 async function sendChat() {
   var inp = document.getElementById('chat-input');
@@ -1790,6 +1828,8 @@ function startChatSync(code) {
           if (!chatOpen) {
             chatUnread++;
             updateChatBadge();
+            var dot=document.getElementById('chat-dot'); if(dot) dot.classList.add('active');
+            var tabDot=document.getElementById('chat-tab-dot'); if(tabDot) tabDot.style.display='block';
             showToast('💬 ' + m.nickname + ': ' + (m.text.length > 20 ? m.text.slice(0,20)+'...' : m.text));
           }
           sendNotif(m.nickname, m.text);
@@ -1805,15 +1845,78 @@ function stopChatSync() {
 }
 
 function showChatBubble(show) {
+  var isMobile = window.innerWidth < 600;
   var b = document.getElementById('chat-bubble');
-  if (b) b.style.display = show ? 'flex' : 'none';
+  var t = document.getElementById('chat-tab-btn');
+  if (isMobile) {
+    // 모바일: 탭 버튼 표시, 플로팅 버튼 숨김
+    if (b) b.style.display = 'none';
+    if (t) t.style.display = show ? 'flex' : 'none';
+  } else {
+    // PC: 플로팅 버튼 표시, 탭 버튼 숨김
+    if (b) b.style.display = show ? 'flex' : 'none';
+    if (t) t.style.display = 'none';
+  }
+}
+
+function renderChatTab() {
+  var el = document.getElementById('tab-chat');
+  if (!el) return;
+  // 채팅 탭 열면 dot 끄기
+  var dot = document.getElementById('chat-tab-dot');
+  if (dot) dot.style.display = 'none';
+  var dotBubble = document.getElementById('chat-dot');
+  if (dotBubble) dotBubble.classList.remove('active');
+  chatUnread = 0;
+  el.innerHTML = '';
+  el.style.display = 'flex';
+  el.style.flexDirection = 'column';
+  el.style.height = 'calc(100dvh - 100px)';
+  // 메시지 컨테이너
+  var msgs = document.getElementById('chat-msgs');
+  if (msgs) {
+    // 기존 chat-win의 msgs를 탭으로 이동
+    el.appendChild(msgs);
+  } else {
+    var newMsgs = document.createElement('div');
+    newMsgs.id = 'chat-msgs';
+    newMsgs.className = 'chat-msgs';
+    el.appendChild(newMsgs);
+  }
+  // 입력창
+  var inp = document.createElement('div');
+  inp.className = 'chat-inp';
+  inp.style.cssText = 'border-top:1px solid var(--border);padding:10px 12px;display:flex;gap:8px;flex-shrink:0';
+  inp.innerHTML = '<input id="chat-input-tab" placeholder="메시지를 입력하세요..." autocomplete="off" style="height:38px;border-radius:20px;font-size:16px">'
+    + '<button onclick="sendChatTab()" style="width:38px;height:38px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#412402"><i class="ti ti-arrow-up" style="font-size:16px;font-weight:900"></i></button>';
+    + '<button onclick="sendChatTab()" style="width:38px;height:38px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#412402"><i class="ti ti-arrow-up" style="font-size:16px;font-weight:900"></i></button>';
+  el.appendChild(inp);
+  var msgEl = document.getElementById('chat-msgs');
+  if (msgEl) setTimeout(function(){ msgEl.scrollTop = msgEl.scrollHeight; }, 50);
+}
+
+async function sendChatTab() {
+  var inp = document.getElementById('chat-input-tab');
+  if (!inp) return;
+  var text = inp.value.trim();
+  if (!text || !S.code || !S.me) return;
+  inp.value = '';
+  inp.focus();
+  var msg = { id: uid(), nickname: S.me, text: text, ts: Date.now() };
+  chatSeenIds[msg.id] = true;
+  var container = document.getElementById('chat-msgs');
+  if (container) { container.appendChild(renderChatMsg(msg, true)); container.scrollTop = container.scrollHeight; }
+  var token = await getToken();
+  await fetch(FB + '/chat_' + S.code + '/' + msg.id + '.json?auth=' + token, {
+    method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(msg)
+  });
 }
 
 </script>
 <!-- 채팅 -->
 <button class="chat-bubble" id="chat-bubble" onclick="toggleChat()">
   <i class="ti ti-message-circle" style="font-size:22px;color:#412402"></i>
-  <span class="badge" id="chat-badge"></span>
+  <span class="dot" id="chat-dot"></span>
 </button>
 <div class="chat-win" id="chat-win">
   <div class="chat-hd">
