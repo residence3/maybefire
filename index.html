@@ -1122,21 +1122,21 @@ function switchTab(n){
       if(!hd || !tabs) { ticking=false; return; }
       var hdH = hd.offsetHeight;
       var tabsH = tabs.offsetHeight;
-      var atBottom = (window.innerHeight + y) >= document.body.scrollHeight - 10;
-      if(y > lastY && y > 60 && !hidden) {
-        // 아래로 스크롤 → 제목바만 숨김, 탭은 유지
-        hd.style.transform = 'translateY(-' + hdH + 'px)';
-        tabs.style.transform = 'translateY(-' + hdH + 'px)';
-        hidden = true;
-      } else if(y < lastY && hidden) {
-        // 위로 스크롤 → 둘 다 보임
+      var atTop = y <= 10;
+      if(atTop) {
+        // 최상단 → 둘 다 보임
         hd.style.transform = '';
         tabs.style.transform = '';
         hidden = false;
-      } else if(atBottom && hidden) {
-        // 맨 아래 도달 → 둘 다 보임
-        hd.style.transform = '';
-        tabs.style.transform = '';
+      } else if(y > lastY && y > 60) {
+        // 아래로 스크롤 → 둘 다 숨김
+        hd.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
+        tabs.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
+        hidden = true;
+      } else if(y < lastY && hidden) {
+        // 위로 스크롤 → 탭만 보임
+        hd.style.transform = 'translateY(-' + hdH + 'px)';
+        tabs.style.transform = 'translateY(-' + hdH + 'px)';
         hidden = false;
       }
       lastY = y;
@@ -1409,7 +1409,12 @@ function renderExpenses(){
     var sc=el.querySelector('#split-chips');
     if(sc){nicks.forEach(function(n){var b=document.createElement('button');var inc=EF.split.includes(n);b.className='chip'+(inc?' on':'');b.innerHTML=(inc?'<i class="ti ti-check" style="font-size:11px"></i>':'<i class="ti ti-x" style="font-size:11px;opacity:.5"></i>')+getMemberName(n);b.onclick=function(){toggleSplit(n);};sc.appendChild(b);});}
   }
-  } catch(err){el.innerHTML='<div class="card" style="border-color:var(--no)"><p style="color:var(--no);font-weight:700">오류: '+err.message+'</p></div>';console.error('renderExpenses:',err);}
+  // settle panel: 처음 열릴 때만 렌더
+  if(settleOpen){
+    var sp=document.getElementById('settle-panel');
+    if(sp&&!sp.hasChildNodes()) sp.innerHTML=renderSettlePanelHTML();
+  }
+    } catch(err){el.innerHTML='<div class="card" style="border-color:var(--no)"><p style="color:var(--no);font-weight:700">오류: '+err.message+'</p></div>';console.error('renderExpenses:',err);}
 }
 
 function startEditExp(id) {
@@ -1844,6 +1849,8 @@ function startChatSync(code) {
       newMsgs.forEach(function(m) {
         var isMe = m.nickname === S.me;
         container.appendChild(renderChatMsg(m, isMe));
+        var tabContainer = document.getElementById('chat-msgs-tab');
+        if(tabContainer) { tabContainer.appendChild(renderChatMsg(m, isMe)); tabContainer.scrollTop = tabContainer.scrollHeight; }
         if (!isMe) {
           if (!chatOpen) {
             chatUnread++;
@@ -1882,37 +1889,36 @@ function showChatBubble(show) {
 function renderChatTab() {
   var el = document.getElementById('tab-chat');
   if (!el) return;
-  // 채팅 탭 열면 dot 끄기
+
   var dot = document.getElementById('chat-tab-dot');
   if (dot) dot.style.display = 'none';
   var dotBubble = document.getElementById('chat-dot');
   if (dotBubble) dotBubble.classList.remove('active');
   chatUnread = 0;
-  el.innerHTML = '';
-  el.style.display = 'flex';
-  el.style.flexDirection = 'column';
-  el.style.height = 'calc(100dvh - 100px)';
-  // 메시지 컨테이너
-  var msgs = document.getElementById('chat-msgs');
-  if (msgs) {
-    // 기존 chat-win의 msgs를 탭으로 이동
-    el.appendChild(msgs);
-  } else {
-    var newMsgs = document.createElement('div');
-    newMsgs.id = 'chat-msgs';
-    newMsgs.className = 'chat-msgs';
-    el.appendChild(newMsgs);
+
+  // 이미 렌더됐으면 스크롤만
+  if (document.getElementById('chat-msgs-tab')) {
+    var m = document.getElementById('chat-msgs-tab');
+    setTimeout(function(){ m.scrollTop = m.scrollHeight; }, 50);
+    return;
   }
-  // 입력창
-  var inp = document.createElement('div');
-  inp.className = 'chat-inp';
-  inp.style.cssText = 'border-top:1px solid var(--border);padding:10px 12px;display:flex;gap:8px;flex-shrink:0';
-  inp.innerHTML = '<input id="chat-input-tab" placeholder="메시지를 입력하세요..." autocomplete="off" style="height:38px;border-radius:20px;font-size:16px">'
-    + '<button onclick="sendChatTab()" style="width:38px;height:38px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#412402"><i class="ti ti-arrow-up" style="font-size:16px;font-weight:900"></i></button>';
-    + '<button onclick="sendChatTab()" style="width:38px;height:38px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#412402"><i class="ti ti-arrow-up" style="font-size:16px;font-weight:900"></i></button>';
-  el.appendChild(inp);
-  var msgEl = document.getElementById('chat-msgs');
-  if (msgEl) setTimeout(function(){ msgEl.scrollTop = msgEl.scrollHeight; }, 50);
+
+  el.innerHTML =
+    '<div id="chat-msgs-tab" class="chat-msgs" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:0"></div>'
+    + '<div style="border-top:1px solid var(--border);padding:10px 12px;display:flex;gap:8px;flex-shrink:0">'
+    + '<input id="chat-input-tab" placeholder="메시지를 입력하세요..." autocomplete="off" style="flex:1;height:38px;border-radius:20px;font-size:16px;padding:0 14px;border:1.5px solid var(--border);background:#fff">'
+    + '<button onclick="sendChatTab()" style="width:38px;height:38px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#412402"><i class="ti ti-arrow-up" style="font-size:16px;font-weight:900"></i></button>'
+    + '</div>';
+
+  // 기존 메시지 복사
+  var srcMsgs = document.getElementById('chat-msgs');
+  var dstMsgs = document.getElementById('chat-msgs-tab');
+  if (srcMsgs && dstMsgs) {
+    Array.from(srcMsgs.children).forEach(function(child){
+      dstMsgs.appendChild(child.cloneNode(true));
+    });
+    setTimeout(function(){ dstMsgs.scrollTop = dstMsgs.scrollHeight; }, 50);
+  }
 }
 
 async function sendChatTab() {
@@ -1924,7 +1930,8 @@ async function sendChatTab() {
   inp.focus();
   var msg = { id: uid(), nickname: S.me, text: text, ts: Date.now() };
   chatSeenIds[msg.id] = true;
-  var container = document.getElementById('chat-msgs');
+  // 탭 메시지 컨테이너에 추가
+  var container = document.getElementById('chat-msgs-tab') || document.getElementById('chat-msgs');
   if (container) { container.appendChild(renderChatMsg(msg, true)); container.scrollTop = container.scrollHeight; }
   var token = await getToken();
   await fetch(FB + '/chat_' + S.code + '/' + msg.id + '.json?auth=' + token, {
