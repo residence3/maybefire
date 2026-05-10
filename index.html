@@ -1084,6 +1084,7 @@ function renderTrip(){
   document.getElementById('trip-dates').textContent=t.startDate?(t.endDate?t.startDate+' ~ '+t.endDate:t.startDate):'';
   document.getElementById('trip-me').innerHTML='<i class="ti ti-user" style="font-size:11px;margin-right:3px"></i>'+S.me;
   var sc=document.getElementById('share-code'); if(sc) sc.textContent=S.code;
+  if(S.code) showChatBubble(true);
   // 처음 입장 시만 일정 탭, 이미 탭 선택된 경우 유지
   var activeTab = (document.querySelector('.tab.on') || {}).dataset;
   var curTab = activeTab && activeTab.tab || 'schedule';
@@ -1518,19 +1519,25 @@ function renderSettlePanel(){
 
 function renderSettlePanelHTML(){
   var savedIdx = settleSlideIdx;
-  setTimeout(function(){
-    var slider=document.getElementById('settle-slider');
-    if(!slider) return;
+  // 렌더 직후 위치 복원 - transition 없이 즉시
+  var slider=document.getElementById('settle-slider');
+  if(slider){
     slider.style.transition='none';
     slider.style.transform='translateX(-'+savedIdx*100+'%)';
+    // 다음 프레임에 transition 복원
+    requestAnimationFrame(function(){
+      var s=document.getElementById('settle-slider');
+      if(s) s.style.transition='transform .3s ease';
+    });
     ['dot-0','dot-1'].forEach(function(id,i){
       var d=document.getElementById(id);
       if(!d) return;
+      d.style.transition='none';
       d.style.background = i===savedIdx?'var(--A)':'var(--border)';
       d.style.width = i===savedIdx?'20px':'8px';
       d.style.borderRadius = '4px';
     });
-  },0);
+  }
 
   var nicks=getNicks();
   var exps=S.trip.expenses||[];
@@ -1843,7 +1850,7 @@ function startChatSync(code) {
             updateChatBadge();
             var dot=document.getElementById('chat-dot'); if(dot) dot.classList.add('active');
             var tabDot=document.getElementById('chat-tab-dot'); if(tabDot) tabDot.style.display='block';
-            showToast('💬 ' + m.nickname + ': ' + (m.text.length > 20 ? m.text.slice(0,20)+'...' : m.text));
+            showToast('💬 ' + m.nickname + ': ' + (m.text.length > 40 ? m.text.slice(0,40)+'...' : m.text));
           }
           sendNotif(m.nickname, m.text);
         }
@@ -1858,7 +1865,7 @@ function stopChatSync() {
 }
 
 function showChatBubble(show) {
-  var isMobile = window.innerWidth < 600;
+  var isMobile = window.innerWidth < 600 || (window.screen && window.screen.width < 600);
   var b = document.getElementById('chat-bubble');
   var t = document.getElementById('chat-tab-btn');
   if (isMobile) {
