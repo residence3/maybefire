@@ -36,7 +36,7 @@ input[type=password]{letter-spacing:.1em}
 .chip{border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer;font-weight:600;background:transparent;color:var(--muted);border:1.5px solid var(--border);display:inline-flex;align-items:center;gap:4px;transition:all .15s;font-family:inherit}
 .chip:active{transform:scale(.96)}
 .chip.on{background:var(--AX);color:var(--A);border-color:var(--A)}
-.tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;height:46px;transition:transform .25s ease}
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;height:46px;transition:transform .25s ease,top .25s ease}
 .tab{flex:1;border:none;background:none;padding:13px 4px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);border-bottom:2.5px solid transparent;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;font-family:inherit}
 .tab.on{color:var(--A);border-bottom-color:var(--A)}
 .page{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.25rem;background:var(--bg)}
@@ -52,7 +52,7 @@ input[type=password]{letter-spacing:.1em}
 .big-code{font-size:22px;font-weight:900;letter-spacing:5px;color:var(--A);margin:4px 0 2px;word-break:break-all}
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
 .stat-card{background:#f5f0ea;border-radius:var(--r);padding:12px 8px;text-align:center}
-.trip-hd{background:#fff;border-bottom:1px solid var(--border);padding:14px 18px;position:sticky;top:0;z-index:30;transition:transform .25s ease}
+.trip-hd{background:#fff;border-bottom:1px solid var(--border);padding:14px 18px;position:sticky;top:0;z-index:30;transition:transform .25s ease,top .25s ease}
 .content{padding:14px 14px 2rem;max-width:600px;margin:0 auto}
 .act-row{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--border);align-items:flex-start}
 .date-range{background:#fff;border:1.5px solid var(--border);border-radius:var(--rl);overflow:hidden}
@@ -1127,16 +1127,19 @@ function switchTab(n){
         // 최상단 → 둘 다 보임
         hd.style.transform = '';
         tabs.style.transform = '';
+        tabs.style.top = '';
         hidden = false;
       } else if(y > lastY && y > 60) {
         // 아래로 스크롤 → 둘 다 숨김
         hd.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
         tabs.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
+        tabs.style.top = '';
         hidden = true;
       } else if(y < lastY && hidden) {
-        // 위로 스크롤 → 탭만 보임
+        // 위로 스크롤 → 탭만 보임 (헤더 위로 올리고 탭은 맨 위로)
         hd.style.transform = 'translateY(-' + hdH + 'px)';
         tabs.style.transform = 'translateY(-' + hdH + 'px)';
+        tabs.style.top = '0px';
         hidden = false;
       }
       lastY = y;
@@ -1247,6 +1250,111 @@ function renderSchedule(){
       jumpWrap.appendChild(btn);
     });
   }
+}
+
+
+// ══ 일정 드래그 ══
+var dragState = null;
+var dragGhost = null;
+var dropTargetId = null;
+
+function startDrag(dayId, actId, e) {
+  e.preventDefault();
+  var day = S.trip.itinerary.find(function(d){ return d.id===dayId; });
+  var act = day && day.activities.find(function(a){ return a.id===actId; });
+  if (!act) return;
+  dragState = { dayId:dayId, actId:actId, act:JSON.parse(JSON.stringify(act)), dropBeforeActId:null };
+  // 고스트 생성
+  dragGhost = document.createElement('div');
+  dragGhost.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;opacity:.85;min-width:200px;max-width:320px;background:#fff;border:2px solid var(--A);border-radius:12px;padding:10px 14px;box-shadow:0 4px 16px rgba(0,0,0,.18);font-family:inherit;';
+  dragGhost.innerHTML = '<div style="display:flex;align-items:center;gap:8px">'
+    + (act.time ? '<span style="font-size:12px;color:var(--A);font-weight:700;flex-shrink:0">'+act.time+'</span>' : '')
+    + '<span style="font-size:14px;font-weight:700">'+act.title+'</span></div>'
+    + (act.location ? '<p style="font-size:12px;color:#8A6B52;margin-top:4px">📍 '+act.location+'</p>' : '');
+  document.body.appendChild(dragGhost);
+  var cx = e.touches ? e.touches[0].clientX : e.clientX;
+  var cy = e.touches ? e.touches[0].clientY : e.clientY;
+  posGhost(cx, cy);
+  document.addEventListener('mousemove', onDragMove);
+  document.addEventListener('touchmove', onDragMove, {passive:false});
+  document.addEventListener('mouseup', onDragEnd);
+  document.addEventListener('touchend', onDragEnd);
+}
+
+function onDragMove(e) {
+  if (!dragState) return;
+  if (e.cancelable) e.preventDefault();
+  var cx = e.touches ? e.touches[0].clientX : e.clientX;
+  var cy = e.touches ? e.touches[0].clientY : e.clientY;
+  posGhost(cx, cy);
+}
+
+function posGhost(x, y) {
+  if (!dragGhost) return;
+  dragGhost.style.left = (x+16)+'px';
+  dragGhost.style.top = (y-16)+'px';
+  // 플레이스홀더 제거
+  document.querySelectorAll('.drag-placeholder').forEach(function(p){ p.remove(); });
+  dragGhost.style.display = 'none';
+  var el = document.elementFromPoint(x, y);
+  dragGhost.style.display = '';
+  var targetRow = el && el.closest('.act-row');
+  var targetZone = el && el.closest('[data-drop-day]');
+  var newDayId = targetZone ? targetZone.dataset.dropDay : null;
+  // 이전 강조 제거
+  document.querySelectorAll('.day-card').forEach(function(c){ c.style.border=''; c.style.background=''; });
+  if (newDayId && newDayId !== dragState.dayId) {
+    var dayCard = document.querySelector('[data-drop-day="'+newDayId+'"]');
+    if (dayCard) { dayCard.style.border='2px solid var(--A)'; dayCard.style.background='var(--AX)'; }
+  }
+  if (targetRow && targetRow.dataset.actId !== dragState.actId) {
+    var ph = document.createElement('div');
+    ph.className = 'drag-placeholder';
+    ph.style.cssText = 'height:4px;background:var(--A);border-radius:2px;margin:2px 0;opacity:.8;';
+    targetRow.parentNode.insertBefore(ph, targetRow);
+    dropTargetId = newDayId || dragState.dayId;
+    dragState.dropBeforeActId = targetRow.dataset.actId;
+  } else {
+    dropTargetId = newDayId;
+    dragState.dropBeforeActId = null;
+  }
+}
+
+function onDragEnd(e) {
+  document.removeEventListener('mousemove', onDragMove);
+  document.removeEventListener('touchmove', onDragMove);
+  document.removeEventListener('mouseup', onDragEnd);
+  document.removeEventListener('touchend', onDragEnd);
+  if (dragGhost) { dragGhost.remove(); dragGhost=null; }
+  document.querySelectorAll('.drag-placeholder').forEach(function(p){ p.remove(); });
+  document.querySelectorAll('.day-card').forEach(function(c){ c.style.border=''; c.style.background=''; });
+  if (!dragState) return;
+  var srcDay = S.trip.itinerary.find(function(d){ return d.id===dragState.dayId; });
+  if (dropTargetId && dropTargetId !== dragState.dayId) {
+    var dstDay = S.trip.itinerary.find(function(d){ return d.id===dropTargetId; });
+    if (srcDay && dstDay) {
+      srcDay.activities = srcDay.activities.filter(function(a){ return a.id!==dragState.actId; });
+      if (dragState.dropBeforeActId) {
+        var bi = dstDay.activities.findIndex(function(a){ return a.id===dragState.dropBeforeActId; });
+        if (bi>=0) dstDay.activities.splice(bi, 0, dragState.act);
+        else dstDay.activities.push(dragState.act);
+      } else { dstDay.activities.push(dragState.act); }
+      dbSet('trip:'+S.code, S.trip); renderSchedule(); showToast('일정을 이동했어요');
+    }
+  } else if (dragState.dropBeforeActId && dragState.dropBeforeActId !== dragState.actId) {
+    if (srcDay) {
+      var acts = srcDay.activities;
+      var fi = acts.findIndex(function(a){ return a.id===dragState.actId; });
+      var ni = acts.findIndex(function(a){ return a.id===dragState.dropBeforeActId; });
+      if (fi>=0 && ni>=0) {
+        acts.splice(fi, 1);
+        var ni2 = acts.findIndex(function(a){ return a.id===dragState.dropBeforeActId; });
+        acts.splice(ni2, 0, dragState.act);
+        dbSet('trip:'+S.code, S.trip); renderSchedule(); showToast('순서를 변경했어요');
+      }
+    }
+  }
+  dragState = null; dropTargetId = null;
 }
 
 function toggleDF(){openDayForm=!openDayForm;renderSchedule();}
