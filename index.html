@@ -432,7 +432,7 @@ body.excel-mode .content::before {
 .chat-row.other{align-items:flex-start}
 .chat-row-inner{display:flex;align-items:flex-end;gap:3px}
 .chat-row.me .chat-row-inner{flex-direction:row-reverse}
-.chat-msg{max-width:75%;padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5;word-break:break-word}
+.chat-msg{max-width:80%;padding:7px 12px;border-radius:10px;font-size:13px;line-height:1.4;word-break:break-word;width:fit-content}
 .chat-msg.me{background:#7a4e0d;color:#fff;border-bottom-right-radius:4px}
 .chat-msg.other{background:#f0e8d8;border:1px solid var(--bm);color:#2d1a00;border-bottom-left-radius:4px}
 .chat-msg .sender{font-size:10px;font-weight:700;margin-bottom:2px;opacity:.7}
@@ -1965,7 +1965,7 @@ function startChatSync(code) {
             updateChatBadge();
             var dot=document.getElementById('chat-dot'); if(dot) dot.classList.add('active');
             var tabDot=document.getElementById('chat-tab-dot'); if(tabDot) tabDot.style.display='block';
-            showToast('💬 ' + m.nickname + ': ' + (m.text.length > 40 ? m.text.slice(0,40)+'...' : m.text));
+
           }
           sendNotif(m.nickname, m.text);
         }
