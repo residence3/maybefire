@@ -790,7 +790,15 @@ async function enterTrip(code) {
 function onStartChange() {
   var s=document.getElementById('inp-start').value;
   var endInput=document.getElementById('inp-end');
-  if(s){ endInput.min=s; if(endInput.value&&endInput.value<s) endInput.value=''; endInput.focus(); }
+  if(s){
+    endInput.min=s;
+    if(endInput.value&&endInput.value<s) endInput.value='';
+    // 모바일에서 종료일 피커 자동 열기
+    setTimeout(function(){
+      endInput.focus();
+      endInput.click();
+    }, 100);
+  }
   updateNights();
 }
 function updateNights() {
