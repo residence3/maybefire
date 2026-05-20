@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="같이 가자">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#BA7517">
+<link rel="apple-touch-icon" href="https://em-content.zobj.net/source/apple/391/airplane_2708-fe0f.png">
 <title>✈️ 같이 가자</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
@@ -511,6 +516,14 @@ body.excel-mode .content::before {
       <button class="bg" style="width:100%" onclick="go('join')"><i class="ti ti-ticket"></i>코드로 참여하기</button>
     </div>
     <div id="my-trips-wrap"></div>
+    <div id="pwa-hint" style="margin-top:20px;padding:12px 14px;background:var(--AX);border:1px solid var(--AL);border-radius:var(--r);display:flex;align-items:flex-start;gap:10px">
+      <i class="ti ti-device-mobile" style="font-size:20px;color:var(--A);flex-shrink:0;margin-top:2px"></i>
+      <div style="flex:1;min-width:0">
+        <p style="font-size:13px;font-weight:700;color:var(--A);margin-bottom:4px">앱처럼 사용하기</p>
+        <p style="font-size:12px;color:var(--muted);line-height:1.6" id="pwa-hint-text"></p>
+      </div>
+      <button onclick="document.getElementById('pwa-hint').style.display='none'" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:0;flex-shrink:0"><i class="ti ti-x" style="font-size:14px"></i></button>
+    </div>
   </div>
 </div>
 <div id="s-create" class="page">
@@ -693,6 +706,27 @@ function showToast(msg) {
 }
 
 function showErr(id,msg) { var e=document.getElementById(id); if(e){e.textContent=msg;e.style.display=msg?'block':'none';} }
+
+// PWA 힌트 문구 설정
+(function(){
+  var hint = document.getElementById('pwa-hint-text');
+  if (!hint) return;
+  var ua = navigator.userAgent;
+  var isIOS = /iPhone|iPad|iPod/.test(ua);
+  var isAndroid = /Android/.test(ua);
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (isStandalone) {
+    document.getElementById('pwa-hint').style.display = 'none';
+    return;
+  }
+  if (isIOS) {
+    hint.innerHTML = 'Safari에서 하단 <b>공유 버튼(□↑)</b> → <b>"홈 화면에 추가"</b>를 누르면 앱처럼 사용할 수 있어요!';
+  } else if (isAndroid) {
+    hint.innerHTML = 'Chrome에서 우측 상단 <b>점 3개 메뉴(⋮)</b> → <b>"홈 화면에 추가"</b>를 누르면 앱처럼 사용할 수 있어요!';
+  } else {
+    document.getElementById('pwa-hint').style.display = 'none';
+  }
+})();
 
 function go(screen) {
   document.querySelectorAll('[id^="s-"]').forEach(function(e){e.style.display='none';});
