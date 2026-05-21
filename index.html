@@ -592,8 +592,8 @@ body.excel-mode .content::before {
   <div class="tabs">
     <button class="tab on" data-tab="schedule" onclick="switchTab('schedule')"><i class="ti ti-calendar" style="font-size:14px"></i>일정</button>
     <button class="tab" data-tab="expenses" onclick="switchTab('expenses')"><i class="ti ti-credit-card" style="font-size:14px"></i>비용</button>
-    <button class="tab" data-tab="settings" onclick="switchTab('settings')"><i class="ti ti-settings" style="font-size:14px"></i>설정</button>
     <button class="tab chat-tab-btn" data-tab="chat" onclick="switchTab('chat')" id="chat-tab-btn" style="display:none;position:relative"><i class="ti ti-message-circle" style="font-size:14px"></i>채팅<span id="chat-tab-dot" style="display:none;position:absolute;top:6px;right:8px;width:7px;height:7px;background:#22c55e;border-radius:50%;border:1.5px solid #fff"></span></button>
+    <button class="tab" data-tab="settings" onclick="switchTab('settings')"><i class="ti ti-settings" style="font-size:14px"></i>설정</button>
   </div>
   <div class="content">
     <div id="tab-schedule" style="min-height:60vh"></div>
@@ -1183,6 +1183,25 @@ function switchTab(n){
   var ticking = false;
   var hidden = false;
 
+  // 채팅탭 내부 스크롤도 감지
+  document.addEventListener('scroll', handleScroll, true);
+
+  function handleScroll(e) {
+    var target = e.target;
+    if (target && target.id === 'chat-msgs-tab') {
+      var hd = document.querySelector('.trip-hd');
+      var tabs = document.querySelector('.tabs');
+      if (!hd || !tabs) return;
+      var hdH = hd.offsetHeight;
+      if (target.scrollTop < 30) {
+        hd.style.transform = '';
+        tabs.style.transform = '';
+        tabs.style.top = '';
+        hidden = false;
+      }
+    }
+  }
+
   window.addEventListener('scroll', function(){
     if(ticking) return;
     ticking = true;
@@ -1669,6 +1688,38 @@ function goSettle(idx) {
   slideSettle(idx - settleSlideIdx);
 }
 
+// 모바일 탭 스와이프
+(function(){
+  var tabOrder = ['schedule','expenses','chat','settings'];
+  var touchStartX = 0;
+  var touchStartY = 0;
+
+  document.addEventListener('touchstart', function(e){
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, {passive:true});
+
+  document.addEventListener('touchend', function(e){
+    if(!document.getElementById('s-trip') || document.getElementById('s-trip').style.display==='none') return;
+    var dx = e.changedTouches[0].clientX - touchStartX;
+    var dy = e.changedTouches[0].clientY - touchStartY;
+    if(Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)*0.8) return;
+    // 채팅 입력창이나 슬라이더 조작 중 무시
+    var target = e.target;
+    if(target.closest('#chat-msgs-tab') || target.closest('.chat-inp') || target.closest('#settle-slider')) return;
+    var curTab = (document.querySelector('.tab.on')||{}).dataset;
+    var cur = curTab && curTab.tab || 'schedule';
+    // 채팅탭이 숨겨진 경우 제외
+    var visibleTabs = tabOrder.filter(function(t){
+      if(t==='chat') return document.getElementById('chat-tab-btn') && document.getElementById('chat-tab-btn').style.display!=='none';
+      return true;
+    });
+    var idx = visibleTabs.indexOf(cur);
+    if(dx < -60 && idx < visibleTabs.length-1) switchTab(visibleTabs[idx+1]);
+    else if(dx > 60 && idx > 0) switchTab(visibleTabs[idx-1]);
+  }, {passive:true});
+})();
+
 // ESC 키로 채팅 닫기
 document.addEventListener('keydown', function(e){
   if(e.key === 'Escape' && chatOpen) toggleChat();
@@ -1899,6 +1950,26 @@ async function sendChat() {
   });
 }
 
+function makeDateDivider(ts) {
+  var d = new Date(ts);
+  var now = new Date();
+  var diff = Math.floor((now - d) / 86400000);
+  var label;
+  if (diff === 0) label = '오늘';
+  else if (diff === 1) label = '어제';
+  else label = d.getFullYear() + '년 ' + (d.getMonth()+1) + '월 ' + d.getDate() + '일';
+  var div = document.createElement('div');
+  div.className = 'chat-date-divider';
+  div.dataset.date = d.toDateString();
+  div.style.cssText = 'display:flex;align-items:center;gap:8px;margin:8px 0;';
+  div.innerHTML = '<div style="flex:1;height:1px;background:var(--border)"></div>'
+    + '<span style="font-size:11px;color:var(--muted);font-weight:700;white-space:nowrap">'+label+'</span>'
+    + '<div style="flex:1;height:1px;background:var(--border)"></div>';
+  return div;
+}
+
+var lastChatDate = '';
+
 function renderChatMsg(msg, isMe) {
   var t = new Date(msg.ts);
   var timeStr = t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
@@ -1975,7 +2046,13 @@ async function loadChatHistory(code) {
       loadMore.onclick = loadMoreChat;
       container.appendChild(loadMore);
     }
+    var prevDate = '';
     chatAllMsgs.slice(startIdx).forEach(function(m) {
+      var d = new Date(m.ts).toDateString();
+      if (d !== prevDate) {
+        container.appendChild(makeDateDivider(m.ts));
+        prevDate = d;
+      }
       container.appendChild(renderChatMsg(m, m.nickname === S.me));
     });
     setTimeout(function(){ container.scrollTop = container.scrollHeight; }, 100);
@@ -2044,9 +2121,20 @@ function startChatSync(code) {
       if (!container) return;
       newMsgs.forEach(function(m) {
         var isMe = m.nickname === S.me;
+        var d = new Date(m.ts).toDateString();
+        // 날짜 구분선 - 마지막 divider 날짜 확인
+        var lastDiv = container.querySelector('.chat-date-divider:last-of-type');
+        if (!lastDiv || lastDiv.dataset.date !== d) {
+          container.appendChild(makeDateDivider(m.ts));
+        }
         container.appendChild(renderChatMsg(m, isMe));
         var tabContainer = document.getElementById('chat-msgs-tab');
-        if(tabContainer) { tabContainer.appendChild(renderChatMsg(m, isMe)); tabContainer.scrollTop = tabContainer.scrollHeight; }
+        if(tabContainer) {
+          var lastDivTab = tabContainer.querySelector('.chat-date-divider:last-of-type');
+          if (!lastDivTab || lastDivTab.dataset.date !== d) tabContainer.appendChild(makeDateDivider(m.ts));
+          tabContainer.appendChild(renderChatMsg(m, isMe));
+          tabContainer.scrollTop = tabContainer.scrollHeight;
+        }
         if (!isMe) {
           if (!chatOpen) {
             chatUnread++;
