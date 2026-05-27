@@ -632,7 +632,7 @@ body.blue-mode select{background:#fff!important;color:#0c1a3d!important;border-c
   <div class="tabs">
     <button class="tab on" data-tab="schedule" onclick="switchTab('schedule')"><i class="ti ti-calendar" style="font-size:14px"></i>일정</button>
     <button class="tab" data-tab="expenses" onclick="switchTab('expenses')"><i class="ti ti-credit-card" style="font-size:14px"></i>비용</button>
-    <button class="tab chat-tab-btn" data-tab="chat" onclick="switchTab('chat')" id="chat-tab-btn" style="display:none;position:relative"><i class="ti ti-message-circle" style="font-size:14px"></i>채팅<span id="chat-tab-dot" style="display:none;position:absolute;top:6px;right:8px;width:7px;height:7px;background:#22c55e;border-radius:50%;border:1.5px solid #fff"></span></button>
+    <button class="tab chat-tab-btn" data-tab="chat" onclick="switchTab('chat')" id="chat-tab-btn" style="display:none;position:relative"><i class="ti ti-message-circle" style="font-size:14px"></i>채팅<span id="chat-tab-dot" style="display:none;position:absolute;top:5px;right:6px;width:8px;height:8px;background:#22c55e;border-radius:50%;border:2px solid #fff;animation:dotPulse 1.2s ease-in-out infinite"></span></button>
     <button class="tab" data-tab="settings" onclick="switchTab('settings')"><i class="ti ti-settings" style="font-size:14px"></i>설정</button>
   </div>
   <div class="content">
@@ -1058,7 +1058,7 @@ function renderSettings(){
       +'<input id="set-name" value="'+(S.trip.name||'')+'" maxlength="15" autocomplete="off">'
       +'<button class="bp" style="padding:10px" onclick="saveName()">저장</button></div>';
   } else {
-    h+='<div class="bw" style="padding:4px 0;margin-bottom:4px">'
+    h+='<div class="bw" style="padding:8px 0">'
       +'<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 이름</p>'
       +'<p style="font-size:15px;font-weight:700">'+(S.trip.name||'')+'</p></div>'
       +(isCreator?'<button class="bt" onclick="editingName=true;renderSettings()"><i class="ti ti-pencil" style="font-size:16px"></i></button>':'')
@@ -1084,7 +1084,7 @@ function renderSettings(){
       +'<p style="font-size:15px;font-weight:700">'+d+'</p></div>'
       +(isCreator?'<button class="bt" onclick="editingDate=true;renderSettings()"><i class="ti ti-pencil" style="font-size:16px"></i></button>':'')
       +'</div>';
-    h+='<div class="bw" style="padding-top:12px;border-top:1px solid var(--border);gap:12px">'
+    h+='<div class="bw" style="padding-top:8px;border-top:1px solid var(--border);gap:12px">'
       +'<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 코드</p>'
       +'<p style="font-size:15px;font-weight:700;letter-spacing:4px;color:var(--A)">'+S.code+'</p></div>'
       +'<button class="copy-btn" style="flex-shrink:0;width:auto;padding:8px 14px;font-size:13px;white-space:nowrap" onclick="copyCode()"><i class="ti ti-copy"></i>복사</button>'
@@ -1241,6 +1241,7 @@ function switchTab(n){
   var lastY = 0;
   var ticking = false;
   var hidden = false;
+  var tabsOnly = false;
 
   // 채팅탭 내부 스크롤도 감지
   document.addEventListener('scroll', handleScroll, true);
@@ -1271,22 +1272,30 @@ function switchTab(n){
       if(!hd || !tabs) { ticking=false; return; }
       var hdH = hd.offsetHeight;
       var tabsH = tabs.offsetHeight;
-      var atTop = y <= 10;
+      var atTop = y <= 4;
       if(atTop) {
-        // 최상단 → 제목바 + 탭바 둘 다 보임
+        // 최상단에서만 제목바 + 탭바 둘 다 보임
         hd.style.top = '0';
         tabs.style.top = hdH + 'px';
         hidden = false;
-      } else if(y > lastY && y > 60 && !hidden) {
+        tabsOnly = false;
+      } else if(y > lastY && y > 60 && !hidden && !tabsOnly) {
         // 아래로 스크롤 → 둘 다 숨김
         hd.style.top = '-' + hdH + 'px';
         tabs.style.top = '-' + (hdH + tabsH) + 'px';
         hidden = true;
+        tabsOnly = false;
+      } else if(y > lastY && y > 60 && tabsOnly) {
+        // 탭바만 보이는 상태에서 다시 아래로 → 탭바도 숨김
+        tabs.style.top = '-' + tabsH + 'px';
+        hidden = true;
+        tabsOnly = false;
       } else if(y < lastY && hidden) {
-        // 위로 스크롤 → 탭바만 보임
+        // 위로 스크롤 → 탭바만 보임 (제목바 숨긴 채)
         hd.style.top = '-' + hdH + 'px';
         tabs.style.top = '0';
         hidden = false;
+        tabsOnly = true;
       }
       lastY = y;
       ticking = false;
@@ -2248,7 +2257,7 @@ function renderChatTab() {
   chatUnread = 0;
 
   // 탭 컨테이너 스타일 - 화면 꽉 채우기
-  el.style.cssText = 'display:flex;flex-direction:column;position:fixed;top:46px;left:0;right:0;bottom:0;background:var(--bg);z-index:10;';
+  el.style.cssText = 'display:flex;flex-direction:column;position:fixed;top:46px;left:0;right:0;bottom:0;background:var(--bg);z-index:10;overflow:hidden;';
 
   // 이미 렌더됐으면 스크롤만
   if (document.getElementById('chat-msgs-tab')) {
@@ -2258,10 +2267,10 @@ function renderChatTab() {
   }
 
   el.innerHTML =
-    '<div id="chat-msgs-tab" class="chat-msgs" style="flex:1;overflow-y:auto;padding:12px 12px 0;display:flex;flex-direction:column;gap:8px;"></div>'
-    + '<div id="chat-inp-tab" style="border-top:1px solid var(--border);padding:10px 12px;display:flex;gap:8px;background:var(--card);flex-shrink:0;">'
-    + '<input id="chat-input-tab" placeholder="메시지를 입력하세요..." autocomplete="off" style="flex:1;height:38px;border-radius:20px;font-size:16px;padding:0 14px;border:1.5px solid var(--border);background:var(--card);color:var(--text)">'
-    + '<button onclick="sendChatTab()" style="width:38px;height:38px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#412402"><i class="ti ti-arrow-up" style="font-size:16px;font-weight:900"></i></button>'
+    '<div id="chat-msgs-tab" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:0;"></div>'
+    + '<div id="chat-inp-tab" style="border-top:1px solid var(--border);padding:10px 12px;display:flex;gap:8px;align-items:center;background:var(--card);flex-shrink:0;position:sticky;bottom:0;">'
+    + '<input id="chat-input-tab" placeholder="메시지를 입력하세요..." autocomplete="off" style="flex:1;height:42px;border-radius:24px;font-size:16px;padding:0 16px;border:1.5px solid var(--border);background:var(--card);color:var(--text);outline:none;">'
+    + '<button onclick="sendChatTab()" style="width:42px;height:42px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-arrow-up" style="font-size:18px;font-weight:900;color:#fff"></i></button>'
     + '</div>';
 
   // 기존 메시지 복사
