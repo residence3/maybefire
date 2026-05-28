@@ -2242,7 +2242,12 @@ function startChatSync(code) {
             chatUnread++;
             updateChatBadge();
             var dot=document.getElementById('chat-dot'); if(dot) dot.classList.add('active');
-            var tabDot=document.getElementById('chat-tab-dot'); if(tabDot) tabDot.style.display='block';
+            // 채팅탭이 현재 활성화 안된 경우에만 dot 표시
+            var curTab=(document.querySelector('.tab.on')||{}).dataset;
+            var isOnChat = curTab && curTab.tab==='chat';
+            if(!isOnChat) {
+              var tabDot=document.getElementById('chat-tab-dot'); if(tabDot) tabDot.style.display='block';
+            }
 
           }
           sendNotif(m.nickname, m.text);
