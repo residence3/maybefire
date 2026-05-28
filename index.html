@@ -1345,14 +1345,14 @@ function renderSchedule(){
       var hasLoc=actMoreFields.has(day.id+'_loc'), hasNote=actMoreFields.has(day.id+'_note');
       var locBtn=hasLoc?'':'<button type="button" data-dayid="'+day.id+'" onclick="toggleMoreFields(this.dataset.dayid+\'_loc\')" style="flex:1;background:none;border:1.5px dashed var(--border);border-radius:8px;padding:8px;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px"><i class="ti ti-map-pin"></i>장소</button>';
       var noteBtn=hasNote?'':'<button type="button" data-dayid="'+day.id+'" onclick="toggleMoreFields(this.dataset.dayid+\'_note\')" style="flex:1;background:none;border:1.5px dashed var(--border);border-radius:8px;padding:8px;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px"><i class="ti ti-note"></i>메모</button>';
-      h+='<div style="display:block;border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:8px">'
+      h+='<div style="display:block;padding-bottom:14px;margin-bottom:8px">'
         +'<p style="font-size:14px;font-weight:700;margin-bottom:12px">일정 추가</p>'
         +'<div class="col">'
         +'<div><label class="lbl">내용 *</label><input id="an-'+day.id+'" placeholder="한라산 등반" autocomplete="off"></div>'
         +'<div><label class="lbl">시간</label><input id="at-'+day.id+'" type="text" placeholder="00:00" inputmode="numeric" maxlength="5" oninput="fmtTime(this)" autocomplete="off"></div>'
         +'<div id="loc-field-'+day.id+'" style="display:'+(hasLoc?'block':'none')+'"><label class="lbl">장소</label><input id="al-'+day.id+'" placeholder="한라산 국립공원" autocomplete="off"></div>'
         +'<div id="note-field-'+day.id+'" style="display:'+(hasNote?'block':'none')+'"><label class="lbl">메모</label><input id="am-'+day.id+'" placeholder="준비물, 예약번호..." autocomplete="off"></div>'
-        +((locBtn||noteBtn)?'<div style="display:flex;gap:8px">'+locBtn+noteBtn+'</div>':'')
+        +(locBtn?'<div>'+locBtn+'</div>':'')+(noteBtn?'<div>'+noteBtn+'</div>':'')
         +'<div style="display:flex;gap:8px;justify-content:flex-end">'
         +'<button class="bg" onclick="toggleAF(\''+day.id+'\')" >취소</button>'
         +'<button class="bp" style="width:auto;padding:12px 20px" onclick="addAct(\''+day.id+'\')" >추가</button>'
@@ -1367,8 +1367,8 @@ function renderSchedule(){
           +'<div class="col">'
           +'<div><label class="lbl">내용 *</label><input id="en-'+ek+'" value="'+act.title+'" autocomplete="off"></div>'
           +'<div><label class="lbl">시간 (선택)</label><input id="et-'+ek+'" type="text" value="'+(act.time||'')+'" placeholder="00:00" inputmode="numeric" maxlength="5" oninput="fmtTime(this)" autocomplete="off"></div>'
-          +'<div><label class="lbl">장소</label><input id="el-'+ek+'" value="'+(act.location||'')+'" placeholder="한라산 국립공원" autocomplete="off"></div>'
-          +'<div><label class="lbl">메모</label><input id="em-'+ek+'" value="'+(act.note||'')+'" placeholder="준비물, 예약번호..." autocomplete="off"></div>'
+          +(act.location?'<div><label class="lbl">장소</label><input id="el-'+ek+'" value="'+act.location+'" placeholder="한라산 국립공원" autocomplete="off"></div>':'<div><button type="button" onclick="showEditField(this,\'el-\'+\''+ek+'\',\'장소\')" style="background:none;border:1.5px dashed var(--border);border-radius:8px;padding:7px 12px;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;width:100%"><i class="ti ti-map-pin"></i>장소 추가</button><input id="el-'+ek+'" value="" placeholder="한라산 국립공원" autocomplete="off" style="display:none"></div>')
+          +(act.note?'<div><label class="lbl">메모</label><input id="em-'+ek+'" value="'+act.note+'" placeholder="준비물, 예약번호..." autocomplete="off"></div>':'<div><button type="button" onclick="showEditField(this,\'em-\'+\''+ek+'\',\'메모\')" style="background:none;border:1.5px dashed var(--border);border-radius:8px;padding:7px 12px;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;width:100%"><i class="ti ti-note"></i>메모 추가</button><input id="em-'+ek+'" value="" placeholder="준비물, 예약번호..." autocomplete="off" style="display:none"></div>')
           +'<div style="display:flex;gap:8px;justify-content:flex-end">'
           +'<button class="bd" onclick="removeAct(\''+day.id+'\',\''+act.id+'\')" style="margin-right:auto"><i class="ti ti-trash"></i> 삭제</button>'
           +'<button class="bg" onclick="cancelEditAct(\''+ek+'\')">취소</button>'
@@ -1546,6 +1546,12 @@ function toggleMoreFields(key){
   var parent=field&&field.parentElement;
   if(parent)parent.querySelectorAll('button').forEach(function(btn){if((key.endsWith('_loc')&&btn.textContent.includes('장소'))||(key.endsWith('_note')&&btn.textContent.includes('메모')))btn.style.display='none';});
 }
+function showEditField(btn, inputId, label) {
+  btn.parentElement.innerHTML = '<label class="lbl">'+label+'</label><input id="'+inputId+'" placeholder="'+(label==='장소'?'한라산 국립공원':'준비물, 예약번호...')+'" autocomplete="off">';
+  var inp = document.getElementById(inputId);
+  if (inp) inp.focus();
+}
+
 function startEditAct(key){editActState[key]=true;renderSchedule();}
 function cancelEditAct(key){delete editActState[key];renderSchedule();}
 function saveEditAct(dayId,actId,key){
