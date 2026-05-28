@@ -880,7 +880,7 @@ async function enterTrip(code) {
         await dbSet('trip:'+code, t);
       }
       S.trip=normalizeTripData(t); S.code=code; S.me=myInfo.nickname;
-      switchTab('schedule'); renderTrip(); go('trip'); startSync(code); startChatSync(code); showChatBubble(true);
+      switchTab('schedule'); renderTrip(); go('trip'); startSync(code); startChatSync(code); showChatBubble(true); setTimeout(initHeaderPos, 100);
     } else {
       S.pendingCode=code;
       document.getElementById('disp-code').textContent=code;
@@ -946,7 +946,7 @@ async function doCreate() {
   if(btn){btn.disabled=false;btn.innerHTML='여행 만들기 <i class="ti ti-arrow-right"></i>';}
   showErr('err-create','');
   S.trip=normalizeTripData(t); S.code=c; S.me=nick;
-  switchTab('schedule'); renderTrip(); go('trip'); startSync(c); startChatSync(c); showChatBubble(true);
+  switchTab('schedule'); renderTrip(); go('trip'); startSync(c); startChatSync(c); showChatBubble(true); setTimeout(initHeaderPos, 100);
 }
 
 async function doJoin() {
@@ -985,7 +985,7 @@ async function doSetNick() {
     var patch={}; patch[S.pendingCode]={nickname:nick,joinedAt:Date.now()};
     await dbPatch('user-trips:'+S.user.uid,patch);
     S.trip=normalizeTripData(t); S.code=S.pendingCode; S.me=nick;
-    switchTab('schedule'); renderTrip(); go('trip'); startSync(S.code); startChatSync(S.code); showChatBubble(true);
+    switchTab('schedule'); renderTrip(); go('trip'); startSync(S.code); startChatSync(S.code); showChatBubble(true); setTimeout(initHeaderPos, 100);
   } catch(e) { showErr('err-nick',e.message||'오류가 발생했어요'); }
   finally { if(btn){btn.disabled=false;btn.innerHTML='입장하기 <i class="ti ti-arrow-right"></i>';} }
 }
@@ -1208,7 +1208,6 @@ function renderTrip(){
   document.getElementById('trip-me').innerHTML='<i class="ti ti-user" style="font-size:11px;margin-right:3px"></i>'+S.me;
   var sc=document.getElementById('share-code'); if(sc) sc.textContent=S.code;
   if(S.code) showChatBubble(true);
-  setTimeout(initHeaderPos, 0);
   // 처음 입장 시만 일정 탭, 이미 탭 선택된 경우 유지
   var activeTab = (document.querySelector('.tab.on') || {}).dataset;
   var curTab = activeTab && activeTab.tab || 'schedule';
@@ -1226,7 +1225,17 @@ function switchTab(n){
     if(!el) return;
     if(t==='chat'){
       if(n==='chat') el.style.display='block';
-      else { el.style.display='none'; el.style.cssText='display:none'; }
+      else {
+        // visualViewport 이벤트 제거
+        if (el._vvResize && window.visualViewport) {
+          window.visualViewport.removeEventListener('resize', el._vvResize);
+          window.visualViewport.removeEventListener('scroll', el._vvResize);
+          el._vvResize = null;
+        }
+        el.style.cssText = 'display:none';
+        // 헤더/탭바 복원
+        setTimeout(initHeaderPos, 0);
+      }
     } else {
       el.style.display=t===n?'block':'none';
     }
@@ -1791,6 +1800,22 @@ function goSettle(idx) {
   }, {passive:true});
 })();
 
+// 모바일 채팅탭 키보드 대응
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', function() {
+    var el = document.getElementById('tab-chat');
+    if (!el || el.style.display === 'none') return;
+    var vvh = window.visualViewport.height;
+    var tabsH = 46;
+    el.style.height = (vvh - tabsH) + 'px';
+    el.style.top = tabsH + 'px';
+    el.style.bottom = 'auto';
+    // 최신 메시지로 스크롤
+    var msgs = document.getElementById('chat-msgs-tab');
+    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+  });
+}
+
 // ESC 키로 채팅 닫기
 document.addEventListener('keydown', function(e){
   if(e.key === 'Escape' && chatOpen) toggleChat();
@@ -2204,7 +2229,9 @@ function startChatSync(code) {
           var lastDivTab = tabContainer.querySelector('.chat-date-divider:last-of-type');
           if (!lastDivTab || lastDivTab.dataset.date !== d) tabContainer.appendChild(makeDateDivider(m.ts));
           tabContainer.appendChild(renderChatMsg(m, isMe));
-          tabContainer.scrollTop = tabContainer.scrollHeight;
+          // 스크롤이 거의 끝에 있을 때만 자동 스크롤
+          var isNearBottom = tabContainer.scrollHeight - tabContainer.scrollTop - tabContainer.clientHeight < 80;
+          if (isNearBottom) tabContainer.scrollTop = tabContainer.scrollHeight;
         }
         if (!isMe) {
           if (!chatOpen) {
@@ -2256,26 +2283,33 @@ function renderChatTab() {
   var el = document.getElementById('tab-chat');
   if (!el) return;
 
+  // dot 끄기
   var dot = document.getElementById('chat-tab-dot');
   if (dot) dot.style.display = 'none';
   var dotBubble = document.getElementById('chat-dot');
   if (dotBubble) dotBubble.classList.remove('active');
   chatUnread = 0;
 
-  // 탭 컨테이너 스타일 - 화면 꽉 채우기
+  // 제목바 숨기고 탭바 맨 위로
+  var hd = document.querySelector('.trip-hd');
+  var tabs = document.querySelector('.tabs');
+  if (hd) hd.style.top = '-' + (hd.offsetHeight || 60) + 'px';
+  if (tabs) tabs.style.top = '0';
+
+  // 채팅 컨테이너: 탭바(46px) 아래부터 화면 끝까지
   el.style.cssText = 'display:flex;flex-direction:column;position:fixed;top:46px;left:0;right:0;bottom:0;background:var(--bg);z-index:10;overflow:hidden;';
 
   // 이미 렌더됐으면 스크롤만
   if (document.getElementById('chat-msgs-tab')) {
     var m = document.getElementById('chat-msgs-tab');
-    setTimeout(function(){ m.scrollTop = m.scrollHeight; }, 100);
+    setTimeout(function(){ m.scrollTop = m.scrollHeight; }, 80);
     return;
   }
 
   el.innerHTML =
-    '<div id="chat-msgs-tab" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:0;"></div>'
-    + '<div id="chat-inp-tab" style="border-top:1px solid var(--border);padding:10px 12px;display:flex;gap:8px;align-items:center;background:var(--card);flex-shrink:0;position:sticky;bottom:0;">'
-    + '<input id="chat-input-tab" placeholder="메시지를 입력하세요..." autocomplete="off" style="flex:1;height:42px;border-radius:24px;font-size:16px;padding:0 16px;border:1.5px solid var(--border);background:var(--card);color:var(--text);outline:none;">'
+    '<div id="chat-msgs-tab" style="flex:1;overflow-y:auto;padding:12px 12px 8px;display:flex;flex-direction:column;gap:8px;min-height:0;overscroll-behavior:contain;"></div>'
+    + '<div id="chat-inp-tab" style="padding:8px 12px 12px;display:flex;gap:8px;align-items:center;background:var(--card);border-top:1px solid var(--border);flex-shrink:0;">'
+    + '<input id="chat-input-tab" placeholder="메시지를 입력하세요..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="flex:1;height:42px;border-radius:24px;font-size:16px;padding:0 16px;border:1.5px solid var(--border);background:var(--card);color:var(--text);outline:none;">'
     + '<button onclick="sendChatTab()" style="width:42px;height:42px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-arrow-up" style="font-size:18px;font-weight:900;color:#fff"></i></button>'
     + '</div>';
 
@@ -2287,11 +2321,25 @@ function renderChatTab() {
       dstMsgs.appendChild(child.cloneNode(true));
     });
   }
-  // 최신 메시지로 스크롤
   setTimeout(function(){
     var m = document.getElementById('chat-msgs-tab');
     if (m) m.scrollTop = m.scrollHeight;
-  }, 50);
+  }, 80);
+
+  // iOS 키보드 대응
+  if (window.visualViewport) {
+    var onVVResize = function() {
+      var chatEl = document.getElementById('tab-chat');
+      if (!chatEl || chatEl.style.cssText.indexOf('display:flex') < 0) return;
+      var vvH = window.visualViewport.height;
+      chatEl.style.height = (vvH - 46) + 'px';
+      chatEl.style.bottom = 'auto';
+      var msgs = document.getElementById('chat-msgs-tab');
+      if (msgs) { var isNearBottom = msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight < 80; if(isNearBottom) msgs.scrollTop = msgs.scrollHeight; }
+    };
+    window.visualViewport.addEventListener('resize', onVVResize);
+    el._vvResize = onVVResize;
+  }
 }
 
 async function sendChatTab() {
