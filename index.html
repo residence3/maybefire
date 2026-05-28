@@ -2245,16 +2245,19 @@ function startChatSync(code) {
           if (!chatOpen) {
             chatUnread++;
             updateChatBadge();
-            var dot=document.getElementById('chat-dot'); if(dot) dot.classList.add('active');
-            // 채팅탭이 현재 활성화 안된 경우에만 dot 표시
             var curTab=(document.querySelector('.tab.on')||{}).dataset;
             var isOnChat = curTab && curTab.tab==='chat';
-            if(!isOnChat) {
-              var tabDot=document.getElementById('chat-tab-dot'); if(tabDot) tabDot.style.display='block';
+            var chatWinOpen = chatOpen; // PC 플로팅 창
+            if (!isOnChat && !chatWinOpen) {
+              // 채팅 탭도 아니고 PC창도 안 열렸을 때만 알림
+              var tabDot=document.getElementById('chat-tab-dot');
+              if(tabDot) tabDot.style.display='block';
+              var dotEl=document.getElementById('chat-dot');
+              if(dotEl) dotEl.classList.add('active');
             }
-
+            // 브라우저 탭 백그라운드면 브라우저 알림
+            sendNotif(m.nickname, m.text);
           }
-          sendNotif(m.nickname, m.text);
         }
       });
       if (chatOpen) container.scrollTop = container.scrollHeight;
@@ -2365,10 +2368,13 @@ function renderChatTab() {
       var ov = document.getElementById('chat-tab-overlay');
       if (!ov) return;
       var vvH = window.visualViewport.height;
-      var vvTop = window.visualViewport.offsetTop;
-      ov.style.top = (vvTop + 46) + 'px';
+      // 탭바(46px)는 항상 보이게 - overlay는 탭바 바로 아래부터
+      ov.style.top = '46px';
       ov.style.height = (vvH - 46) + 'px';
       ov.style.bottom = 'auto';
+      // 탭바도 항상 맨 위에
+      var tabs = document.querySelector('.tabs');
+      if (tabs) tabs.style.top = '0';
       var msgs = document.getElementById('chat-msgs-tab');
       if (msgs) msgs.scrollTop = msgs.scrollHeight;
     };
