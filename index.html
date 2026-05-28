@@ -476,6 +476,7 @@ body.excel-mode .content::before {
 .chat-inp input{height:38px;border-radius:20px;font-size:13px}
 .chat-inp button{width:38px;height:38px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#412402}
 
+#chat-input-tab:focus{border-color:var(--AL)!important;box-shadow:none!important;}
 /* ── 다크 테마 추가 ── */
 body.dark-mode .chat-date-divider span{color:#7b8299!important}
 body.dark-mode .chat-date-divider div{background:#2e3340!important}
@@ -2343,7 +2344,7 @@ function renderChatTab() {
   overlay.innerHTML =
     '<div id="chat-msgs-tab" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;"></div>'
     + '<div id="chat-inp-tab" style="display:flex;gap:8px;align-items:center;padding:10px 12px;background:var(--card);border-top:1px solid var(--border);flex-shrink:0;">'
-    + '<input id="chat-input-tab" placeholder="메시지를 입력하세요..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="flex:1;height:42px;border-radius:24px;font-size:16px;padding:0 16px;border:1.5px solid var(--border);background:var(--card);color:var(--text);outline:none;">'
+    + '<input id="chat-input-tab" placeholder="메시지를 입력하세요..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="flex:1;height:42px;border-radius:24px;font-size:16px;padding:0 16px;border:1.5px solid var(--border);background:var(--card);color:var(--text);outline:none;-webkit-appearance:none;">'
     + '<button onclick="sendChatTab()" style="width:42px;height:42px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-arrow-up" style="font-size:18px;color:#fff;font-weight:900"></i></button>'
     + '</div>';
 
@@ -2368,13 +2369,14 @@ function renderChatTab() {
       var ov = document.getElementById('chat-tab-overlay');
       if (!ov) return;
       var vvH = window.visualViewport.height;
-      // 탭바(46px)는 항상 보이게 - overlay는 탭바 바로 아래부터
+      // 탭바 항상 맨 위 고정
+      var tabs = document.querySelector('.tabs');
+      if (tabs) { tabs.style.top = '0'; tabs.style.transform = 'none'; }
+      // overlay: 탭바(46px) 아래~키보드 위까지
+      ov.style.position = 'fixed';
       ov.style.top = '46px';
       ov.style.height = (vvH - 46) + 'px';
       ov.style.bottom = 'auto';
-      // 탭바도 항상 맨 위에
-      var tabs = document.querySelector('.tabs');
-      if (tabs) tabs.style.top = '0';
       var msgs = document.getElementById('chat-msgs-tab');
       if (msgs) msgs.scrollTop = msgs.scrollHeight;
     };
