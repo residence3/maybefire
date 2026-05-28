@@ -1058,7 +1058,7 @@ function renderSettings(){
       +'<input id="set-name" value="'+(S.trip.name||'')+'" maxlength="15" autocomplete="off">'
       +'<button class="bp" style="padding:10px" onclick="saveName()">저장</button></div>';
   } else {
-    h+='<div class="bw" style="padding:8px 0">'
+    h+='<div class="bw" style="padding:14px 0">'
       +'<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 이름</p>'
       +'<p style="font-size:15px;font-weight:700">'+(S.trip.name||'')+'</p></div>'
       +(isCreator?'<button class="bt" onclick="editingName=true;renderSettings()"><i class="ti ti-pencil" style="font-size:16px"></i></button>':'')
@@ -1079,12 +1079,12 @@ function renderSettings(){
       +'<button class="bp" style="padding:10px" onclick="saveDate()">저장</button></div>';
   } else {
     var d=S.trip.startDate?(S.trip.endDate?S.trip.startDate+' ~ '+S.trip.endDate:S.trip.startDate):'날짜 미정';
-    h+='<div class="bw" style="padding-top:8px;border-top:1px solid var(--border)">'
+    h+='<div class="bw" style="padding:14px 0;border-top:1px solid var(--border)">'
       +'<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 날짜</p>'
       +'<p style="font-size:15px;font-weight:700">'+d+'</p></div>'
       +(isCreator?'<button class="bt" onclick="editingDate=true;renderSettings()"><i class="ti ti-pencil" style="font-size:16px"></i></button>':'')
       +'</div>';
-    h+='<div class="bw" style="padding-top:8px;border-top:1px solid var(--border);gap:12px">'
+    h+='<div class="bw" style="padding:14px 0;border-top:1px solid var(--border);gap:12px">'
       +'<div><p style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:3px">여행 코드</p>'
       +'<p style="font-size:15px;font-weight:700;letter-spacing:4px;color:var(--A)">'+S.code+'</p></div>'
       +'<button class="copy-btn" style="flex-shrink:0;width:auto;padding:8px 14px;font-size:13px;white-space:nowrap" onclick="copyCode()"><i class="ti ti-copy"></i>복사</button>'
@@ -1361,7 +1361,7 @@ function renderSchedule(){
         +'<div><label class="lbl">시간</label><input id="at-'+day.id+'" type="text" placeholder="00:00" inputmode="numeric" maxlength="5" oninput="fmtTime(this)" autocomplete="off"></div>'
         +'<div id="loc-field-'+day.id+'" style="display:'+(hasLoc?'block':'none')+'"><label class="lbl">장소</label><input id="al-'+day.id+'" placeholder="한라산 국립공원" autocomplete="off"></div>'
         +'<div id="note-field-'+day.id+'" style="display:'+(hasNote?'block':'none')+'"><label class="lbl">메모</label><input id="am-'+day.id+'" placeholder="준비물, 예약번호..." autocomplete="off"></div>'
-        +(locBtn?'<div>'+locBtn+'</div>':'')+(noteBtn?'<div>'+noteBtn+'</div>':'')
+        +((locBtn||noteBtn)?'<div style="display:flex;gap:8px">'+locBtn+noteBtn+'</div>':'')
         +'<div style="display:flex;gap:8px;justify-content:flex-end">'
         +'<button class="bg" onclick="toggleAF(\''+day.id+'\')" >취소</button>'
         +'<button class="bp" style="width:auto;padding:12px 20px" onclick="addAct(\''+day.id+'\')" >추가</button>'
