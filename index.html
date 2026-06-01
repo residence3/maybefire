@@ -1605,7 +1605,7 @@ function renderExpenses(){
 
   var h='<div style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">'
     +'<h3 style="font-size:17px;font-weight:900">지출 내역'+(total>0?' · 총 '+fmt(total)+'원':'')+'</h3>'
-    +(exps.length>0&&nicks.length>=2?'<button onclick="toggleSettle()" style="background:var(--A);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px"><i class="ti ti-receipt"></i>정산하기</button>':'')
+    +(exps.length>0?'<button onclick="toggleSettle()" style="background:var(--A);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px"><i class="ti ti-receipt"></i>정산하기</button>':'')
     +'</div>'
     +'<div id="settle-panel" style="display:'+(settleOpen?'block':'none')+';margin-bottom:14px">'+(settleOpen?renderSettlePanelHTML():'')+'</div>';
 
