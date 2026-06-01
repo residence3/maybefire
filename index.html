@@ -1522,7 +1522,7 @@ function onDragEnd(e) {
         acts.splice(fi, 1);
         var ni2 = acts.findIndex(function(a){ return a.id===dragState.dropBeforeActId; });
         acts.splice(ni2, 0, dragState.act);
-        dbSet('trip:'+S.code, S.trip); renderSchedule(); showToast('순서를 변경했어요');
+        dbSet('trip:'+S.code, S.trip); renderSchedule(); 
       }
     }
   }
@@ -1542,15 +1542,20 @@ function addAct(dayId){
   var titleEl=document.getElementById('an-'+dayId); if(!titleEl) return;
   var title=titleEl.value.trim(); if(!title) return;
   var day=S.trip.itinerary.find(function(d){return d.id===dayId;});
-  if(day) day.activities.push({id:uid(),time:(document.getElementById('at-'+dayId)||{}).value||'',title:title,location:(document.getElementById('al-'+dayId)||{}).value||'',note:(document.getElementById('am-'+dayId)||{}).value||''});
+  if(day) {
+    var newAct = {id:uid(),time:(document.getElementById('at-'+dayId)||{}).value||'',title:title,location:(document.getElementById('al-'+dayId)||{}).value||'',note:(document.getElementById('am-'+dayId)||{}).value||''};
+    if(newAct.time) {
+      // 시간 있으면 적절한 위치에 삽입
+      var insertIdx = day.activities.length;
+      for(var i=0;i<day.activities.length;i++){
+        if(day.activities[i].time && day.activities[i].time > newAct.time){insertIdx=i;break;}
+      }
+      day.activities.splice(insertIdx, 0, newAct);
+    } else {
+      day.activities.push(newAct);
+    }
+  }
   openActForms.delete(dayId); actMoreFields.delete(dayId+'_loc'); actMoreFields.delete(dayId+'_note');
-  // 시간 있는 것 먼저 시간순, 없는 건 뒤에
-  if(day) day.activities.sort(function(a,b){
-    if(!a.time && !b.time) return 0;
-    if(!a.time) return 1;
-    if(!b.time) return -1;
-    return a.time.localeCompare(b.time);
-  });
   dbSet('trip:'+S.code,S.trip); renderSchedule();
 }
 function removeAct(dayId,actId){var day=S.trip.itinerary.find(function(d){return d.id===dayId;});if(day)day.activities=day.activities.filter(function(a){return a.id!==actId;});dbSet('trip:'+S.code,S.trip);renderSchedule();}
@@ -1579,13 +1584,6 @@ function saveEditAct(dayId,actId,key){
   if(act){act.title=title.trim();act.time=(document.getElementById('et-'+key)||{}).value||'';act.location=(document.getElementById('el-'+key)||{}).value||'';act.note=(document.getElementById('em-'+key)||{}).value||'';}
   delete editActState[key];
   // 시간 수정 후 재정렬
-  var sortDay = S.trip.itinerary.find(function(d){return d.id===dayId;});
-  if(sortDay) sortDay.activities.sort(function(a,b){
-    if(!a.time && !b.time) return 0;
-    if(!a.time) return 1;
-    if(!b.time) return -1;
-    return a.time.localeCompare(b.time);
-  });
   dbSet('trip:'+S.code,S.trip); renderSchedule();
 }
 
@@ -1928,7 +1926,7 @@ function onExpDragEnd(e) {
       exps.splice(ni, 0, moved);
       dbSet('trip:'+S.code, S.trip);
       renderExpenses();
-      showToast('순서를 변경했어요');
+      
     }
   }
   expDragState = null;
