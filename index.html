@@ -1696,7 +1696,26 @@ function renderExpenses(){
   // settle panel: 처음 열릴 때만 렌더
   if(settleOpen){
     var sp=document.getElementById('settle-panel');
-    if(sp&&!sp.querySelector('#settle-slider')) sp.innerHTML=renderSettlePanelHTML();
+    if(sp){
+      if(!sp.querySelector('#settle-slider')){
+        sp.innerHTML=renderSettlePanelHTML();
+      }
+      // 슬라이드 위치 복원 (innerHTML 재생성 없이)
+      var slider=document.getElementById('settle-slider');
+      if(slider && settleSlideIdx > 0){
+        slider.style.transition='none';
+        slider.style.transform='translateX(-'+settleSlideIdx*100+'%)';
+        requestAnimationFrame(function(){
+          var s=document.getElementById('settle-slider');
+          if(s) s.style.transition='transform .3s ease';
+        });
+        ['dot-0','dot-1'].forEach(function(id,i){
+          var d=document.getElementById(id); if(!d) return;
+          d.style.background=i===settleSlideIdx?'var(--A)':'var(--border)';
+          d.style.width=i===settleSlideIdx?'20px':'8px';
+        });
+      }
+    }
   }
     } catch(err){el.innerHTML='<div class="card" style="border-color:var(--no)"><p style="color:var(--no);font-weight:700">오류: '+err.message+'</p></div>';console.error('renderExpenses:',err);}
 }
