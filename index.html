@@ -2369,14 +2369,15 @@ function showChatBubble(show) {
   var isMobile = window.innerWidth < 600 || (window.screen && window.screen.width < 600);
   var b = document.getElementById('chat-bubble');
   var t = document.getElementById('chat-tab-btn');
+  var addBtn = document.getElementById('add-exp-btn');
   if (isMobile) {
-    // 모바일: 탭 버튼 표시, 플로팅 버튼 숨김
     if (b) b.style.display = 'none';
     if (t) t.style.display = show ? 'flex' : 'none';
+    if (addBtn) addBtn.style.display = 'none';
   } else {
-    // PC: 플로팅 버튼 표시, 탭 버튼 숨김
     if (b) b.style.display = show ? 'flex' : 'none';
     if (t) t.style.display = 'none';
+    if (addBtn) addBtn.style.display = show ? 'flex' : 'none';
   }
 }
 
@@ -2490,6 +2491,9 @@ async function sendChatTab() {
 
 </script>
 <!-- 채팅 -->
+<button id="add-exp-btn" onclick="openEF();switchTab('expenses')" style="position:fixed;bottom:84px;right:20px;z-index:99;width:48px;height:48px;border-radius:50%;background:var(--card);border:1.5px solid var(--border);cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.15);" title="지출 추가">
+  <i class="ti ti-receipt" style="font-size:22px;color:var(--A)"></i>
+</button>
 <button class="chat-bubble" id="chat-bubble" onclick="toggleChat()">
   <i class="ti ti-message-circle" style="font-size:22px;color:#fff"></i>
   <span class="dot" id="chat-dot"></span>
