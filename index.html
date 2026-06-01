@@ -1850,6 +1850,90 @@ async function toggleSettleItem(key) {
   renderExpenses();
 }
 
+
+// ══ 비용 드래그 ══
+var expDragState = null;
+var expDragGhost = null;
+
+function startExpDrag(e, expId, gkey) {
+  e.preventDefault();
+  var exp = (S.trip.expenses||[]).find(function(ex){return ex.id===expId;});
+  if (!exp) return;
+  expDragState = { expId:expId, gkey:gkey, exp:JSON.parse(JSON.stringify(exp)) };
+
+  expDragGhost = document.createElement('div');
+  expDragGhost.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;opacity:.85;min-width:180px;max-width:300px;background:var(--card);border:2px solid var(--A);border-radius:12px;padding:10px 14px;box-shadow:0 4px 16px rgba(0,0,0,.18);font-family:inherit;font-size:14px;font-weight:700;';
+  expDragGhost.textContent = exp.title + ' · ' + exp.amount.toLocaleString() + '원';
+  document.body.appendChild(expDragGhost);
+
+  var cx = e.touches ? e.touches[0].clientX : e.clientX;
+  var cy = e.touches ? e.touches[0].clientY : e.clientY;
+  posExpGhost(cx, cy);
+
+  document.addEventListener('mousemove', onExpDragMove);
+  document.addEventListener('touchmove', onExpDragMove, {passive:false});
+  document.addEventListener('mouseup', onExpDragEnd);
+  document.addEventListener('touchend', onExpDragEnd);
+}
+
+function onExpDragMove(e) {
+  if (!expDragState) return;
+  if (e.cancelable) e.preventDefault();
+  var cx = e.touches ? e.touches[0].clientX : e.clientX;
+  var cy = e.touches ? e.touches[0].clientY : e.clientY;
+  posExpGhost(cx, cy);
+}
+
+function posExpGhost(x, y) {
+  if (!expDragGhost) return;
+  expDragGhost.style.left = (x+12) + 'px';
+  expDragGhost.style.top = (y-16) + 'px';
+
+  // 플레이스홀더 제거
+  document.querySelectorAll('.exp-drag-placeholder').forEach(function(p){p.remove();});
+
+  expDragGhost.style.display = 'none';
+  var el = document.elementFromPoint(x, y);
+  expDragGhost.style.display = '';
+
+  var targetCard = el && el.closest('[data-exp-id]');
+  if (targetCard && targetCard.dataset.expId !== expDragState.expId &&
+      targetCard.dataset.expGkey === expDragState.gkey) {
+    var ph = document.createElement('div');
+    ph.className = 'exp-drag-placeholder';
+    ph.style.cssText = 'height:3px;background:var(--A);border-radius:2px;margin:2px 0;';
+    targetCard.parentNode.insertBefore(ph, targetCard);
+    expDragState.dropBeforeId = targetCard.dataset.expId;
+  } else {
+    expDragState.dropBeforeId = null;
+  }
+}
+
+function onExpDragEnd(e) {
+  document.removeEventListener('mousemove', onExpDragMove);
+  document.removeEventListener('touchmove', onExpDragMove);
+  document.removeEventListener('mouseup', onExpDragEnd);
+  document.removeEventListener('touchend', onExpDragEnd);
+  document.querySelectorAll('.exp-drag-placeholder').forEach(function(p){p.remove();});
+  if (expDragGhost) { expDragGhost.remove(); expDragGhost = null; }
+  if (!expDragState) return;
+
+  if (expDragState.dropBeforeId && expDragState.dropBeforeId !== expDragState.expId) {
+    var exps = S.trip.expenses;
+    var fi = exps.findIndex(function(ex){return ex.id===expDragState.expId;});
+    var ti = exps.findIndex(function(ex){return ex.id===expDragState.dropBeforeId;});
+    if (fi>=0 && ti>=0) {
+      var moved = exps.splice(fi, 1)[0];
+      var ni = exps.findIndex(function(ex){return ex.id===expDragState.dropBeforeId;});
+      exps.splice(ni, 0, moved);
+      dbSet('trip:'+S.code, S.trip);
+      renderExpenses();
+      showToast('순서를 변경했어요');
+    }
+  }
+  expDragState = null;
+}
+
 function toggleSettle(){
   settleOpen=!settleOpen;
   renderExpenses();
