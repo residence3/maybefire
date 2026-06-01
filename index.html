@@ -1050,6 +1050,13 @@ function renderSettings(){
       +(isHost?' <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#1DA1F2;border-radius:50%;flex-shrink:0"><i class="ti ti-check" style="font-size:10px;color:#fff"></i></span>':'')
       +'</p>'
       +(email?'<p style="font-size:11px;color:var(--muted);margin-top:2px">'+email+'</p>':'')
+      +(nick===S.me?'<div style="margin-top:6px" id="nick-edit-wrap-'+mUid+'">'
+        +(function(){
+          var used=(S.trip.nickChanges&&S.trip.nickChanges[S.user&&S.user.uid])||0;
+          var left=3-used;
+          return '<button onclick="startNickEdit()" style="background:none;border:none;padding:0;font-size:12px;color:var(--muted);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px"><i class="ti ti-pencil" style="font-size:12px"></i>'+(left>0?'닉네임 수정':'닉네임 수정 불가')+'</button>';
+        })()
+        +'</div>':'')
       +'</div></div>';
   });
 
@@ -1949,6 +1956,79 @@ function onExpDragEnd(e) {
     }
   }
   expDragState = null;
+}
+
+function startNickEdit() {
+  var used = (S.trip.nickChanges && S.trip.nickChanges[S.user.uid]) || 0;
+  var left = 3 - used;
+  if (left <= 0) { showToast('닉네임 변경 횟수를 모두 사용했어요'); return; }
+  // 첫 번째 클릭이면 안내 팝업
+  if (!confirm('닉네임은 최대 3회까지 변경할 수 있어요.\n현재 '+(3-used)+'회 남았어요.\n\n변경 후 채팅/지출 기록도 모두 바뀌어요.\n\n지금 변경하시겠어요?')) return;
+  var wrap = document.getElementById('nick-edit-wrap-'+(S.user&&S.user.uid));
+  if (!wrap) return;
+  wrap.innerHTML =
+    '<div style="display:flex;gap:8px;align-items:center;margin-top:4px">'
+    + '<input id="new-nick-input" value="'+S.me+'" maxlength="10" autocomplete="off" style="flex:1;height:36px;font-size:14px;">'
+    + '<button onclick="saveNick()" style="background:var(--A);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">저장</button>'
+    + '<button onclick="renderSettings()" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;font-family:inherit;color:var(--muted)">취소</button>'
+    + '</div>';
+  setTimeout(function(){ var el=document.getElementById('new-nick-input'); if(el) el.focus(); }, 50);
+}
+
+async function saveNick() {
+  var inp = document.getElementById('new-nick-input');
+  if (!inp) return;
+  var newNick = inp.value.trim();
+  if (!newNick) return showToast('닉네임을 입력해주세요');
+  if (newNick === S.me) return showToast('현재 닉네임과 동일해요');
+  var nicks = getNicks();
+  if (nicks.indexOf(newNick) >= 0) return showToast('이미 사용 중인 닉네임이에요');
+  var used = (S.trip.nickChanges && S.trip.nickChanges[S.user.uid]) || 0;
+  if (used >= 3) return showToast('변경 횟수를 모두 사용했어요');
+  var oldNick = S.me;
+  // 멤버 닉네임 변경
+  S.trip.members = S.trip.members.map(function(m){
+    if (typeof m === 'object' && m.uid === S.user.uid) m.nickname = newNick;
+    return m;
+  });
+  // 지출 기록 닉네임 변경
+  (S.trip.expenses||[]).forEach(function(e){
+    if (e.paidBy === oldNick) e.paidBy = newNick;
+    if (e.split) e.split = e.split.map(function(n){ return n===oldNick?newNick:n; });
+  });
+  // 변경 횟수 기록
+  if (!S.trip.nickChanges) S.trip.nickChanges = {};
+  S.trip.nickChanges[S.user.uid] = used + 1;
+  // 채팅 닉네임 변경
+  try {
+    var token = await getToken();
+    var r = await fetch(FB+'/chat_'+S.code+'.json?auth='+token);
+    if (r.ok) {
+      var chats = await r.json();
+      if (chats) {
+        var updates = {};
+        Object.keys(chats).forEach(function(k){
+          if (chats[k].nickname === oldNick) {
+            updates[k+'/nickname'] = newNick;
+          }
+        });
+        if (Object.keys(updates).length > 0) {
+          await fetch(FB+'/chat_'+S.code+'.json?auth='+token, {
+            method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(updates)
+          });
+        }
+      }
+    }
+  } catch(e) {}
+  // user-trips 닉네임 업데이트
+  var token2 = await getToken();
+  await fetch(FB+'/user-trips_'+S.user.uid+'/'+S.code+'/nickname.json?auth='+token2, {
+    method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(newNick)
+  });
+  S.me = newNick;
+  await dbSet('trip:'+S.code, S.trip);
+  renderTrip();
+  showToast('닉네임이 변경됐어요!');
 }
 
 async function deleteTrip(){
