@@ -155,284 +155,192 @@ body.blue-mode .chat-hd span i{color:#fff!important}
 body.blue-mode .chat-win{background:#f0f7ff!important;border-color:#bfdbfe!important;border-radius:20px!important}
 
 /* ── 엑셀 테마 ── */
-body.excel-mode {
-  font-family: 'Calibri','Arial',sans-serif !important;
-  background: #fff !important;
-  color: #000 !important;
+body.excel-mode{
+  --excel-green:#107c41;--excel-dark:#0a5c2e;
+  --excel-ribbon:#f3f3f3;--excel-border:#d0d0d0;
+  --excel-header:#e9e9e9;--excel-hilite:#e2efda;--excel-sel:#cce8ff;
+  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;
+  background:#fff!important;color:#000!important;
 }
-/* 포뮬라 바 */
-body.excel-mode::before {
-  content: '';
-  display: block;
+/* ── 타이틀바: 엑셀 윈도우 제목줄 ── */
+body.excel-mode .trip-hd{
+  background:#fff!important;border-bottom:none!important;
+  padding:4px 12px 0!important;
 }
-body.excel-mode .trip-hd {
-  background: #f2f2f2 !important;
-  border-bottom: none !important;
-  padding: 0 !important;
+body.excel-mode #trip-name{font-size:13px!important;color:#000!important;font-weight:400!important;}
+body.excel-mode #trip-name::after{content:'.xlsx';color:#888;font-size:11px}
+body.excel-mode #trip-dates,body.excel-mode #trip-me{font-size:11px!important;color:#666!important;}
+
+/* ── 리본 탭바 ── */
+body.excel-mode .tabs{
+  background:var(--excel-green)!important;
+  border-bottom:none!important;height:auto!important;padding:0 4px!important;
+  gap:0!important;
 }
-body.excel-mode .trip-hd > .bw {
-  background: #e8e8e8 !important;
-  border-bottom: 1px solid #bbb !important;
-  padding: 3px 6px !important;
-  font-size: 11px !important;
+body.excel-mode .tab{
+  color:rgba(255,255,255,.9)!important;font-size:11px!important;
+  padding:6px 14px!important;border-radius:3px 3px 0 0!important;
+  border:none!important;letter-spacing:0!important;height:30px!important;
+  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;
 }
-body.excel-mode #trip-name {
-  font-size: 12px !important;
-  color: #000 !important;
-  font-family: 'Calibri','Arial',sans-serif !important;
-  font-weight: 400 !important;
+body.excel-mode .tab.on{
+  background:#fff!important;color:var(--excel-green)!important;
+  font-weight:700!important;
 }
-body.excel-mode #trip-dates, body.excel-mode #trip-me {
-  font-size: 10px !important; color: #666 !important;
+
+/* ── fx 수식바 ── */
+body.excel-mode .content{
+  background:#fff!important;padding:0!important;
 }
-/* 포뮬라 바 효과 */
-body.excel-mode #code-panel {
-  background: #fff !important;
-  border: none !important;
-  border-bottom: 1px solid #bbb !important;
-  border-radius: 0 !important;
-  padding: 2px 8px !important;
-  font-size: 11px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
+body.excel-mode .content::before{
+  content:'A1     fx   여행 일정 데이터';
+  display:block;height:22px;line-height:22px;
+  padding:0 8px;font-size:11px;color:#333;
+  background:#fff;border-bottom:1px solid var(--excel-border);
+  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif;
+  letter-spacing:.2px;
 }
-body.excel-mode #code-panel::before {
-  content: 'fx';
-  color: #217346;
-  font-weight: 700;
-  font-size: 13px;
-  font-style: italic;
-  border-right: 1px solid #bbb;
-  padding-right: 6px;
+
+/* ── 열 헤더 바 ── */
+body.excel-mode .content::after{
+  content:'#    A 제목/내용          B 날짜/시간          C 금액          D 비고';
+  display:block;height:20px;line-height:20px;
+  padding:0 8px;font-size:10px;color:#333;
+  background:var(--excel-header);
+  border-bottom:1px solid var(--excel-border);
+  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif;
+  white-space:nowrap;overflow:hidden;
 }
-/* 리본 탭 */
-body.excel-mode .tabs {
-  background: #217346 !important;
-  border-bottom: 2px solid #185a2e !important;
-  height: 46px !important;
+
+/* ── 카드 → 행 ── */
+body.excel-mode .card{
+  background:#fff!important;border:none!important;border-radius:0!important;
+  border-bottom:1px solid #e8e8e8!important;
+  margin:0!important;padding:5px 8px 5px 34px!important;
+  box-shadow:none!important;position:relative!important;
+  transition:background .1s!important;
 }
-body.excel-mode .tab {
-  color: rgba(255,255,255,0.85) !important;
-  font-size: 11px !important;
-  font-family: 'Calibri','Arial',sans-serif !important;
-  border-bottom: none !important;
-  padding: 6px 14px !important;
-  border-radius: 0 !important;
-  letter-spacing: 0 !important;
-  border-right: 1px solid rgba(255,255,255,0.15) !important;
-}
-body.excel-mode .tab.on {
-  background: #fff !important;
-  color: #217346 !important;
-  font-weight: 700 !important;
-  border-top: 2px solid #217346 !important;
-  margin-top: -2px !important;
-}
-/* 행/열 헤더 */
-body.excel-mode .content {
-  background: #fff !important;
-  padding: 0 !important;
-}
-body.excel-mode #tab-schedule,
-body.excel-mode #tab-expenses,
-body.excel-mode #tab-settings {
-  min-height: 60vh;
-}
-/* 셀 그리드 */
-body.excel-mode .card {
-  background: #fff !important;
-  border: none !important;
-  border-bottom: 1px solid #d0d7be !important;
-  border-right: 1px solid #d0d7de !important;
-  border-radius: 0 !important;
-  margin: 0 !important;
-  padding: 4px 8px 4px 32px !important;
-  box-shadow: none !important;
-  position: relative !important;
-}
+body.excel-mode .card:hover{background:var(--excel-sel)!important;}
+
 /* 행 번호 */
-body.excel-mode .card::before {
-  content: attr(data-row);
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 28px;
-  background: #f2f2f2;
-  border-right: 1px solid #bbb;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  color: #666;
-  font-family: 'Calibri','Arial',sans-serif;
+body.excel-mode .card::before{
+  position:absolute;left:0;top:0;bottom:0;width:30px;
+  background:var(--excel-header);border-right:1px solid var(--excel-border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:#444;
+  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif;
 }
-body.excel-mode .card:nth-child(even) {
-  background: #fff !important;
+body.excel-mode .card:nth-child(1)::before{content:'1'}
+body.excel-mode .card:nth-child(2)::before{content:'2'}
+body.excel-mode .card:nth-child(3)::before{content:'3'}
+body.excel-mode .card:nth-child(4)::before{content:'4'}
+body.excel-mode .card:nth-child(5)::before{content:'5'}
+body.excel-mode .card:nth-child(6)::before{content:'6'}
+body.excel-mode .card:nth-child(7)::before{content:'7'}
+body.excel-mode .card:nth-child(8)::before{content:'8'}
+body.excel-mode .card:nth-child(9)::before{content:'9'}
+body.excel-mode .card:nth-child(10)::before{content:'10'}
+body.excel-mode .card:nth-child(11)::before{content:'11'}
+body.excel-mode .card:nth-child(12)::before{content:'12'}
+body.excel-mode .card:nth-child(13)::before{content:'13'}
+body.excel-mode .card:nth-child(14)::before{content:'14'}
+body.excel-mode .card:nth-child(15)::before{content:'15'}
+body.excel-mode .card:nth-child(16)::before{content:'16'}
+body.excel-mode .card:nth-child(17)::before{content:'17'}
+body.excel-mode .card:nth-child(18)::before{content:'18'}
+body.excel-mode .card:nth-child(19)::before{content:'19'}
+body.excel-mode .card:nth-child(20)::before{content:'20'}
+
+/* ── 그룹 헤더 ── */
+body.excel-mode h3,body.excel-mode [data-gkey]{
+  background:var(--excel-hilite)!important;
+  color:var(--excel-dark)!important;font-weight:700!important;
+  font-size:11px!important;padding:4px 8px 4px 34px!important;
+  border:none!important;border-bottom:1px solid #b6d7a8!important;
+  border-radius:0!important;margin:0!important;
+  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;
 }
-body.excel-mode .card:nth-child(odd) {
-  background: #fff !important;
+/* ── day-card ── */
+body.excel-mode .day-card{
+  border:none!important;border-radius:0!important;margin:0!important;
+  border-bottom:1px solid #e0e0e0!important;
+  border-left:3px solid var(--excel-green)!important;
+  background:#fff!important;padding-left:34px!important;
 }
-/* 선택된 셀 효과 */
-body.excel-mode .card:focus-within {
-  outline: 2px solid #0070C0 !important;
-  z-index: 1 !important;
+
+/* ── 입력창 → 셀 스타일 ── */
+body.excel-mode input:not([type=checkbox]):not([type=radio]),
+body.excel-mode select,body.excel-mode textarea{
+  border:1px solid var(--excel-border)!important;
+  border-radius:0!important;height:26px!important;
+  padding:1px 5px!important;font-size:11px!important;
+  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;
+  background:#fff!important;box-shadow:none!important;
 }
-/* 섹션 제목 → 열 헤더 */
-body.excel-mode h3 {
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  color: #000 !important;
-  background: #d6e4bc !important;
-  padding: 4px 8px 4px 32px !important;
-  border: 1px solid #a8c08a !important;
-  border-radius: 0 !important;
-  margin: 0 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.3px !important;
-  position: relative !important;
+body.excel-mode input:focus,body.excel-mode select:focus,body.excel-mode textarea:focus{
+  border:2px solid var(--excel-green)!important;
+  box-shadow:0 0 0 1px rgba(16,124,65,.3)!important;
+  outline:none!important;background:var(--excel-sel)!important;
 }
-body.excel-mode h3::before {
-  content: '▶';
-  position: absolute;
-  left: 8px;
-  font-size: 8px;
-  color: #217346;
+body.excel-mode textarea{height:auto!important;min-height:44px!important;}
+
+/* ── 버튼 ── */
+body.excel-mode .bp{
+  background:var(--excel-green)!important;color:#fff!important;
+  border:1px solid var(--excel-dark)!important;border-radius:2px!important;
+  font-size:11px!important;height:26px!important;padding:0 14px!important;
+  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;
 }
-/* 행 번호 자동 부여 */
-body.excel-mode .card:nth-child(1)::before  { content: '1'; }
-body.excel-mode .card:nth-child(2)::before  { content: '2'; }
-body.excel-mode .card:nth-child(3)::before  { content: '3'; }
-body.excel-mode .card:nth-child(4)::before  { content: '4'; }
-body.excel-mode .card:nth-child(5)::before  { content: '5'; }
-body.excel-mode .card:nth-child(6)::before  { content: '6'; }
-body.excel-mode .card:nth-child(7)::before  { content: '7'; }
-body.excel-mode .card:nth-child(8)::before  { content: '8'; }
-body.excel-mode .card:nth-child(9)::before  { content: '9'; }
-body.excel-mode .card:nth-child(10)::before { content: '10'; }
-body.excel-mode .card:nth-child(11)::before { content: '11'; }
-body.excel-mode .card:nth-child(12)::before { content: '12'; }
-body.excel-mode .card:nth-child(13)::before { content: '13'; }
-body.excel-mode .card:nth-child(14)::before { content: '14'; }
-body.excel-mode .card:nth-child(15)::before { content: '15'; }
-/* 입력 → 셀 */
-body.excel-mode input, body.excel-mode textarea {
-  border: 1px solid #bbb !important;
-  border-radius: 0 !important;
-  height: 24px !important;
-  padding: 1px 4px !important;
-  font-size: 11px !important;
-  font-family: 'Calibri','Arial',sans-serif !important;
-  background: #fff !important;
-  box-shadow: none !important;
+body.excel-mode .bg{
+  background:var(--excel-ribbon)!important;color:#333!important;
+  border:1px solid var(--excel-border)!important;border-radius:2px!important;
+  font-size:11px!important;height:26px!important;padding:0 10px!important;
 }
-body.excel-mode input:focus, body.excel-mode textarea:focus {
-  border: 2px solid #0070C0 !important;
-  box-shadow: none !important;
-  background: #fff !important;
-  outline: none !important;
+body.excel-mode .chip{
+  border:1px solid var(--excel-border)!important;border-radius:2px!important;
+  background:var(--excel-ribbon)!important;color:#333!important;
+  font-size:11px!important;padding:2px 8px!important;
 }
-body.excel-mode textarea { height: auto !important; min-height: 48px !important; }
-body.excel-mode input[type=date] { height: 24px !important; }
-/* 버튼 */
-body.excel-mode .bp {
-  background: #217346 !important;
-  color: #fff !important;
-  border: 1px solid #185a2e !important;
-  border-radius: 1px !important;
-  font-size: 11px !important;
-  padding: 4px 12px !important;
-  height: auto !important;
-  font-family: 'Calibri','Arial',sans-serif !important;
+body.excel-mode .chip.on{
+  background:var(--excel-hilite)!important;color:var(--excel-dark)!important;
+  border-color:var(--excel-green)!important;font-weight:700!important;
 }
-body.excel-mode .bg {
-  background: #f2f2f2 !important;
-  border: 1px solid #bbb !important;
-  border-radius: 1px !important;
-  font-size: 11px !important;
-  padding: 4px 10px !important;
-  color: #333 !important;
+
+/* ── 정산/통계 ── */
+body.excel-mode .stat-card{
+  background:var(--excel-hilite)!important;
+  border:1px solid #b6d7a8!important;border-radius:0!important;
 }
-body.excel-mode .bt, body.excel-mode .bd {
-  font-size: 11px !important;
-  padding: 2px 5px !important;
+body.excel-mode .av{
+  background:var(--excel-hilite)!important;border:1px solid #b6d7a8!important;
+  color:var(--excel-green)!important;border-radius:2px!important;
 }
-/* 칩 → 셀 드롭다운 */
-body.excel-mode .chip {
-  border: 1px solid #bbb !important;
-  border-radius: 0 !important;
-  font-size: 11px !important;
-  padding: 3px 7px !important;
-  background: #f9f9f9 !important;
-  color: #333 !important;
+
+/* ── 홈/카드 ── */
+body.excel-mode .trip-card{
+  background:#fff!important;border:none!important;
+  border-bottom:1px solid #e0e0e0!important;border-radius:0!important;margin:0!important;
 }
-body.excel-mode .chip.on {
-  background: #d6e4bc !important;
-  color: #217346 !important;
-  border-color: #217346 !important;
+body.excel-mode .copy-btn{
+  background:var(--excel-hilite)!important;border:1px solid var(--excel-green)!important;
+  color:var(--excel-green)!important;border-radius:2px!important;
 }
-/* 레이블 */
-body.excel-mode .lbl {
-  font-size: 10px !important;
-  color: #555 !important;
-  font-family: 'Calibri','Arial',sans-serif !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.3px !important;
-}
-/* 아코디언 */
-body.excel-mode [data-gkey] {
-  border-radius: 0 !important;
-  background: #e2efda !important;
-  border: 1px solid #a8c08a !important;
-  padding-left: 32px !important;
-}
-/* 통계 */
-body.excel-mode .stat-card {
-  border: 1px solid #bbb !important;
-  border-radius: 0 !important;
-  background: #f2f8ee !important;
-}
-body.excel-mode .stat-grid {
-  border-top: 1px solid #bbb !important;
-  border-left: 1px solid #bbb !important;
-}
-body.excel-mode .stat-card {
-  border-top: none !important;
-  border-left: none !important;
-}
-/* day-card */
-body.excel-mode .day-card {
-  border: 1px solid #a8c08a !important;
-  border-left: 3px solid #217346 !important;
-  margin: 4px 0 !important;
-  border-radius: 0 !important;
-  padding-left: 32px !important;
-}
-/* 엑셀 토글 버튼 */
-body.excel-mode #excel-toggle-btn {
-  color: #fff !important;
-  border-color: rgba(255,255,255,0.5) !important;
-  background: rgba(255,255,255,0.15) !important;
-}
-/* 텍스트 */
-body.excel-mode p, body.excel-mode span {
-  font-family: 'Calibri','Arial',sans-serif !important;
-  font-size: 12px !important;
-}
-/* 셀 선택 시 이름 상자 (좌상단 셀 주소) */
-body.excel-mode .content::before {
-  content: 'A1';
-  display: block;
-  background: #f2f2f2;
-  border: 1px solid #bbb;
-  border-top: none;
-  padding: 2px 8px;
-  font-size: 11px;
-  font-family: 'Calibri','Arial',sans-serif;
-  color: #333;
-  width: 60px;
-}
+
+/* ── 채팅 ── */
+body.excel-mode .chat-bubble{background:var(--excel-green)!important;}
+body.excel-mode .chat-win{background:#fff!important;border-color:var(--excel-border)!important;border-radius:2px!important;}
+body.excel-mode .chat-hd{background:var(--excel-hilite)!important;border-color:#b6d7a8!important;}
+body.excel-mode .chat-msg.me{background:var(--excel-green)!important;color:#fff!important;border-radius:2px!important;}
+body.excel-mode .chat-msg.other{background:var(--excel-hilite)!important;border-color:#b6d7a8!important;color:#000!important;border-radius:2px!important;}
+body.excel-mode .chat-inp button{background:var(--excel-green)!important;}
+body.excel-mode .chat-inp input{border-radius:0!important;}
+
+/* ── lbl, 텍스트 ── */
+body.excel-mode .lbl{font-size:10px!important;color:#555!important;text-transform:uppercase!important;letter-spacing:.3px!important;}
+body.excel-mode .loading{background:#fff!important;}
+body.excel-mode .page{background:#fff!important;}
+body.excel-mode *{font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;}
+
 /* ── 채팅 ── */
 .chat-bubble{position:fixed;bottom:24px;right:20px;z-index:100;width:48px;height:48px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:transform .15s}
 .chat-bubble:active{transform:scale(.92)}
@@ -1050,14 +958,11 @@ function renderSettings(){
       +(isHost?' <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#1DA1F2;border-radius:50%;flex-shrink:0"><i class="ti ti-check" style="font-size:10px;color:#fff"></i></span>':'')
       +'</p>'
       +(email?'<p style="font-size:11px;color:var(--muted);margin-top:2px">'+email+'</p>':'')
-      +(nick===S.me?'<div style="margin-top:6px" id="nick-edit-wrap-'+mUid+'">'
-        +(function(){
-          var used=(S.trip.nickChanges&&S.trip.nickChanges[S.user&&S.user.uid])||0;
-          var left=3-used;
-          return '<button onclick="startNickEdit()" style="background:none;border:none;padding:0;font-size:12px;color:var(--muted);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px"><i class="ti ti-pencil" style="font-size:12px"></i>'+(left>0?'닉네임 수정':'닉네임 수정 불가')+'</button>';
-        })()
-        +'</div>':'')
-      +'</div></div>';
+      +'</div>'
+      +(nick===S.me
+        ?(function(){var used=(S.trip.nickChanges&&S.trip.nickChanges[S.user&&S.user.uid])||0;var left=3-used;return '<button onclick="startNickEdit()" class="bt" style="color:var(--muted);padding:4px;flex-shrink:0'+(left<=0?';opacity:.3':'')+'"><i class="ti ti-pencil" style="font-size:15px"></i></button>';})()
+        :'')
+      +'</div>';
   });
 
   // 방 정보
@@ -1118,7 +1023,7 @@ function renderSettings(){
 
   // 테마
   var curTheme=localStorage.getItem('app-theme')||'default';
-  var themes=[{id:'default',label:'기본',icon:'ti-sun'},{id:'dark',label:'다크',icon:'ti-moon'},{id:'blue',label:'블루',icon:'ti-ripple'}];
+  var themes=[{id:'default',label:'기본',icon:'ti-sun'},{id:'dark',label:'다크',icon:'ti-moon'},{id:'blue',label:'블루',icon:'ti-ripple'},{id:'excel',label:'엑셀',icon:'ti-table'}];
   h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">테마</h3>';
   h+='<div class="card"><div style="display:flex;gap:8px">';
   themes.forEach(function(t){
