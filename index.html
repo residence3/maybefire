@@ -577,17 +577,16 @@ body.blue-mode select{background:#fff!important;color:#0c1a3d!important;border-c
   <div class="trip-hd">
     <div class="bw" style="max-width:600px;margin:0 auto;gap:10px">
       <button onclick="go('home')" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:4px 6px 4px 0;flex-shrink:0;display:flex;align-items:center"><i class="ti ti-chevron-left" style="font-size:22px"></i></button>
-      <div style="flex:1;min-width:0;text-align:right">
+      <div style="flex:1;min-width:0">
         <h2 id="trip-name" style="font-size:18px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></h2>
         <p id="trip-dates" style="font-size:12px;color:var(--muted);margin-top:2px"></p>
         <p id="trip-me" style="font-size:12px;color:var(--muted);margin-top:2px"></p>
-        <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-top:3px">
-          <span id="share-code" style="font-size:11px;font-weight:700;color:var(--A);letter-spacing:2px"></span>
-          <button onclick="copyCode()" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:0;display:flex;align-items:center"><i class="ti ti-copy" style="font-size:13px"></i></button>
-        </div>
-        <div id="guest-badge" style="display:none;margin-top:4px;justify-content:flex-end"><button onclick="goAuth()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;color:inherit;display:inline-flex;align-items:center;gap:4px"><i class="ti ti-eye" style="font-size:11px"></i>읽기 전용 · 탭하여 로그인</button></div>
+        <div id="guest-badge" style="display:none;margin-top:4px"><button onclick="goAuth()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;color:inherit;display:inline-flex;align-items:center;gap:4px"><i class="ti ti-eye" style="font-size:11px"></i>읽기 전용 · 탭하여 로그인</button></div>
       </div>
-    </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:4px;flex-shrink:0">
+        <span id="share-code" style="font-size:13px;font-weight:900;color:var(--A);letter-spacing:3px"></span>
+        <button onclick="copyCode()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;cursor:pointer;color:var(--muted);font-size:11px;display:flex;align-items:center;gap:3px;font-family:inherit"><i class="ti ti-copy" style="font-size:11px"></i>복사</button>
+      </div>
 
   </div>
   <div class="tabs">
