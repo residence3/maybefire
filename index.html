@@ -385,6 +385,22 @@ body.excel-mode *{font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!i
 .chat-inp button{width:38px;height:38px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#412402}
 
 #chat-input-tab:focus{border-color:var(--AL)!important;box-shadow:none!important;}
+/* ── 게스트 모드 ── */
+body.guest-mode .bp,
+body.guest-mode .bt.edit-btn,
+body.guest-mode [onclick*="addAct"],
+body.guest-mode [onclick*="openEF"],
+body.guest-mode [onclick*="toggleSettle"],
+body.guest-mode [onclick*="addDay"],
+body.guest-mode [onclick*="startEdit"],
+body.guest-mode [onclick*="removeAct"],
+body.guest-mode [onclick*="removeExp"],
+body.guest-mode .drag-handle,
+body.guest-mode #day-jump-btns + *,
+body.guest-mode [onclick*="startNickEdit"],
+body.guest-mode [onclick*="toggleDF"] { display:none!important; }
+body.guest-mode #add-exp-btn { display:none!important; }
+
 /* ── 다크 테마 추가 ── */
 body.dark-mode .chat-date-divider span{color:#7b8299!important}
 body.dark-mode .chat-date-divider div{background:#2e3340!important}
@@ -449,6 +465,13 @@ body.blue-mode select{background:#fff!important;color:#0c1a3d!important;border-c
     <div><label class="lbl">비밀번호</label><input id="inp-pw" type="password" placeholder="6자리 이상" autocomplete="current-password"></div>
     <div id="inp-pw2-wrap" style="display:none"><label class="lbl">비밀번호 확인</label><input id="inp-pw2" type="password" placeholder="비밀번호 재입력" autocomplete="new-password"></div>
     <button class="bp" id="auth-btn" onclick="doAuth()">로그인 <i class="ti ti-arrow-right"></i></button>
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:8px;text-align:center">로그인 없이 읽기 전용으로 보기</p>
+      <div style="display:flex;gap:8px">
+        <input id="inp-guest-code" placeholder="여행 코드 6자리" maxlength="6" autocomplete="off" autocorrect="off" style="flex:1;text-transform:uppercase;letter-spacing:3px;text-align:center;font-weight:700;font-size:16px" oninput="this.value=this.value.toUpperCase()">
+        <button class="bg" onclick="doGuestView()" style="flex-shrink:0;white-space:nowrap">👀 보기만</button>
+      </div>
+    </div>
     <button class="bt" id="forgot-btn" onclick="doForgot()" style="justify-content:center;width:100%;font-size:13px">비밀번호를 잊으셨나요?</button>
   </div>
 </div>
@@ -698,6 +721,53 @@ function go(screen) {
   if(screen==='trip') window.scrollTo(0,0);
   if(screen==='home') { loadMyTrips(); stopChatSync(); showChatBubble(false); var cw=document.getElementById('chat-win'); if(cw) cw.style.display='none'; chatOpen=false; }
   if(screen==='nick'||screen==='create') setNickPlaceholders();
+}
+
+// 게스트(비로그인) 모드
+var guestMode = false;
+
+async function goAuth(){guestMode=false;document.body.classList.remove('guest-mode');S.trip=null;S.code='';S.me='';if(window._guestSyncTimer){clearInterval(window._guestSyncTimer);}go('auth');}
+
+async function doGuestView() {
+  var code = (document.getElementById('inp-guest-code')||{}).value;
+  if (!code) code = (document.getElementById('inp-jcode')||{}).value;
+  if (!code || code.length !== 6) return showToast('여행 코드 6자리를 입력해주세요');
+  code = code.toUpperCase();
+  showToast('여행 정보를 불러오는 중...');
+  try {
+    // 비로그인 상태로 Firebase REST API 호출 (auth 토큰 없이)
+    var r = await fetch(FB + '/trip_' + code + '.json');
+    if (!r.ok) throw new Error('연결 실패');
+    var t = await r.json();
+    if (!t) return showToast('존재하지 않는 여행 코드예요');
+    guestMode = true;
+    document.body.classList.add('guest-mode');
+    S.trip = t;
+    S.code = code;
+    S.me = '';
+    S.user = null;
+    switchTab('schedule');
+    renderTrip();
+    go('trip');
+    startGuestSync(code);
+    showChatBubble(false);
+    showToast('읽기 전용으로 보고 있어요 ✍️ 편집하려면 로그인하세요');
+  } catch(e) {
+    showToast('불러오기 실패: ' + (e.message||e));
+  }
+}
+
+function startGuestSync(code) {
+  if (window._guestSyncTimer) clearInterval(window._guestSyncTimer);
+  window._guestSyncTimer = setInterval(async function(){
+    try {
+      var r = await fetch(FB + '/trip_' + code + '.json');
+      if (r.ok) {
+        var t = await r.json();
+        if (t) { S.trip = t; renderTabSafe(document.querySelector('.tab.on')&&document.querySelector('.tab.on').dataset.tab||'schedule'); }
+      }
+    } catch(e) {}
+  }, 5000);
 }
 
 // 저장된 테마 복원
@@ -1150,6 +1220,20 @@ function initHeaderPos(){
 
 function renderTrip(){
   var t=S.trip; if(!t) return;
+  // 게스트 배너
+  var banner = document.getElementById('guest-banner');
+  if (guestMode) {
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'guest-banner';
+      banner.style.cssText = 'background:#fef3c7;border-bottom:1px solid #f59e0b;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;font-size:13px;position:sticky;top:92px;z-index:19;';
+      banner.innerHTML = '<span>👀 읽기 전용으로 보는 중</span><button onclick="goAuth()" style="background:#f59e0b;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">로그인하여 편집</button>';
+      var content = document.querySelector('.content');
+      if (content) content.prepend(banner);
+    }
+  } else {
+    if (banner) banner.remove();
+  }
   document.getElementById('trip-name').textContent=t.name;
   document.getElementById('trip-dates').textContent=t.startDate?(t.endDate?t.startDate+' ~ '+t.endDate:t.startDate):'';
   document.getElementById('trip-me').innerHTML='<i class="ti ti-user" style="font-size:11px;margin-right:3px"></i>'+S.me;
