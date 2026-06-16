@@ -1268,6 +1268,14 @@ function switchTab(n){
           ov.remove();
         }
         el.style.cssText = 'display:none';
+        // 탭바 스타일 완전 복원
+        var tabs = document.querySelector('.tabs');
+        if (tabs) {
+          tabs.style.position = '';
+          tabs.style.top = '';
+          tabs.style.zIndex = '';
+          tabs.style.transform = '';
+        }
         // 헤더/탭바 복원
         setTimeout(initHeaderPos, 0);
       }
@@ -2603,21 +2611,29 @@ function renderChatTab() {
     var onVV = function() {
       var ov = document.getElementById('chat-tab-overlay');
       if (!ov) return;
+      var vvTop = window.visualViewport.offsetTop;
       var vvH = window.visualViewport.height;
-      // 탭바 항상 맨 위 고정
+      var tabsH = 46;
+      // 탭바를 visualViewport 기준으로 고정
       var tabs = document.querySelector('.tabs');
-      if (tabs) { tabs.style.top = '0'; tabs.style.transform = 'none'; }
-      // overlay: 탭바(46px) 아래~키보드 위까지
+      if (tabs) {
+        tabs.style.position = 'fixed';
+        tabs.style.top = vvTop + 'px';
+        tabs.style.transform = 'none';
+        tabs.style.zIndex = '26';
+      }
+      // 오버레이도 visualViewport 기준으로 위치 계산
       ov.style.position = 'fixed';
-      ov.style.top = '46px';
-      ov.style.height = (vvH - 46) + 'px';
+      ov.style.top = (vvTop + tabsH) + 'px';
+      ov.style.height = (vvH - tabsH) + 'px';
       ov.style.bottom = 'auto';
       var msgs = document.getElementById('chat-msgs-tab');
-      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+      if (msgs) setTimeout(function(){ msgs.scrollTop = msgs.scrollHeight; }, 50);
     };
     window.visualViewport.addEventListener('resize', onVV);
     window.visualViewport.addEventListener('scroll', onVV);
     overlay._vv = onVV;
+    onVV(); // 초기 실행
   }
 }
 
