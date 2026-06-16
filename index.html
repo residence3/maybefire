@@ -57,8 +57,8 @@ input[type=password]{letter-spacing:.1em}
 .big-code{font-size:22px;font-weight:900;letter-spacing:5px;color:var(--A);margin:4px 0 2px;word-break:break-all}
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
 .stat-card{background:#f5f0ea;border-radius:var(--r);padding:12px 8px;text-align:center}
-.trip-hd{background:#fff;border-bottom:1px solid var(--border);padding:14px 18px;position:fixed;top:0;left:0;right:0;z-index:30;transition:top .25s ease}
-.content{padding:14px 14px 2rem;max-width:600px;margin:0 auto;padding-top:140px}
+.trip-hd{background:#fff;border-bottom:1px solid var(--border);padding:14px 18px;position:sticky;top:0;z-index:30;transition:transform .25s ease}
+.content{padding:14px 14px 2rem;max-width:600px;margin:0 auto}
 .act-row{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--border);align-items:flex-start}
 .date-range{background:#fff;border:1.5px solid var(--border);border-radius:var(--rl);overflow:hidden}
 .date-range-row{display:grid;grid-template-columns:1fr 1px 1fr}
@@ -1230,16 +1230,11 @@ function getNicks(){var seen={};return getMembers().map(function(m){return typeo
 function getMemberName(nick){var m=getMembers().find(function(m){return(typeof m==='object'?m.nickname:m)===nick;});if(!m)return nick;return typeof m==='object'?m.nickname:m;}
 
 function initHeaderPos(){
+  // sticky 방식: transform 초기화만
   var hd = document.querySelector('.trip-hd');
   var tabs = document.querySelector('.tabs');
-  if(!hd || !tabs) return;
-  var hdH = hd.offsetHeight;
-  var tabH = tabs.offsetHeight || 46;
-  hd.style.top = '0';
-  tabs.style.top = hdH + 'px';
-  // content padding 동적 설정
-  var el = document.querySelector('.content');
-  if(el) el.style.paddingTop = (hdH + tabH + 14) + 'px';
+  if(hd) hd.style.transform = '';
+  if(tabs) tabs.style.transform = '';
 }
 
 function renderTrip(){
@@ -1329,26 +1324,26 @@ function switchTab(n){
       var tabsH = tabs.offsetHeight;
       var atTop = y <= 4;
       if(atTop) {
-        // 최상단에서만 제목바 + 탭바 둘 다 보임
-        hd.style.top = '0';
-        tabs.style.top = hdH + 'px';
+        hd.style.transform = '';
+        tabs.style.transform = '';
         hidden = false;
         tabsOnly = false;
       } else if(y > lastY && y > 60 && !hidden && !tabsOnly) {
-        // 아래로 스크롤 → 둘 다 숨김
-        hd.style.top = '-' + hdH + 'px';
-        tabs.style.top = '-' + (hdH + tabsH) + 'px';
+        // 아래로 → 둘 다 숨김
+        hd.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
+        tabs.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
         hidden = true;
         tabsOnly = false;
       } else if(y > lastY && y > 60 && tabsOnly) {
-        // 탭바만 보이는 상태에서 다시 아래로 → 탭바도 숨김
-        tabs.style.top = '-' + tabsH + 'px';
+        // 탭바만 보이다 다시 아래로
+        hd.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
+        tabs.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
         hidden = true;
         tabsOnly = false;
       } else if(y < lastY && hidden) {
-        // 위로 스크롤 → 탭바만 보임 (제목바 숨긴 채)
-        hd.style.top = '-' + hdH + 'px';
-        tabs.style.top = '0';
+        // 위로 → 탭바만 보임
+        hd.style.transform = 'translateY(-' + hdH + 'px)';
+        tabs.style.transform = 'translateY(-' + hdH + 'px)';
         hidden = false;
         tabsOnly = true;
       }
@@ -2584,7 +2579,7 @@ function renderChatTab() {
     'display:flex',
     'flex-direction:column',
     'background:var(--bg)',
-    'z-index:15'
+    'z-index:25'
   ].join(';');
 
   overlay.innerHTML =
