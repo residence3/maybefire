@@ -57,7 +57,7 @@ input[type=password]{letter-spacing:.1em}
 .big-code{font-size:22px;font-weight:900;letter-spacing:5px;color:var(--A);margin:4px 0 2px;word-break:break-all}
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
 .stat-card{background:#f5f0ea;border-radius:var(--r);padding:12px 8px;text-align:center}
-.trip-hd{background:#fff;border-bottom:1px solid var(--border);padding:14px 18px;transition:transform .25s ease}
+.trip-hd{background:#fff;border-bottom:1px solid var(--border);padding:14px 18px;position:sticky;top:0;z-index:30;transition:transform .25s ease}
 .content{padding:14px 14px 2rem;max-width:600px;margin:0 auto}
 .act-row{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--border);align-items:flex-start}
 .date-range{background:#fff;border:1.5px solid var(--border);border-radius:var(--rl);overflow:hidden}
@@ -575,7 +575,6 @@ body.blue-mode select{background:#fff!important;color:#0c1a3d!important;border-c
 </div>
 <div id="s-trip">
   <div class="trip-hd">
-  <div id="trip-header-wrap" style="position:sticky;top:0;z-index:30;">
     <div class="bw" style="max-width:600px;margin:0 auto;gap:10px">
       <button onclick="go('home')" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:4px 6px 4px 0;flex-shrink:0;display:flex;align-items:center"><i class="ti ti-chevron-left" style="font-size:22px"></i></button>
       <div style="flex:1;min-width:0">
@@ -583,10 +582,6 @@ body.blue-mode select{background:#fff!important;color:#0c1a3d!important;border-c
         <p id="trip-dates" style="font-size:12px;color:var(--muted);margin-top:2px"></p>
         <p id="trip-me" style="font-size:12px;color:var(--muted);margin-top:2px"></p>
         <div id="guest-badge" style="display:none;margin-top:4px"><button onclick="goAuth()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;color:inherit;display:inline-flex;align-items:center;gap:4px"><i class="ti ti-eye" style="font-size:11px"></i>읽기 전용 · 탭하여 로그인</button></div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:4px;flex-shrink:0">
-        <span id="share-code" style="font-size:13px;font-weight:900;color:var(--A);letter-spacing:3px"></span>
-        <button onclick="copyCode()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;cursor:pointer;color:var(--muted);font-size:11px;display:flex;align-items:center;gap:3px;font-family:inherit"><i class="ti ti-copy" style="font-size:11px"></i>복사</button>
       </div>
 
   </div>
@@ -602,7 +597,6 @@ body.blue-mode select{background:#fff!important;color:#0c1a3d!important;border-c
     <div id="tab-settings" style="display:none;min-height:60vh"></div>
     <div id="tab-chat" style="display:none;min-height:60vh;display:flex;flex-direction:column;height:calc(100dvh - 100px)"></div>
   </div>
-  </div><!-- /trip-header-wrap -->
 </div>
 
 <script>
@@ -1233,7 +1227,8 @@ function getMemberName(nick){var m=getMembers().find(function(m){return(typeof m
 
 function initHeaderPos(){
   var wrap = document.getElementById('trip-header-wrap');
-  if(wrap) wrap.style.transform = '';
+  if(wrap) hd.style.transform = '';
+        tabs.style.transform = '';
 }
 
 function renderTrip(){
@@ -1243,7 +1238,6 @@ function renderTrip(){
   document.getElementById('trip-dates').textContent=t.startDate?(t.endDate?t.startDate+' ~ '+t.endDate:t.startDate):'';
   document.getElementById('trip-me').innerHTML='<i class="ti ti-user" style="font-size:11px;margin-right:3px"></i>'+S.me;
   var gb=document.getElementById('guest-badge'); if(gb) gb.style.display=guestMode?'block':'none';
-  var sc=document.getElementById('share-code'); if(sc) sc.textContent=S.code;
   if(S.code) showChatBubble(true);
   // 처음 입장 시만 일정 탭, 이미 탭 선택된 경우 유지
   var activeTab = (document.querySelector('.tab.on') || {}).dataset;
@@ -1303,7 +1297,8 @@ function switchTab(n){
       if (!hd || !tabs) return;
       var hdH = hd.offsetHeight;
       if (target.scrollTop < 30) {
-        wrap.style.transform = '';
+        hd.style.transform = '';
+        tabs.style.transform = '';
         tabs.style.top = '';
         hidden = false;
       }
@@ -1315,30 +1310,33 @@ function switchTab(n){
     ticking = true;
     requestAnimationFrame(function(){
       var y = window.scrollY;
-      var wrap = document.getElementById('trip-header-wrap');
       var hd = document.querySelector('.trip-hd');
       var tabs = document.querySelector('.tabs');
-      if(!wrap) { ticking=false; return; }
-      var hdH = hd ? hd.offsetHeight : 60;
-      var tabsH = tabs ? tabs.offsetHeight : 46;
+      if(!hd || !tabs) { ticking=false; return; }
+      var hdH = hd.offsetHeight;
+      var tabsH = tabs.offsetHeight;
       var atTop = y <= 4;
       if(atTop) {
-        wrap.style.transform = '';
+        hd.style.transform = '';
+        tabs.style.transform = '';
         hidden = false;
         tabsOnly = false;
       } else if(y > lastY && y > 60 && !hidden && !tabsOnly) {
         // 아래로 → 둘 다 숨김
-        wrap.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
+        hd.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
+        tabs.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
         hidden = true;
         tabsOnly = false;
       } else if(y > lastY && y > 60 && tabsOnly) {
         // 탭바만 보이다 다시 아래로
-        wrap.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
+        hd.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
+        tabs.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
         hidden = true;
         tabsOnly = false;
       } else if(y < lastY && hidden) {
         // 위로 → 탭바만 보임
-        wrap.style.transform = 'translateY(-' + hdH + 'px)';
+        hd.style.transform = 'translateY(-' + hdH + 'px)';
+        tabs.style.transform = 'translateY(-' + hdH + 'px)';
         hidden = false;
         tabsOnly = true;
       }
