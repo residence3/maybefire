@@ -500,6 +500,19 @@ body.blue-mode select{background:#fff!important;color:#0c1a3d!important;border-c
       <p id="nights-badge" style="display:none;font-size:13px;color:var(--A);text-align:right;margin-top:6px"></p>
     </div>
     <div><label class="lbl">내 닉네임 <span style="font-weight:400;color:var(--muted)">(이 여행에서 사용)</span></label><input id="inp-creator-nick" placeholder="닉네임" oninput="this.value=this.value.replace(/\s/g,'').slice(0,10)" autocomplete="off"></div>
+    <div>
+      <label class="lbl">총 인원 <span style="font-weight:400;color:var(--muted)">(나 포함)</span></label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px" id="member-count-chips">
+        <button type="button" class="chip on" onclick="selectMemberCount(2)" data-cnt="2">2명</button>
+        <button type="button" class="chip" onclick="selectMemberCount(3)" data-cnt="3">3명</button>
+        <button type="button" class="chip" onclick="selectMemberCount(4)" data-cnt="4">4명</button>
+        <button type="button" class="chip" onclick="selectMemberCount(5)" data-cnt="5">5명</button>
+        <button type="button" class="chip" onclick="selectMemberCount(6)" data-cnt="6">6명</button>
+        <button type="button" class="chip" onclick="selectMemberCount(7)" data-cnt="7">7명</button>
+        <button type="button" class="chip" onclick="selectMemberCount(8)" data-cnt="8">8명</button>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:6px">나머지 자리는 아무개②③...으로 만들어져요. 코드로 참여하면 빈 자리를 차지해요.</p>
+    </div>
     <button class="bp" onclick="doCreate()">여행 만들기 <i class="ti ti-arrow-right"></i></button>
   </div>
 </div>
@@ -847,8 +860,14 @@ async function doCreate() {
   var btn=document.querySelector('#s-create .bp');
   if(btn){btn.disabled=true;btn.textContent='저장 중...';}
   var c=mkCode();
+  // 아무개 슬롯 생성 (본인 제외 나머지)
+  var guestSlots = [];
+  for(var gi=1; gi<selectedMemberCount; gi++){
+    guestSlots.push({uid:'guest_'+gi, nickname:'아무개'+ORDINALS[gi-1], email:'', isGuest:true});
+  }
   var t={name:name,code:c,startDate:startDate,endDate:endDate,members:[],itinerary:[],expenses:[],createdAt:Date.now(),createdBy:S.user.uid};
   t.members.push({uid:S.user.uid,nickname:nick,email:S.user.email||''});
+  t.members = t.members.concat(guestSlots);
   t=autoPopulateDays(t);
   await dbSet('trip:'+c,t);
   var patch={}; patch[c]={nickname:nick,joinedAt:Date.now()};
@@ -889,7 +908,18 @@ async function doSetNick() {
     var exists=members.find(function(m){return (typeof m==='object'?m.nickname:m)===nick&&(typeof m==='object'?m.uid!==S.user.uid:true);});
     if(exists) throw new Error('이미 사용 중인 닉네임이에요');
     var myMember=members.find(function(m){return typeof m==='object'&&m.uid===S.user.uid;});
-    if(!myMember) members.push({uid:S.user.uid,nickname:nick,email:S.user.email||''});
+    if(!myMember) {
+      // 빈 아무개 슬롯이 있으면 차지, 없으면 새로 추가
+      var guestSlot = members.find(function(m){return m.isGuest && m.uid && m.uid.indexOf('guest_')===0;});
+      if(guestSlot) {
+        guestSlot.uid = S.user.uid;
+        guestSlot.nickname = nick;
+        guestSlot.email = S.user.email||'';
+        guestSlot.isGuest = false;
+      } else {
+        members.push({uid:S.user.uid,nickname:nick,email:S.user.email||''});
+      }
+    }
     t.members=members; t=autoPopulateDays(t); t.itinerary=t.itinerary||[]; t.expenses=t.expenses||[];
     await dbSet('trip:'+S.pendingCode,t);
     var patch={}; patch[S.pendingCode]={nickname:nick,joinedAt:Date.now()};
@@ -957,7 +987,7 @@ function renderSettings(){
       +(nick===S.me?' <span style="font-size:12px;color:var(--A);font-weight:700">나</span>':'')
       +(isHost?' <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#1DA1F2;border-radius:50%;flex-shrink:0"><i class="ti ti-check" style="font-size:10px;color:#fff"></i></span>':'')
       +'</p>'
-      +(email?'<p style="font-size:11px;color:var(--muted);margin-top:2px">'+email+'</p>':'')
+      +(m.isGuest?'<p style="font-size:11px;color:var(--muted);margin-top:2px">참여 대기중</p>':(email?'<p style="font-size:11px;color:var(--muted);margin-top:2px">'+email+'</p>':''))
       +'</div>'
       +(nick===S.me
         ?(function(){var used=(S.trip.nickChanges&&S.trip.nickChanges[S.user&&S.user.uid])||0;var left=3-used;return '<button onclick="startNickEdit()" class="bt" style="color:var(--muted);padding:4px;flex-shrink:0'+(left<=0?';opacity:.3':'')+'"><i class="ti ti-pencil" style="font-size:15px"></i></button>';})()
@@ -1950,6 +1980,18 @@ async function deleteTrip(){
     go('home');
   }catch(e){showToast('삭제 실패: '+(e.message||e));}
 }
+
+// 인원수 선택
+var selectedMemberCount = 2;
+function selectMemberCount(n) {
+  selectedMemberCount = n;
+  document.querySelectorAll('#member-count-chips .chip').forEach(function(b){
+    b.classList.toggle('on', parseInt(b.dataset.cnt) === n);
+  });
+}
+
+// 서수 이모지
+var ORDINALS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩'];
 
 function confirmDeleteTrip(){
   if(confirm('정말로 이 여행을 삭제할까요?\n\n모든 일정, 비용 데이터가 영구적으로 사라져요.')) {
