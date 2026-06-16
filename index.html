@@ -583,7 +583,7 @@ body.blue-mode select{background:#fff!important;color:#0c1a3d!important;border-c
         <p id="trip-me" style="font-size:12px;color:var(--muted);margin-top:2px"></p>
         <div id="guest-badge" style="display:none;margin-top:4px"><button onclick="goAuth()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;color:inherit;display:inline-flex;align-items:center;gap:4px"><i class="ti ti-eye" style="font-size:11px"></i>읽기 전용 · 탭하여 로그인</button></div>
       </div>
-
+    </div>
   </div>
   <div class="tabs">
     <button class="tab on" data-tab="schedule" onclick="switchTab('schedule')"><i class="ti ti-calendar" style="font-size:14px"></i>일정</button>
@@ -1226,9 +1226,10 @@ function getNicks(){var seen={};return getMembers().map(function(m){return typeo
 function getMemberName(nick){var m=getMembers().find(function(m){return(typeof m==='object'?m.nickname:m)===nick;});if(!m)return nick;return typeof m==='object'?m.nickname:m;}
 
 function initHeaderPos(){
-  var wrap = document.getElementById('trip-header-wrap');
-  if(wrap) hd.style.transform = '';
-        tabs.style.transform = '';
+  var hd = document.querySelector('.trip-hd');
+  var tabs = document.querySelector('.tabs');
+  if(hd) hd.style.transform = '';
+  if(tabs) tabs.style.transform = '';
 }
 
 function renderTrip(){
