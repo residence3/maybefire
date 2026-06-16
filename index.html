@@ -57,7 +57,7 @@ input[type=password]{letter-spacing:.1em}
 .big-code{font-size:22px;font-weight:900;letter-spacing:5px;color:var(--A);margin:4px 0 2px;word-break:break-all}
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
 .stat-card{background:#f5f0ea;border-radius:var(--r);padding:12px 8px;text-align:center}
-.trip-hd{background:#fff;border-bottom:1px solid var(--border);padding:14px 18px;position:sticky;top:0;z-index:30;transition:transform .25s ease}
+.trip-hd{background:#fff;border-bottom:1px solid var(--border);padding:14px 18px;transition:transform .25s ease}
 .content{padding:14px 14px 2rem;max-width:600px;margin:0 auto}
 .act-row{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--border);align-items:flex-start}
 .date-range{background:#fff;border:1.5px solid var(--border);border-radius:var(--rl);overflow:hidden}
@@ -575,6 +575,7 @@ body.blue-mode select{background:#fff!important;color:#0c1a3d!important;border-c
 </div>
 <div id="s-trip">
   <div class="trip-hd">
+  <div id="trip-header-wrap" style="position:sticky;top:0;z-index:30;">
     <div class="bw" style="max-width:600px;margin:0 auto;gap:10px">
       <button onclick="go('home')" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:4px 6px 4px 0;flex-shrink:0;display:flex;align-items:center"><i class="ti ti-chevron-left" style="font-size:22px"></i></button>
       <div style="flex:1;min-width:0">
@@ -601,6 +602,7 @@ body.blue-mode select{background:#fff!important;color:#0c1a3d!important;border-c
     <div id="tab-settings" style="display:none;min-height:60vh"></div>
     <div id="tab-chat" style="display:none;min-height:60vh;display:flex;flex-direction:column;height:calc(100dvh - 100px)"></div>
   </div>
+  </div><!-- /trip-header-wrap -->
 </div>
 
 <script>
@@ -1230,11 +1232,8 @@ function getNicks(){var seen={};return getMembers().map(function(m){return typeo
 function getMemberName(nick){var m=getMembers().find(function(m){return(typeof m==='object'?m.nickname:m)===nick;});if(!m)return nick;return typeof m==='object'?m.nickname:m;}
 
 function initHeaderPos(){
-  // sticky 방식: transform 초기화만
-  var hd = document.querySelector('.trip-hd');
-  var tabs = document.querySelector('.tabs');
-  if(hd) hd.style.transform = '';
-  if(tabs) tabs.style.transform = '';
+  var wrap = document.getElementById('trip-header-wrap');
+  if(wrap) wrap.style.transform = '';
 }
 
 function renderTrip(){
@@ -1304,8 +1303,7 @@ function switchTab(n){
       if (!hd || !tabs) return;
       var hdH = hd.offsetHeight;
       if (target.scrollTop < 30) {
-        hd.style.transform = '';
-        tabs.style.transform = '';
+        wrap.style.transform = '';
         tabs.style.top = '';
         hidden = false;
       }
@@ -1317,33 +1315,30 @@ function switchTab(n){
     ticking = true;
     requestAnimationFrame(function(){
       var y = window.scrollY;
+      var wrap = document.getElementById('trip-header-wrap');
       var hd = document.querySelector('.trip-hd');
       var tabs = document.querySelector('.tabs');
-      if(!hd || !tabs) { ticking=false; return; }
-      var hdH = hd.offsetHeight;
-      var tabsH = tabs.offsetHeight;
+      if(!wrap) { ticking=false; return; }
+      var hdH = hd ? hd.offsetHeight : 60;
+      var tabsH = tabs ? tabs.offsetHeight : 46;
       var atTop = y <= 4;
       if(atTop) {
-        hd.style.transform = '';
-        tabs.style.transform = '';
+        wrap.style.transform = '';
         hidden = false;
         tabsOnly = false;
       } else if(y > lastY && y > 60 && !hidden && !tabsOnly) {
         // 아래로 → 둘 다 숨김
-        hd.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
-        tabs.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
+        wrap.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
         hidden = true;
         tabsOnly = false;
       } else if(y > lastY && y > 60 && tabsOnly) {
         // 탭바만 보이다 다시 아래로
-        hd.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
-        tabs.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
+        wrap.style.transform = 'translateY(-' + (hdH + tabsH) + 'px)';
         hidden = true;
         tabsOnly = false;
       } else if(y < lastY && hidden) {
         // 위로 → 탭바만 보임
-        hd.style.transform = 'translateY(-' + hdH + 'px)';
-        tabs.style.transform = 'translateY(-' + hdH + 'px)';
+        wrap.style.transform = 'translateY(-' + hdH + 'px)';
         hidden = false;
         tabsOnly = true;
       }
