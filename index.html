@@ -69,6 +69,7 @@ input[type=password]{letter-spacing:.1em}
 .copy-btn:active{background:rgba(186,117,23,.22)}
 .trip-card{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:border-color .15s,box-shadow .15s;display:flex;align-items:center;gap:14px}
 .trip-card:active{border-color:var(--A);box-shadow:0 2px 12px rgba(186,117,23,.15)}
+.trip-card.past-trip{opacity:.45;filter:grayscale(.6)}
 .loading{min-height:100dvh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
 [id^="s-"]{display:none}
 #s-loading{display:flex}
@@ -544,7 +545,6 @@ body.blue-mode select{background:#fff!important;color:#0c1a3d!important;border-c
         <button type="button" class="chip" onclick="selectMemberCount(7)" data-cnt="7">7명</button>
         <button type="button" class="chip" onclick="selectMemberCount(8)" data-cnt="8">8명</button>
       </div>
-      <p style="font-size:11px;color:var(--muted);margin-top:6px">나머지 자리는 아무개②③...으로 만들어져요. 코드로 참여하면 빈 자리를 차지해요.</p>
     </div>
     <button class="bp" onclick="doCreate()">여행 만들기 <i class="ti ti-arrow-right"></i></button>
   </div>
@@ -577,11 +577,15 @@ body.blue-mode select{background:#fff!important;color:#0c1a3d!important;border-c
   <div class="trip-hd">
     <div class="bw" style="max-width:600px;margin:0 auto;gap:10px">
       <button onclick="go('home')" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:4px 6px 4px 0;flex-shrink:0;display:flex;align-items:center"><i class="ti ti-chevron-left" style="font-size:22px"></i></button>
-      <div style="flex:1;min-width:0">
+      <div style="flex:1;min-width:0;text-align:right">
         <h2 id="trip-name" style="font-size:18px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></h2>
         <p id="trip-dates" style="font-size:12px;color:var(--muted);margin-top:2px"></p>
         <p id="trip-me" style="font-size:12px;color:var(--muted);margin-top:2px"></p>
-        <div id="guest-badge" style="display:none;margin-top:4px"><button onclick="goAuth()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;color:inherit;display:inline-flex;align-items:center;gap:4px"><i class="ti ti-eye" style="font-size:11px"></i>읽기 전용 · 탭하여 로그인</button></div>
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-top:3px">
+          <span id="share-code" style="font-size:11px;font-weight:700;color:var(--A);letter-spacing:2px"></span>
+          <button onclick="copyCode()" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:0;display:flex;align-items:center"><i class="ti ti-copy" style="font-size:13px"></i></button>
+        </div>
+        <div id="guest-badge" style="display:none;margin-top:4px;justify-content:flex-end"><button onclick="goAuth()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;color:inherit;display:inline-flex;align-items:center;gap:4px"><i class="ti ti-eye" style="font-size:11px"></i>읽기 전용 · 탭하여 로그인</button></div>
       </div>
     </div>
 
@@ -843,7 +847,16 @@ async function loadMyTrips() {
     var t2=await dbGet('trip:'+codes[i]); if(!t2) continue;
     tripList.push({code:codes[i],trip:t2,nick:(myTrips[codes[i]]&&myTrips[codes[i]].nickname)?myTrips[codes[i]].nickname:''});
   }
+  var today = new Date().toISOString().slice(0,10);
   tripList.sort(function(a,b){
+    var aEnd = a.trip.endDate || a.trip.startDate || '';
+    var bEnd = b.trip.endDate || b.trip.startDate || '';
+    var aPast = aEnd && aEnd < today;
+    var bPast = bEnd && bEnd < today;
+    // 지난 여행은 뒤로
+    if(aPast && !bPast) return 1;
+    if(!aPast && bPast) return -1;
+    // 같은 그룹 내에서는 출발일 순
     if(!a.trip.startDate) return 1;
     if(!b.trip.startDate) return -1;
     return a.trip.startDate.localeCompare(b.trip.startDate);
@@ -854,7 +867,7 @@ async function loadMyTrips() {
     var nick=tripList[i].nick;
     var d=t.startDate?(t.endDate?t.startDate+' ~ '+t.endDate:t.startDate):'날짜 미정';
     var memberCount=(t.members||[]).length;
-    var card=document.createElement('div'); card.className='trip-card';
+    var card=document.createElement('div'); var aEnd=t.endDate||t.startDate||''; var isPast=aEnd&&aEnd<today; card.className='trip-card'+(isPast?' past-trip':'');
     var ICON_MAP={'plane':'ti-plane','beach':'ti-beach','mountain':'ti-mountain','map':'ti-map','luggage':'ti-luggage','ship':'ti-ship','train':'ti-train','tent':'ti-tent','world':'ti-world','rollercoaster':'ti-roller-skating','building':'ti-building-castle','tower':'ti-tower','bowl':'ti-bowl','backpack':'ti-backpack','motorbike':'ti-motorbike','camper':'ti-camper'};
 var iconCls = ICON_MAP[t.icon] || 'ti-plane';
 var iconHtml = '<i class="ti '+iconCls+'" style="font-size:22px;color:var(--A)"></i>';
