@@ -16,7 +16,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--bg:#F7F3EE;--card:#fff;--border:#E5D9CC;--bm:#D4C4B2;--text:#1A0F05;--muted:#8A6B52;--A:#BA7517;--AX:#FAF0D7;--AL:#FAC775;--ok:#1A7A5A;--no:#CC3333;--r:12px;--rl:16px}
+:root{--bg:#fff;--card:#fff;--border:#BFDBFE;--bm:#93C5FD;--text:#1E3A5F;--muted:#6B9AC4;--A:#2563EB;--AX:#EFF6FF;--AL:#BFDBFE;--ok:#059669;--no:#DC2626;--r:12px;--rl:16px}
 html{height:100%;-webkit-text-size-adjust:100%}
 body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;overscroll-behavior-y:none}
 input,button,textarea{font-family:inherit;font-size:16px}
@@ -96,305 +96,48 @@ input[type=password]{letter-spacing:.1em}
 
 @media(max-width:380px){.big-code{font-size:18px;letter-spacing:3px}.tab{font-size:12px;gap:3px}}
 
-/* ── 다크 테마 ── */
-body.dark-mode{--bg:#111318;--card:#1e2128;--border:#2e3340;--bm:#3e4455;--text:#e2e4ec;--muted:#7b8299;--A:#c084fc;--AX:#2a1f3d;--AL:#9333ea;--ok:#4ade80;--no:#f87171;--r:12px;--rl:16px}
-body.dark-mode{background:#111318!important;color:#e2e4ec!important}
-body.dark-mode .tabs{background:#1e2128!important;border-bottom:1px solid #2e3340!important}
-body.dark-mode .tab{color:#7b8299!important}
-body.dark-mode .tab.on{color:#c084fc!important;border-bottom-color:#c084fc!important}
-body.dark-mode .trip-hd{background:#1e2128!important;border-bottom:1px solid #2e3340!important}
-body.dark-mode .card{background:#1e2128!important;border-color:#2e3340!important}
-body.dark-mode .trip-card{background:#1e2128!important;border-color:#2e3340!important}
-body.dark-mode input,body.dark-mode textarea{background:#111318!important;color:#e2e4ec!important;border-color:#2e3340!important}
-body.dark-mode .bp{background:#9333ea!important;color:#fff!important}
-body.dark-mode .chip{background:#1e2128!important;color:#7b8299!important;border-color:#2e3340!important}
-body.dark-mode .chip.on{background:#2a1f3d!important;color:#c084fc!important;border-color:#9333ea!important}
-body.dark-mode .loading{background:#111318!important}
-body.dark-mode .page{background:#111318!important}
-body.dark-mode .content{background:#111318!important}
-body.dark-mode .stat-card{background:#2a2a3a!important;color:#e2e4ec!important}
-body.dark-mode .av{background:#2a1f3d!important;border-color:#9333ea!important;color:#c084fc!important}
-body.dark-mode .copy-btn{background:rgba(192,132,252,.12)!important;border-color:#9333ea!important;color:#c084fc!important}
-body.dark-mode .day-card{border-left-color:#9333ea!important}
-body.dark-mode .chat-msg.me{background:#6d28d9!important;color:#fff!important}
-body.dark-mode .chat-msg.other{background:#1e2128!important;border-color:#2e3340!important;color:#e2e4ec!important}
-body.dark-mode .chat-inp button{background:#9333ea!important;color:#fff!important}
-body.dark-mode .chat-bubble{background:#9333ea!important}
-body.dark-mode .chat-win{background:#1e2128!important;border-color:#2e3340!important;border-radius:20px!important}
-body.dark-mode .chat-hd{background:#1e2128!important;border-color:#2e3340!important}
-body.dark-mode .chat-inp{background:#1e2128!important;border-color:#2e3340!important}
-body.dark-mode .chat-inp input{background:#111318!important;color:#e2e4ec!important;border-color:#2e3340!important}
-/* ── 블루 테마 ── */
-body.blue-mode{--bg:#f0f7ff;--card:#fff;--border:#bfdbfe;--bm:#93c5fd;--text:#0c1a3d;--muted:#3b6cb0;--A:#0284c7;--AX:#e0f2fe;--AL:#7dd3fc;--ok:#059669;--no:#dc2626;--r:12px;--rl:16px}
-body.blue-mode{background:#f0f7ff!important;color:#0c1a3d!important}
-body.blue-mode .tabs{background:#0284c7!important;border-bottom:1px solid #0369a1!important}
-body.blue-mode .tab{color:rgba(255,255,255,.75)!important;border-bottom-color:transparent!important}
-body.blue-mode .tab.on{color:#fff!important;border-bottom-color:#fff!important;background:rgba(255,255,255,.15)!important}
-body.blue-mode .trip-hd{background:#0284c7!important;border-bottom:none!important}
-body.blue-mode #trip-name,body.blue-mode #trip-dates,body.blue-mode #trip-me{color:#fff!important}
-body.blue-mode .trip-hd button{color:#fff!important}
-body.blue-mode .card{background:#fff!important;border-color:#bfdbfe!important}
-body.blue-mode .trip-card{background:#fff!important;border-color:#bfdbfe!important}
-body.blue-mode .bp{background:#0284c7!important;color:#fff!important}
-body.blue-mode .bg{border-color:#bfdbfe!important;color:#3b6cb0!important}
-body.blue-mode .chip{border-color:#bfdbfe!important;color:#3b6cb0!important;background:#fff!important}
-body.blue-mode .chip.on{background:#e0f2fe!important;color:#0284c7!important;border-color:#0284c7!important}
-body.blue-mode .copy-btn{background:#e0f2fe!important;border-color:#7dd3fc!important;color:#0284c7!important}
-body.blue-mode .stat-card{background:#e0f2fe!important}
-body.blue-mode .av{background:#e0f2fe!important;border-color:#7dd3fc!important;color:#0284c7!important}
-body.blue-mode .loading{background:#f0f7ff!important}
-body.blue-mode .page{background:#f0f7ff!important}
-body.blue-mode .content{background:#f0f7ff!important}
-body.blue-mode .day-card{border-left-color:#0284c7!important}
-body.blue-mode .chat-msg.me{background:#0284c7!important;color:#fff!important}
-body.blue-mode .chat-msg.other{background:#e0f2fe!important;border-color:#7dd3fc!important;color:#0c1a3d!important}
-body.blue-mode .chat-inp button{background:#0284c7!important;color:#fff!important}
-body.blue-mode .chat-bubble{background:#0284c7!important}
-body.blue-mode .chat-hd{background:#0284c7!important}
-body.blue-mode .chat-hd span{color:#fff!important}
-body.blue-mode .chat-hd span i{color:#fff!important}
-body.blue-mode .chat-win{background:#f0f7ff!important;border-color:#bfdbfe!important;border-radius:20px!important}
 
-/* ── 엑셀 테마 ── */
-body.excel-mode{
-  --excel-green:#107c41;--excel-dark:#0a5c2e;
-  --excel-ribbon:#f3f3f3;--excel-border:#d0d0d0;
-  --excel-header:#e9e9e9;--excel-hilite:#e2efda;--excel-sel:#cce8ff;
-  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;
-  background:#fff!important;color:#000!important;
-}
-/* ── 타이틀바: 엑셀 윈도우 제목줄 ── */
-body.excel-mode .trip-hd{
-  background:#fff!important;border-bottom:none!important;
-  padding:4px 12px 0!important;
-}
-body.excel-mode #trip-name{font-size:13px!important;color:#000!important;font-weight:400!important;}
-body.excel-mode #trip-name::after{content:'.xlsx';color:#888;font-size:11px}
-body.excel-mode #trip-dates,body.excel-mode #trip-me{font-size:11px!important;color:#666!important;}
+/* ── ⚡ Electric Blue 테마 (기본) ── */
+/* :root에 직접 반영됨 */
 
-/* ── 리본 탭바 ── */
-body.excel-mode .tabs{
-  background:var(--excel-green)!important;
-  border-bottom:none!important;height:auto!important;padding:0 4px!important;
-  gap:0!important;
-}
-body.excel-mode .tab{
-  color:rgba(255,255,255,.9)!important;font-size:11px!important;
-  padding:6px 14px!important;border-radius:3px 3px 0 0!important;
-  border:none!important;letter-spacing:0!important;height:30px!important;
-  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;
-}
-body.excel-mode .tab.on{
-  background:#fff!important;color:var(--excel-green)!important;
-  font-weight:700!important;
-}
+/* ── 🍋 Lemon Drop 테마 ── */
+body.lemon-mode{--bg:#fff;--card:#fff;--border:#FEF08A;--bm:#FDE047;--text:#422006;--muted:#A16207;--A:#EAB308;--AX:#FEFCE8;--AL:#FDE047;--ok:#16A34A;--no:#DC2626;--r:12px;--rl:16px}
+body.lemon-mode .bp{color:#422006!important}
+body.lemon-mode .tabs{background:#fff!important;border-bottom:2px solid #FDE047!important}
+body.lemon-mode .tab.on{color:#D97706!important;border-bottom-color:#D97706!important;background:#FEFCE8!important}
+body.lemon-mode .trip-hd{background:#fff!important;border-bottom:2px solid #FDE047!important}
+body.lemon-mode .card{background:#fff!important;border-color:#FEF08A!important}
+body.lemon-mode .trip-card{background:#fff!important;border-color:#FEF08A!important}
+body.lemon-mode [data-gkey]{background:#FEFCE8!important;border-color:#FDE047!important;color:#92400E!important}
+body.lemon-mode .stat-card{background:#FEFCE8!important}
+body.lemon-mode .av{background:#FEFCE8!important;border-color:#FDE047!important;color:#D97706!important}
+body.lemon-mode .copy-btn{background:#FEFCE8!important;border-color:#FDE047!important;color:#D97706!important}
+body.lemon-mode .day-card{border-left-color:#EAB308!important}
+body.lemon-mode .chip.on{background:#FEFCE8!important;color:#D97706!important;border-color:#EAB308!important}
+body.lemon-mode #pwa-hint{background:#FEFCE8!important;border-color:#FDE047!important}
+body.lemon-mode .err{background:#FEF3C7!important;color:#92400E!important}
+body.lemon-mode #guest-badge button{background:rgba(234,179,8,.15);border:1px solid #FDE047;color:#D97706}
 
-/* ── fx 수식바 ── */
-body.excel-mode .content{
-  background:#fff!important;padding:0!important;
-}
-body.excel-mode .content::before{
-  content:'A1     fx   여행 일정 데이터';
-  display:block;height:22px;line-height:22px;
-  padding:0 8px;font-size:11px;color:#333;
-  background:#fff;border-bottom:1px solid var(--excel-border);
-  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif;
-  letter-spacing:.2px;
-}
+/* ── 🌿 Matcha Neon 테마 ── */
+body.matcha-mode{--bg:#fff;--card:#fff;--border:#BBF7D0;--bm:#86EFAC;--text:#052E16;--muted:#15803D;--A:#16A34A;--AX:#F0FDF4;--AL:#86EFAC;--ok:#15803D;--no:#DC2626;--r:12px;--rl:16px}
+body.matcha-mode .tabs{background:#fff!important;border-bottom:2px solid #86EFAC!important}
+body.matcha-mode .tab.on{color:#15803D!important;border-bottom-color:#16A34A!important;background:#F0FDF4!important}
+body.matcha-mode .trip-hd{background:#fff!important;border-bottom:2px solid #86EFAC!important}
+body.matcha-mode .card{background:#fff!important;border-color:#BBF7D0!important}
+body.matcha-mode .trip-card{background:#fff!important;border-color:#BBF7D0!important}
+body.matcha-mode [data-gkey]{background:#F0FDF4!important;border-color:#86EFAC!important;color:#14532D!important}
+body.matcha-mode .stat-card{background:#F0FDF4!important}
+body.matcha-mode .av{background:#F0FDF4!important;border-color:#86EFAC!important;color:#15803D!important}
+body.matcha-mode .copy-btn{background:#F0FDF4!important;border-color:#86EFAC!important;color:#15803D!important}
+body.matcha-mode .day-card{border-left-color:#16A34A!important}
+body.matcha-mode .chip.on{background:#F0FDF4!important;color:#15803D!important;border-color:#16A34A!important}
+body.matcha-mode #pwa-hint{background:#F0FDF4!important;border-color:#86EFAC!important}
+body.matcha-mode .err{background:#DCFCE7!important;color:#14532D!important}
+body.matcha-mode #guest-badge button{background:rgba(22,163,74,.12);border:1px solid #86EFAC;color:#15803D}
 
-/* ── 열 헤더 바 ── */
-body.excel-mode .content::after{
-  content:'#    A 제목/내용          B 날짜/시간          C 금액          D 비고';
-  display:block;height:20px;line-height:20px;
-  padding:0 8px;font-size:10px;color:#333;
-  background:var(--excel-header);
-  border-bottom:1px solid var(--excel-border);
-  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif;
-  white-space:nowrap;overflow:hidden;
-}
-
-/* ── 카드 → 행 ── */
-body.excel-mode .card{
-  background:#fff!important;border:none!important;border-radius:0!important;
-  border-bottom:1px solid #e8e8e8!important;
-  margin:0!important;padding:5px 8px 5px 34px!important;
-  box-shadow:none!important;position:relative!important;
-  transition:background .1s!important;
-}
-body.excel-mode .card:hover{background:var(--excel-sel)!important;}
-
-/* 행 번호 */
-body.excel-mode .card::before{
-  position:absolute;left:0;top:0;bottom:0;width:30px;
-  background:var(--excel-header);border-right:1px solid var(--excel-border);
-  display:flex;align-items:center;justify-content:center;
-  font-size:10px;color:#444;
-  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif;
-}
-body.excel-mode .card:nth-child(1)::before{content:'1'}
-body.excel-mode .card:nth-child(2)::before{content:'2'}
-body.excel-mode .card:nth-child(3)::before{content:'3'}
-body.excel-mode .card:nth-child(4)::before{content:'4'}
-body.excel-mode .card:nth-child(5)::before{content:'5'}
-body.excel-mode .card:nth-child(6)::before{content:'6'}
-body.excel-mode .card:nth-child(7)::before{content:'7'}
-body.excel-mode .card:nth-child(8)::before{content:'8'}
-body.excel-mode .card:nth-child(9)::before{content:'9'}
-body.excel-mode .card:nth-child(10)::before{content:'10'}
-body.excel-mode .card:nth-child(11)::before{content:'11'}
-body.excel-mode .card:nth-child(12)::before{content:'12'}
-body.excel-mode .card:nth-child(13)::before{content:'13'}
-body.excel-mode .card:nth-child(14)::before{content:'14'}
-body.excel-mode .card:nth-child(15)::before{content:'15'}
-body.excel-mode .card:nth-child(16)::before{content:'16'}
-body.excel-mode .card:nth-child(17)::before{content:'17'}
-body.excel-mode .card:nth-child(18)::before{content:'18'}
-body.excel-mode .card:nth-child(19)::before{content:'19'}
-body.excel-mode .card:nth-child(20)::before{content:'20'}
-
-/* ── 그룹 헤더 ── */
-body.excel-mode h3,body.excel-mode [data-gkey]{
-  background:var(--excel-hilite)!important;
-  color:var(--excel-dark)!important;font-weight:700!important;
-  font-size:11px!important;padding:4px 8px 4px 34px!important;
-  border:none!important;border-bottom:1px solid #b6d7a8!important;
-  border-radius:0!important;margin:0!important;
-  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;
-}
-/* ── day-card ── */
-body.excel-mode .day-card{
-  border:none!important;border-radius:0!important;margin:0!important;
-  border-bottom:1px solid #e0e0e0!important;
-  border-left:3px solid var(--excel-green)!important;
-  background:#fff!important;padding-left:34px!important;
-}
-
-/* ── 입력창 → 셀 스타일 ── */
-body.excel-mode input:not([type=checkbox]):not([type=radio]),
-body.excel-mode select,body.excel-mode textarea{
-  border:1px solid var(--excel-border)!important;
-  border-radius:0!important;height:26px!important;
-  padding:1px 5px!important;font-size:11px!important;
-  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;
-  background:#fff!important;box-shadow:none!important;
-}
-body.excel-mode input:focus,body.excel-mode select:focus,body.excel-mode textarea:focus{
-  border:2px solid var(--excel-green)!important;
-  box-shadow:0 0 0 1px rgba(16,124,65,.3)!important;
-  outline:none!important;background:var(--excel-sel)!important;
-}
-body.excel-mode textarea{height:auto!important;min-height:44px!important;}
-
-/* ── 버튼 ── */
-body.excel-mode .bp{
-  background:var(--excel-green)!important;color:#fff!important;
-  border:1px solid var(--excel-dark)!important;border-radius:2px!important;
-  font-size:11px!important;height:26px!important;padding:0 14px!important;
-  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;
-}
-body.excel-mode .bg{
-  background:var(--excel-ribbon)!important;color:#333!important;
-  border:1px solid var(--excel-border)!important;border-radius:2px!important;
-  font-size:11px!important;height:26px!important;padding:0 10px!important;
-}
-body.excel-mode .chip{
-  border:1px solid var(--excel-border)!important;border-radius:2px!important;
-  background:var(--excel-ribbon)!important;color:#333!important;
-  font-size:11px!important;padding:2px 8px!important;
-}
-body.excel-mode .chip.on{
-  background:var(--excel-hilite)!important;color:var(--excel-dark)!important;
-  border-color:var(--excel-green)!important;font-weight:700!important;
-}
-
-/* ── 정산/통계 ── */
-body.excel-mode .stat-card{
-  background:var(--excel-hilite)!important;
-  border:1px solid #b6d7a8!important;border-radius:0!important;
-}
-body.excel-mode .av{
-  background:var(--excel-hilite)!important;border:1px solid #b6d7a8!important;
-  color:var(--excel-green)!important;border-radius:2px!important;
-}
-
-/* ── 홈/카드 ── */
-body.excel-mode .trip-card{
-  background:#fff!important;border:none!important;
-  border-bottom:1px solid #e0e0e0!important;border-radius:0!important;margin:0!important;
-}
-body.excel-mode .copy-btn{
-  background:var(--excel-hilite)!important;border:1px solid var(--excel-green)!important;
-  color:var(--excel-green)!important;border-radius:2px!important;
-}
-
-/* ── 채팅 ── */
-body.excel-mode .chat-bubble{background:var(--excel-green)!important;}
-body.excel-mode .chat-win{background:#fff!important;border-color:var(--excel-border)!important;border-radius:2px!important;}
-body.excel-mode .chat-hd{background:var(--excel-hilite)!important;border-color:#b6d7a8!important;}
-body.excel-mode .chat-msg.me{background:var(--excel-green)!important;color:#fff!important;border-radius:2px!important;}
-body.excel-mode .chat-msg.other{background:var(--excel-hilite)!important;border-color:#b6d7a8!important;color:#000!important;border-radius:2px!important;}
-body.excel-mode .chat-inp button{background:var(--excel-green)!important;}
-body.excel-mode .chat-inp input{border-radius:0!important;}
-
-/* ── lbl, 텍스트 ── */
-body.excel-mode .lbl{font-size:10px!important;color:#555!important;text-transform:uppercase!important;letter-spacing:.3px!important;}
-body.excel-mode .loading{background:#fff!important;}
-body.excel-mode .page{background:#fff!important;}
-body.excel-mode *{font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;}
-
-/* ── 채팅 ── */
-.chat-bubble{position:fixed;bottom:24px;right:20px;z-index:100;width:48px;height:48px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:transform .15s}
-.chat-bubble:active{transform:scale(.92)}
-.chat-bubble .badge{position:absolute;top:-2px;right:-2px;background:#e53e3e;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;display:none}
-.chat-bubble .dot{position:absolute;top:-3px;right:-3px;width:12px;height:12px;background:#22c55e;border-radius:50%;display:none;border:2px solid #fff}
-@keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
-.chat-bubble .dot.active{display:block;animation:dotPulse 1.2s ease-in-out infinite}
-.chat-win{position:fixed;z-index:200;background:var(--card);border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,.15);display:none;flex-direction:column}
-@media(min-width:600px){
-  .chat-win{bottom:84px;right:20px;width:320px;height:440px;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.18);}
-  .chat-bubble{bottom:20px;right:20px;}
-}
-@media(max-width:599px){
-  .chat-win{
-    bottom:80px;right:12px;left:12px;
-    height:55vh;
-    border-radius:16px;
-    position:fixed;
-    max-height:55vh;
-    transform:translateZ(0);
-  }
-  .chat-bubble{bottom:16px;right:16px;}
-  .chat-msgs{flex:1;overflow-y:auto;min-height:0;overscroll-behavior:contain;}
-  .chat-inp input{font-size:16px!important;}
-  #tab-chat{display:flex;flex-direction:column;height:calc(100dvh - 92px)!important}
-  #tab-chat .chat-inp{position:sticky;bottom:0;background:var(--card);}
-}
-.chat-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-radius:20px 20px 0 0}
-.chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
-.chat-row{display:flex;flex-direction:column;gap:2px}
-.chat-row.me{align-items:flex-end}
-.chat-row.other{align-items:flex-start}
-.chat-row-inner{display:flex;align-items:flex-end;gap:3px}
-.chat-row.me .chat-row-inner{flex-direction:row-reverse}
-.chat-msg{max-width:80%;padding:7px 12px;border-radius:10px;font-size:13px;line-height:1.4;word-break:break-word;width:fit-content}
-.chat-msg.me{background:#7a4e0d;color:#fff;border-radius:18px 18px 4px 18px}
-.chat-msg.other{background:#f0e8d8;border:1px solid var(--bm);color:#2d1a00;border-radius:18px 18px 18px 4px}
-.chat-msg .sender{font-size:10px;font-weight:700;margin-bottom:2px;opacity:.7}
-.chat-time{font-size:10px;color:var(--muted);white-space:nowrap;align-self:flex-end;margin-bottom:2px;padding:0 4px}
-.chat-inp{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
-.chat-inp input{height:38px;border-radius:20px;font-size:13px}
-.chat-inp button{width:38px;height:38px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#412402}
-
-#chat-input-tab:focus{border-color:var(--AL)!important;box-shadow:none!important;}
 /* ── 게스트 배지 테마별 ── */
 /* 기본: 주황 배경에 반투명 흰색 */
 #guest-badge button{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff}
-/* 다크 */
-body.dark-mode #guest-badge button{background:rgba(192,132,252,.2);border:1px solid rgba(192,132,252,.5);color:#c084fc}
-/* 블루 */
-body.blue-mode #guest-badge button{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff}
-/* 엑셀 */
-body.excel-mode #guest-badge button{background:#e2efda;border:1px solid #107c41;color:#107c41}
 
 /* ── 게스트 모드 ── */
 body.guest-mode .bp,
@@ -412,45 +155,7 @@ body.guest-mode [onclick*="startNickEdit"],
 body.guest-mode [onclick*="toggleDF"] { display:none!important; }
 body.guest-mode #add-exp-btn { display:none!important; }
 
-/* ── 다크 테마 추가 ── */
-body.dark-mode .chat-date-divider span{color:#7b8299!important}
-body.dark-mode .chat-date-divider div{background:#2e3340!important}
-body.dark-mode #tab-chat{background:#111318!important}
-body.dark-mode .chat-tab-btn{color:#7b8299!important}
-body.dark-mode .chat-tab-btn.on{color:#c084fc!important}
-body.dark-mode #pwa-hint{background:#2a1f3d!important;border-color:#9333ea!important}
-body.dark-mode #pwa-hint p{color:#c084fc!important}
-body.dark-mode #pwa-hint p+p{color:#7b8299!important}
-body.dark-mode .day-card{background:#1e2128!important;border-color:#2e3340!important}
-body.dark-mode h3{color:#e2e4ec!important}
-body.dark-mode .lbl{color:#7b8299!important}
-body.dark-mode .bt{color:#7b8299!important}
-body.dark-mode .bd{color:#f87171!important}
-body.dark-mode .bg{background:#1e2128!important;border-color:#2e3340!important;color:#7b8299!important}
-body.dark-mode .date-range{background:#1e2128!important;border-color:#2e3340!important}
-body.dark-mode .tabs .tab{color:#7b8299!important}
-body.dark-mode .tabs .tab.on{color:#c084fc!important;border-bottom-color:#c084fc!important}
-body.dark-mode [data-gkey]{background:#2a1f3d!important;border-color:#3a2f4a!important}
-body.dark-mode .err{background:#2a1212!important;color:#f87171!important}
-body.dark-mode select{background:#1e2128!important;color:#e2e4ec!important;border-color:#2e3340!important}
-/* ── 블루 테마 추가 ── */
-body.blue-mode .chat-date-divider span{color:#3b6cb0!important}
-body.blue-mode .chat-date-divider div{background:#bfdbfe!important}
-body.blue-mode #tab-chat{background:#f0f7ff!important}
-body.blue-mode .chat-tab-btn{color:rgba(255,255,255,.75)!important}
-body.blue-mode .chat-tab-btn.on{color:#fff!important}
-body.blue-mode #pwa-hint{background:#e0f2fe!important;border-color:#7dd3fc!important}
-body.blue-mode #pwa-hint p{color:#0284c7!important}
-body.blue-mode #pwa-hint p+p{color:#3b6cb0!important}
-body.blue-mode .day-card{background:#fff!important;border-color:#bfdbfe!important;border-left-color:#0284c7!important}
-body.blue-mode h3{color:#0c1a3d!important}
-body.blue-mode .lbl{color:#3b6cb0!important}
-body.blue-mode .bt{color:#3b6cb0!important}
-body.blue-mode .bg{border-color:#bfdbfe!important;color:#3b6cb0!important}
-body.blue-mode .date-range{background:#fff!important;border-color:#bfdbfe!important}
-body.blue-mode [data-gkey]{background:#e0f2fe!important;border-color:#7dd3fc!important}
-body.blue-mode .err{background:#fee2e2!important;color:#dc2626!important}
-body.blue-mode select{background:#fff!important;color:#0c1a3d!important;border-color:#bfdbfe!important}
+
 </style>
 </head>
 <body>
@@ -467,8 +172,8 @@ body.blue-mode select{background:#fff!important;color:#0c1a3d!important;border-c
       <h1 style="font-size:28px;font-weight:900;letter-spacing:-1px">같이 가자!</h1>
       <p style="color:var(--muted);font-size:14px;margin-top:6px;line-height:1.7">여행 일정과 비용 정산을<br>한 곳에서 관리해요.</p>
     </div>
-    <div style="display:flex;background:#e8ddd0;border-radius:var(--r);padding:4px;gap:4px">
-      <button id="tab-login-btn" onclick="setAuthTab('login')" style="flex:1;padding:10px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;background:var(--A);color:#412402">로그인</button>
+    <div style="display:flex;background:#DBEAFE;border-radius:var(--r);padding:4px;gap:4px">
+      <button id="tab-login-btn" onclick="setAuthTab('login')" style="flex:1;padding:10px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;background:var(--A);color:#fff">로그인</button>
       <button id="tab-signup-btn" onclick="setAuthTab('signup')" style="flex:1;padding:10px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;background:transparent;color:var(--muted)">회원가입</button>
     </div>
     <div id="err-auth" class="err"></div>
@@ -781,7 +486,7 @@ function startGuestSync(code) {
 }
 
 // 저장된 테마 복원
-(function(){ var t=localStorage.getItem('app-theme'); if(t) applyTheme(t); })();
+(function(){ var t=localStorage.getItem('app-theme'); if(t && t!=='default') applyTheme(t); })();
 
 auth.onAuthStateChanged(function(user) {
   if(user){ S.user=user; document.getElementById('home-email').textContent=user.email; go('home'); }
@@ -1069,20 +774,18 @@ function renderSettings(){
     var mUid=typeof m==='object'?m.uid:null;
     var email=typeof m==='object'?m.email:'';
     var isHost=creatorUid&&mUid&&mUid===creatorUid;
-    var used=(S.trip.nickChanges&&S.trip.nickChanges[S.user&&S.user.uid])||0;
-    var canEdit=nick===S.me&&used<3;
     h+='<div class="card" style="display:flex;align-items:center;gap:12px">'
       +'<div class="av">'+nick[0].toUpperCase()+'</div>'
-      +'<div style="flex:1;min-width:0" id="nick-edit-wrap-'+(S.user&&nick===S.me?S.user.uid:'_'+(nick))+'">'+
-        // 보기 상태
-        '<div id="nick-view-'+(S.user&&nick===S.me?S.user.uid:'_'+nick)+'" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'
-        +'<span style="font-weight:700;font-size:15px">'+nick+'</span>'
-        +(nick===S.me?'<span style="font-size:12px;color:var(--A);font-weight:700">나</span>':'')
-        +(isHost?'<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#1DA1F2;border-radius:50%;flex-shrink:0"><i class="ti ti-check" style="font-size:10px;color:#fff"></i></span>':'')
-        +(canEdit?'<button onclick="startNickEdit()" class="bt" style="color:var(--muted);padding:2px 4px"><i class="ti ti-pencil" style="font-size:14px"></i></button>':'')
-        +'</div>'
-        +(m.isGuest?'<p style="font-size:11px;color:var(--muted);margin-top:2px">참여 대기중</p>':(email?'<p style="font-size:11px;color:var(--muted);margin-top:2px">'+email+'</p>':''))
+      +'<div style="flex:1;min-width:0">'
+      +'<p style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:6px">'+nick
+      +(nick===S.me?' <span style="font-size:12px;color:var(--A);font-weight:700">나</span>':'')
+      +(isHost?' <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#1DA1F2;border-radius:50%;flex-shrink:0"><i class="ti ti-check" style="font-size:10px;color:#fff"></i></span>':'')
+      +'</p>'
+      +(m.isGuest?'<p style="font-size:11px;color:var(--muted);margin-top:2px">참여 대기중</p>':(email?'<p style="font-size:11px;color:var(--muted);margin-top:2px">'+email+'</p>':''))
       +'</div>'
+      +(nick===S.me
+        ?(function(){var used=(S.trip.nickChanges&&S.trip.nickChanges[S.user&&S.user.uid])||0;var left=3-used;return '<button onclick="startNickEdit()" class="bt" style="color:var(--muted);padding:4px;flex-shrink:0'+(left<=0?';opacity:.3':'')+'"><i class="ti ti-pencil" style="font-size:15px"></i></button>';})()
+        :'')
       +'</div>';
   });
 
@@ -1144,7 +847,7 @@ function renderSettings(){
 
   // 테마
   var curTheme=localStorage.getItem('app-theme')||'default';
-  var themes=[{id:'default',label:'기본',icon:'ti-sun'},{id:'dark',label:'다크',icon:'ti-moon'},{id:'blue',label:'블루',icon:'ti-ripple'},{id:'excel',label:'엑셀',icon:'ti-table'}];
+  var themes=[{id:'default',label:'⚡ Electric Blue',icon:'ti-bolt'},{id:'lemon',label:'🍋 Lemon Drop',icon:'ti-sun'},{id:'matcha',label:'🌿 Matcha Neon',icon:'ti-leaf'}];
   h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">테마</h3>';
   h+='<div class="card"><div style="display:flex;gap:8px">';
   themes.forEach(function(t){
@@ -1208,18 +911,13 @@ function setTheme(theme){
 }
 
 function applyTheme(theme){
-  document.body.classList.remove('dark-mode','blue-mode','excel-mode');
-  if(theme==='dark') document.body.classList.add('dark-mode');
-  else if(theme==='blue') document.body.classList.add('blue-mode');
-  else if(theme==='excel') document.body.classList.add('excel-mode');
+  document.body.classList.remove('lemon-mode','matcha-mode');
+  if(theme==='lemon') document.body.classList.add('lemon-mode');
+  else if(theme==='matcha') document.body.classList.add('matcha-mode');
 }
 
-function toggleExcelMode(){
-  document.body.classList.toggle('excel-mode');
-  // 설정 탭 다시 렌더 (ON/OFF 버튼 상태 반영)
-  var activeTab = (document.querySelector('.tab.on')||{}).dataset;
-  if(activeTab && activeTab.tab === 'settings') renderSettings();
-}
+
+
 
 function toggleCode(){var p=document.getElementById('code-panel');p.style.display=p.style.display==='none'?'block':'none';}
 
@@ -1982,20 +1680,19 @@ function onExpDragEnd(e) {
 
 function startNickEdit() {
   var used = (S.trip.nickChanges && S.trip.nickChanges[S.user.uid]) || 0;
-  if (used >= 3) return;
-  var viewEl = document.getElementById('nick-view-' + S.user.uid);
-  if (!viewEl) return;
-  // 보기 영역을 인라인 입력창으로 교체
-  viewEl.innerHTML =
-    '<div style="display:flex;gap:6px;align-items:center;width:100%">'
-    + '<input id="new-nick-input" value="' + S.me + '" maxlength="10" autocomplete="off" '
-    + 'style="flex:1;height:34px;font-size:14px;font-weight:700;padding:0 10px;border:1.5px solid var(--A);border-radius:8px;background:#fff;color:var(--text);outline:none;" '
-    + 'onkeydown="if(event.key===\'Enter\')saveNick();if(event.key===\'Escape\')renderSettings();">'
-    + '<button onclick="saveNick()" style="background:var(--A);color:#fff;border:none;border-radius:8px;padding:0 12px;height:34px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">저장</button>'
-    + '<button onclick="renderSettings()" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;height:34px;font-size:13px;cursor:pointer;font-family:inherit;color:var(--muted);flex-shrink:0">취소</button>'
+  var left = 3 - used;
+  if (left <= 0) { showToast('닉네임 변경 횟수를 모두 사용했어요'); return; }
+  // 첫 번째 클릭이면 안내 팝업
+  if (!confirm('닉네임은 최대 3회까지 변경할 수 있어요.\n현재 '+(3-used)+'회 남았어요.\n\n변경 후 채팅/지출 기록도 모두 바뀌어요.\n\n지금 변경하시겠어요?')) return;
+  var wrap = document.getElementById('nick-edit-wrap-'+(S.user&&S.user.uid));
+  if (!wrap) return;
+  wrap.innerHTML =
+    '<div style="display:flex;gap:8px;align-items:center;margin-top:4px">'
+    + '<input id="new-nick-input" value="'+S.me+'" maxlength="10" autocomplete="off" style="flex:1;height:36px;font-size:14px;">'
+    + '<button onclick="saveNick()" style="background:var(--A);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">저장</button>'
+    + '<button onclick="renderSettings()" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;font-family:inherit;color:var(--muted)">취소</button>'
     + '</div>';
-  var inp = document.getElementById('new-nick-input');
-  if (inp) { inp.focus(); inp.select(); }
+  setTimeout(function(){ var el=document.getElementById('new-nick-input'); if(el) el.focus(); }, 50);
 }
 
 async function saveNick() {
@@ -2003,39 +1700,55 @@ async function saveNick() {
   if (!inp) return;
   var newNick = inp.value.trim();
   if (!newNick) return showToast('닉네임을 입력해주세요');
-  if (newNick === S.me) { renderSettings(); return; }
+  if (newNick === S.me) return showToast('현재 닉네임과 동일해요');
   var nicks = getNicks();
   if (nicks.indexOf(newNick) >= 0) return showToast('이미 사용 중인 닉네임이에요');
   var used = (S.trip.nickChanges && S.trip.nickChanges[S.user.uid]) || 0;
   if (used >= 3) return showToast('변경 횟수를 모두 사용했어요');
-
-  var saveBtn = inp.parentElement.querySelector('button');
-  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '저장 중...'; }
-
   var oldNick = S.me;
+  // 멤버 닉네임 변경
   S.trip.members = S.trip.members.map(function(m){
     if (typeof m === 'object' && m.uid === S.user.uid) m.nickname = newNick;
     return m;
   });
+  // 지출 기록 닉네임 변경
   (S.trip.expenses||[]).forEach(function(e){
     if (e.paidBy === oldNick) e.paidBy = newNick;
     if (e.split) e.split = e.split.map(function(n){ return n===oldNick?newNick:n; });
   });
+  // 변경 횟수 기록
   if (!S.trip.nickChanges) S.trip.nickChanges = {};
   S.trip.nickChanges[S.user.uid] = used + 1;
-
+  // 채팅 닉네임 변경
   try {
     var token = await getToken();
-    await fetch(FB+'/user-trips_'+S.user.uid+'/'+S.code+'/nickname.json?auth='+token, {
-      method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(newNick)
-    });
+    var r = await fetch(FB+'/chat_'+S.code+'.json?auth='+token);
+    if (r.ok) {
+      var chats = await r.json();
+      if (chats) {
+        var updates = {};
+        Object.keys(chats).forEach(function(k){
+          if (chats[k].nickname === oldNick) {
+            updates[k+'/nickname'] = newNick;
+          }
+        });
+        if (Object.keys(updates).length > 0) {
+          await fetch(FB+'/chat_'+S.code+'.json?auth='+token, {
+            method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(updates)
+          });
+        }
+      }
+    }
   } catch(e) {}
-
+  // user-trips 닉네임 업데이트
+  var token2 = await getToken();
+  await fetch(FB+'/user-trips_'+S.user.uid+'/'+S.code+'/nickname.json?auth='+token2, {
+    method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(newNick)
+  });
   S.me = newNick;
   await dbSet('trip:'+S.code, S.trip);
-  document.getElementById('trip-me').innerHTML = '<i class="ti ti-user" style="font-size:11px;margin-right:3px"></i>' + S.me;
-  renderSettings();
-  showToast('닉네임이 변경됐어요! ✅');
+  renderTrip();
+  showToast('닉네임이 변경됐어요!');
 }
 
 async function deleteTrip(){
