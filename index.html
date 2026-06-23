@@ -14,7 +14,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--bg:#F7F3EE;--card:#fff;--border:#E5D9CC;--bm:#D4C4B2;--text:#1A0F05;--muted:#8A6B52;--A:#BA7517;--AX:#FAF0D7;--AL:#FAC775;--ok:#1A7A5A;--no:#CC3333;--r:12px;--rl:16px}
@@ -42,9 +41,9 @@ input[type=password]{letter-spacing:.1em}
 .chip{border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer;font-weight:600;background:transparent;color:var(--muted);border:1.5px solid var(--border);display:inline-flex;align-items:center;gap:4px;transition:all .15s;font-family:inherit}
 .chip:active{transform:scale(.96)}
 .chip.on{background:var(--AX);color:var(--A);border-color:var(--A)}
-.tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;height:50px}
-.tab{flex:1;border:none;background:none;padding:13px 4px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;font-family:inherit;transition:color .15s}
-.tab.on{color:var(--A);border-bottom-color:var(--A);background:var(--AX)}
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;height:46px;transition:transform .25s ease}
+.tab{flex:1;border:none;background:none;padding:13px 4px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);border-bottom:2.5px solid transparent;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;font-family:inherit}
+.tab.on{color:var(--A);border-bottom-color:var(--A)}
 .page{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.25rem;background:var(--bg)}
 .page.top{justify-content:flex-start;padding-top:3rem}
 .fw{width:100%;max-width:420px}
@@ -58,11 +57,9 @@ input[type=password]{letter-spacing:.1em}
 .big-code{font-size:22px;font-weight:900;letter-spacing:5px;color:var(--A);margin:4px 0 2px;word-break:break-all}
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
 .stat-card{background:#f5f0ea;border-radius:var(--r);padding:12px 8px;text-align:center}
-.trip-hd{background:#fff;border-bottom:1px solid var(--border);padding:12px 18px;position:sticky;top:0;z-index:30}
-#add-exp-fab:active{transform:scale(.92)}
+.trip-hd{background:#fff;border-bottom:1px solid var(--border);padding:14px 18px;position:sticky;top:0;z-index:30;transition:transform .25s ease}
 .content{padding:14px 14px 2rem;max-width:600px;margin:0 auto}
 .act-row{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--border);align-items:flex-start}
-.day-card{border-left:4px solid var(--A)!important;border-radius:var(--rl)!important;overflow:hidden}
 .date-range{background:#fff;border:1.5px solid var(--border);border-radius:var(--rl);overflow:hidden}
 .date-range-row{display:grid;grid-template-columns:1fr 1px 1fr}
 .date-range input{border:none;border-radius:0;box-shadow:none;padding:13px 12px;background:transparent;height:auto}
@@ -119,6 +116,14 @@ body.dark-mode .stat-card{background:#2a2a3a!important;color:#e2e4ec!important}
 body.dark-mode .av{background:#2a1f3d!important;border-color:#9333ea!important;color:#c084fc!important}
 body.dark-mode .copy-btn{background:rgba(192,132,252,.12)!important;border-color:#9333ea!important;color:#c084fc!important}
 body.dark-mode .day-card{border-left-color:#9333ea!important}
+body.dark-mode .chat-msg.me{background:#6d28d9!important;color:#fff!important}
+body.dark-mode .chat-msg.other{background:#1e2128!important;border-color:#2e3340!important;color:#e2e4ec!important}
+body.dark-mode .chat-inp button{background:#9333ea!important;color:#fff!important}
+body.dark-mode .chat-bubble{background:#9333ea!important}
+body.dark-mode .chat-win{background:#1e2128!important;border-color:#2e3340!important;border-radius:20px!important}
+body.dark-mode .chat-hd{background:#1e2128!important;border-color:#2e3340!important}
+body.dark-mode .chat-inp{background:#1e2128!important;border-color:#2e3340!important}
+body.dark-mode .chat-inp input{background:#111318!important;color:#e2e4ec!important;border-color:#2e3340!important}
 /* ── 블루 테마 ── */
 body.blue-mode{--bg:#f0f7ff;--card:#fff;--border:#bfdbfe;--bm:#93c5fd;--text:#0c1a3d;--muted:#3b6cb0;--A:#0284c7;--AX:#e0f2fe;--AL:#7dd3fc;--ok:#059669;--no:#dc2626;--r:12px;--rl:16px}
 body.blue-mode{background:#f0f7ff!important;color:#0c1a3d!important}
@@ -141,11 +146,246 @@ body.blue-mode .loading{background:#f0f7ff!important}
 body.blue-mode .page{background:#f0f7ff!important}
 body.blue-mode .content{background:#f0f7ff!important}
 body.blue-mode .day-card{border-left-color:#0284c7!important}
+body.blue-mode .chat-msg.me{background:#0284c7!important;color:#fff!important}
+body.blue-mode .chat-msg.other{background:#e0f2fe!important;border-color:#7dd3fc!important;color:#0c1a3d!important}
+body.blue-mode .chat-inp button{background:#0284c7!important;color:#fff!important}
+body.blue-mode .chat-bubble{background:#0284c7!important}
+body.blue-mode .chat-hd{background:#0284c7!important}
+body.blue-mode .chat-hd span{color:#fff!important}
+body.blue-mode .chat-hd span i{color:#fff!important}
+body.blue-mode .chat-win{background:#f0f7ff!important;border-color:#bfdbfe!important;border-radius:20px!important}
 
+/* ── 엑셀 테마 ── */
+body.excel-mode{
+  --excel-green:#107c41;--excel-dark:#0a5c2e;
+  --excel-ribbon:#f3f3f3;--excel-border:#d0d0d0;
+  --excel-header:#e9e9e9;--excel-hilite:#e2efda;--excel-sel:#cce8ff;
+  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;
+  background:#fff!important;color:#000!important;
+}
+/* ── 타이틀바: 엑셀 윈도우 제목줄 ── */
+body.excel-mode .trip-hd{
+  background:#fff!important;border-bottom:none!important;
+  padding:4px 12px 0!important;
+}
+body.excel-mode #trip-name{font-size:13px!important;color:#000!important;font-weight:400!important;}
+body.excel-mode #trip-name::after{content:'.xlsx';color:#888;font-size:11px}
+body.excel-mode #trip-dates,body.excel-mode #trip-me{font-size:11px!important;color:#666!important;}
 
+/* ── 리본 탭바 ── */
+body.excel-mode .tabs{
+  background:var(--excel-green)!important;
+  border-bottom:none!important;height:auto!important;padding:0 4px!important;
+  gap:0!important;
+}
+body.excel-mode .tab{
+  color:rgba(255,255,255,.9)!important;font-size:11px!important;
+  padding:6px 14px!important;border-radius:3px 3px 0 0!important;
+  border:none!important;letter-spacing:0!important;height:30px!important;
+  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;
+}
+body.excel-mode .tab.on{
+  background:#fff!important;color:var(--excel-green)!important;
+  font-weight:700!important;
+}
 
+/* ── fx 수식바 ── */
+body.excel-mode .content{
+  background:#fff!important;padding:0!important;
+}
+body.excel-mode .content::before{
+  content:'A1     fx   여행 일정 데이터';
+  display:block;height:22px;line-height:22px;
+  padding:0 8px;font-size:11px;color:#333;
+  background:#fff;border-bottom:1px solid var(--excel-border);
+  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif;
+  letter-spacing:.2px;
+}
 
+/* ── 열 헤더 바 ── */
+body.excel-mode .content::after{
+  content:'#    A 제목/내용          B 날짜/시간          C 금액          D 비고';
+  display:block;height:20px;line-height:20px;
+  padding:0 8px;font-size:10px;color:#333;
+  background:var(--excel-header);
+  border-bottom:1px solid var(--excel-border);
+  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif;
+  white-space:nowrap;overflow:hidden;
+}
 
+/* ── 카드 → 행 ── */
+body.excel-mode .card{
+  background:#fff!important;border:none!important;border-radius:0!important;
+  border-bottom:1px solid #e8e8e8!important;
+  margin:0!important;padding:5px 8px 5px 34px!important;
+  box-shadow:none!important;position:relative!important;
+  transition:background .1s!important;
+}
+body.excel-mode .card:hover{background:var(--excel-sel)!important;}
+
+/* 행 번호 */
+body.excel-mode .card::before{
+  position:absolute;left:0;top:0;bottom:0;width:30px;
+  background:var(--excel-header);border-right:1px solid var(--excel-border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:#444;
+  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif;
+}
+body.excel-mode .card:nth-child(1)::before{content:'1'}
+body.excel-mode .card:nth-child(2)::before{content:'2'}
+body.excel-mode .card:nth-child(3)::before{content:'3'}
+body.excel-mode .card:nth-child(4)::before{content:'4'}
+body.excel-mode .card:nth-child(5)::before{content:'5'}
+body.excel-mode .card:nth-child(6)::before{content:'6'}
+body.excel-mode .card:nth-child(7)::before{content:'7'}
+body.excel-mode .card:nth-child(8)::before{content:'8'}
+body.excel-mode .card:nth-child(9)::before{content:'9'}
+body.excel-mode .card:nth-child(10)::before{content:'10'}
+body.excel-mode .card:nth-child(11)::before{content:'11'}
+body.excel-mode .card:nth-child(12)::before{content:'12'}
+body.excel-mode .card:nth-child(13)::before{content:'13'}
+body.excel-mode .card:nth-child(14)::before{content:'14'}
+body.excel-mode .card:nth-child(15)::before{content:'15'}
+body.excel-mode .card:nth-child(16)::before{content:'16'}
+body.excel-mode .card:nth-child(17)::before{content:'17'}
+body.excel-mode .card:nth-child(18)::before{content:'18'}
+body.excel-mode .card:nth-child(19)::before{content:'19'}
+body.excel-mode .card:nth-child(20)::before{content:'20'}
+
+/* ── 그룹 헤더 ── */
+body.excel-mode h3,body.excel-mode [data-gkey]{
+  background:var(--excel-hilite)!important;
+  color:var(--excel-dark)!important;font-weight:700!important;
+  font-size:11px!important;padding:4px 8px 4px 34px!important;
+  border:none!important;border-bottom:1px solid #b6d7a8!important;
+  border-radius:0!important;margin:0!important;
+  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;
+}
+/* ── day-card ── */
+body.excel-mode .day-card{
+  border:none!important;border-radius:0!important;margin:0!important;
+  border-bottom:1px solid #e0e0e0!important;
+  border-left:3px solid var(--excel-green)!important;
+  background:#fff!important;padding-left:34px!important;
+}
+
+/* ── 입력창 → 셀 스타일 ── */
+body.excel-mode input:not([type=checkbox]):not([type=radio]),
+body.excel-mode select,body.excel-mode textarea{
+  border:1px solid var(--excel-border)!important;
+  border-radius:0!important;height:26px!important;
+  padding:1px 5px!important;font-size:11px!important;
+  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;
+  background:#fff!important;box-shadow:none!important;
+}
+body.excel-mode input:focus,body.excel-mode select:focus,body.excel-mode textarea:focus{
+  border:2px solid var(--excel-green)!important;
+  box-shadow:0 0 0 1px rgba(16,124,65,.3)!important;
+  outline:none!important;background:var(--excel-sel)!important;
+}
+body.excel-mode textarea{height:auto!important;min-height:44px!important;}
+
+/* ── 버튼 ── */
+body.excel-mode .bp{
+  background:var(--excel-green)!important;color:#fff!important;
+  border:1px solid var(--excel-dark)!important;border-radius:2px!important;
+  font-size:11px!important;height:26px!important;padding:0 14px!important;
+  font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;
+}
+body.excel-mode .bg{
+  background:var(--excel-ribbon)!important;color:#333!important;
+  border:1px solid var(--excel-border)!important;border-radius:2px!important;
+  font-size:11px!important;height:26px!important;padding:0 10px!important;
+}
+body.excel-mode .chip{
+  border:1px solid var(--excel-border)!important;border-radius:2px!important;
+  background:var(--excel-ribbon)!important;color:#333!important;
+  font-size:11px!important;padding:2px 8px!important;
+}
+body.excel-mode .chip.on{
+  background:var(--excel-hilite)!important;color:var(--excel-dark)!important;
+  border-color:var(--excel-green)!important;font-weight:700!important;
+}
+
+/* ── 정산/통계 ── */
+body.excel-mode .stat-card{
+  background:var(--excel-hilite)!important;
+  border:1px solid #b6d7a8!important;border-radius:0!important;
+}
+body.excel-mode .av{
+  background:var(--excel-hilite)!important;border:1px solid #b6d7a8!important;
+  color:var(--excel-green)!important;border-radius:2px!important;
+}
+
+/* ── 홈/카드 ── */
+body.excel-mode .trip-card{
+  background:#fff!important;border:none!important;
+  border-bottom:1px solid #e0e0e0!important;border-radius:0!important;margin:0!important;
+}
+body.excel-mode .copy-btn{
+  background:var(--excel-hilite)!important;border:1px solid var(--excel-green)!important;
+  color:var(--excel-green)!important;border-radius:2px!important;
+}
+
+/* ── 채팅 ── */
+body.excel-mode .chat-bubble{background:var(--excel-green)!important;}
+body.excel-mode .chat-win{background:#fff!important;border-color:var(--excel-border)!important;border-radius:2px!important;}
+body.excel-mode .chat-hd{background:var(--excel-hilite)!important;border-color:#b6d7a8!important;}
+body.excel-mode .chat-msg.me{background:var(--excel-green)!important;color:#fff!important;border-radius:2px!important;}
+body.excel-mode .chat-msg.other{background:var(--excel-hilite)!important;border-color:#b6d7a8!important;color:#000!important;border-radius:2px!important;}
+body.excel-mode .chat-inp button{background:var(--excel-green)!important;}
+body.excel-mode .chat-inp input{border-radius:0!important;}
+
+/* ── lbl, 텍스트 ── */
+body.excel-mode .lbl{font-size:10px!important;color:#555!important;text-transform:uppercase!important;letter-spacing:.3px!important;}
+body.excel-mode .loading{background:#fff!important;}
+body.excel-mode .page{background:#fff!important;}
+body.excel-mode *{font-family:'맑은 고딕','Malgun Gothic',Arial,sans-serif!important;}
+
+/* ── 채팅 ── */
+.chat-bubble{position:fixed;bottom:24px;right:20px;z-index:100;width:48px;height:48px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:transform .15s}
+.chat-bubble:active{transform:scale(.92)}
+.chat-bubble .badge{position:absolute;top:-2px;right:-2px;background:#e53e3e;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;display:none}
+.chat-bubble .dot{position:absolute;top:-3px;right:-3px;width:12px;height:12px;background:#22c55e;border-radius:50%;display:none;border:2px solid #fff}
+@keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.chat-bubble .dot.active{display:block;animation:dotPulse 1.2s ease-in-out infinite}
+.chat-win{position:fixed;z-index:200;background:var(--card);border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,.15);display:none;flex-direction:column}
+@media(min-width:600px){
+  .chat-win{bottom:84px;right:20px;width:320px;height:440px;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.18);}
+  .chat-bubble{bottom:20px;right:20px;}
+}
+@media(max-width:599px){
+  .chat-win{
+    bottom:80px;right:12px;left:12px;
+    height:55vh;
+    border-radius:16px;
+    position:fixed;
+    max-height:55vh;
+    transform:translateZ(0);
+  }
+  .chat-bubble{bottom:16px;right:16px;}
+  .chat-msgs{flex:1;overflow-y:auto;min-height:0;overscroll-behavior:contain;}
+  .chat-inp input{font-size:16px!important;}
+  #tab-chat{display:flex;flex-direction:column;height:calc(100dvh - 92px)!important}
+  #tab-chat .chat-inp{position:sticky;bottom:0;background:var(--card);}
+}
+.chat-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-radius:20px 20px 0 0}
+.chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.chat-row{display:flex;flex-direction:column;gap:2px}
+.chat-row.me{align-items:flex-end}
+.chat-row.other{align-items:flex-start}
+.chat-row-inner{display:flex;align-items:flex-end;gap:3px}
+.chat-row.me .chat-row-inner{flex-direction:row-reverse}
+.chat-msg{max-width:80%;padding:7px 12px;border-radius:10px;font-size:13px;line-height:1.4;word-break:break-word;width:fit-content}
+.chat-msg.me{background:#7a4e0d;color:#fff;border-radius:18px 18px 4px 18px}
+.chat-msg.other{background:#f0e8d8;border:1px solid var(--bm);color:#2d1a00;border-radius:18px 18px 18px 4px}
+.chat-msg .sender{font-size:10px;font-weight:700;margin-bottom:2px;opacity:.7}
+.chat-time{font-size:10px;color:var(--muted);white-space:nowrap;align-self:flex-end;margin-bottom:2px;padding:0 4px}
+.chat-inp{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+.chat-inp input{height:38px;border-radius:20px;font-size:13px}
+.chat-inp button{width:38px;height:38px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#412402}
+
+#chat-input-tab:focus{border-color:var(--AL)!important;box-shadow:none!important;}
 /* ── 게스트 배지 테마별 ── */
 /* 기본: 주황 배경에 반투명 흰색 */
 #guest-badge button{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff}
@@ -154,6 +394,7 @@ body.dark-mode #guest-badge button{background:rgba(192,132,252,.2);border:1px so
 /* 블루 */
 body.blue-mode #guest-badge button{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);color:#fff}
 /* 엑셀 */
+body.excel-mode #guest-badge button{background:#e2efda;border:1px solid #107c41;color:#107c41}
 
 /* ── 게스트 모드 ── */
 body.guest-mode .bp,
@@ -172,6 +413,11 @@ body.guest-mode [onclick*="toggleDF"] { display:none!important; }
 body.guest-mode #add-exp-btn { display:none!important; }
 
 /* ── 다크 테마 추가 ── */
+body.dark-mode .chat-date-divider span{color:#7b8299!important}
+body.dark-mode .chat-date-divider div{background:#2e3340!important}
+body.dark-mode #tab-chat{background:#111318!important}
+body.dark-mode .chat-tab-btn{color:#7b8299!important}
+body.dark-mode .chat-tab-btn.on{color:#c084fc!important}
 body.dark-mode #pwa-hint{background:#2a1f3d!important;border-color:#9333ea!important}
 body.dark-mode #pwa-hint p{color:#c084fc!important}
 body.dark-mode #pwa-hint p+p{color:#7b8299!important}
@@ -188,6 +434,11 @@ body.dark-mode [data-gkey]{background:#2a1f3d!important;border-color:#3a2f4a!imp
 body.dark-mode .err{background:#2a1212!important;color:#f87171!important}
 body.dark-mode select{background:#1e2128!important;color:#e2e4ec!important;border-color:#2e3340!important}
 /* ── 블루 테마 추가 ── */
+body.blue-mode .chat-date-divider span{color:#3b6cb0!important}
+body.blue-mode .chat-date-divider div{background:#bfdbfe!important}
+body.blue-mode #tab-chat{background:#f0f7ff!important}
+body.blue-mode .chat-tab-btn{color:rgba(255,255,255,.75)!important}
+body.blue-mode .chat-tab-btn.on{color:#fff!important}
 body.blue-mode #pwa-hint{background:#e0f2fe!important;border-color:#7dd3fc!important}
 body.blue-mode #pwa-hint p{color:#0284c7!important}
 body.blue-mode #pwa-hint p+p{color:#3b6cb0!important}
@@ -337,14 +588,14 @@ body.blue-mode select{background:#fff!important;color:#0c1a3d!important;border-c
   <div class="tabs">
     <button class="tab on" data-tab="schedule" onclick="switchTab('schedule')"><i class="ti ti-calendar" style="font-size:14px"></i>일정</button>
     <button class="tab" data-tab="expenses" onclick="switchTab('expenses')"><i class="ti ti-credit-card" style="font-size:14px"></i>비용</button>
-    
+    <button class="tab chat-tab-btn" data-tab="chat" onclick="switchTab('chat')" id="chat-tab-btn" style="display:none;position:relative"><i class="ti ti-message-circle" style="font-size:14px"></i>채팅<span id="chat-tab-dot" style="display:none;position:absolute;top:5px;right:6px;width:8px;height:8px;background:#22c55e;border-radius:50%;border:2px solid #fff;animation:dotPulse 1.2s ease-in-out infinite"></span></button>
     <button class="tab" data-tab="settings" onclick="switchTab('settings')"><i class="ti ti-settings" style="font-size:14px"></i>설정</button>
   </div>
   <div class="content">
     <div id="tab-schedule" style="min-height:60vh"></div>
     <div id="tab-expenses" style="display:none;min-height:60vh"></div>
     <div id="tab-settings" style="display:none;min-height:60vh"></div>
-    
+    <div id="tab-chat" style="display:none;min-height:60vh;display:flex;flex-direction:column;height:calc(100dvh - 100px)"></div>
   </div>
 </div>
 
@@ -477,8 +728,8 @@ function go(screen) {
   document.querySelectorAll('[id^="s-"]').forEach(function(e){e.style.display='none';});
   var el=document.getElementById('s-'+screen); if(!el) return;
   el.style.display=screen==='trip'?'block':'flex';
-  if(screen==='trip') { window.scrollTo(0,0); updateExpFab('schedule'); }
-  if(screen==='home') { loadMyTrips(); updateExpFab('none'); }
+  if(screen==='trip') window.scrollTo(0,0);
+  if(screen==='home') { loadMyTrips(); stopChatSync(); showChatBubble(false); var cw=document.getElementById('chat-win'); if(cw) cw.style.display='none'; chatOpen=false; }
   if(screen==='nick'||screen==='create') setNickPlaceholders();
 }
 
@@ -509,6 +760,7 @@ async function doGuestView() {
     renderTrip();
     go('trip');
     startGuestSync(code);
+    showChatBubble(false);
     showToast('읽기 전용으로 보고 있어요 ✍️ 편집하려면 로그인하세요');
   } catch(e) {
     showToast('불러오기 실패: ' + (e.message||e));
@@ -640,7 +892,7 @@ async function enterTrip(code) {
         await dbSet('trip:'+code, t);
       }
       S.trip=normalizeTripData(t); S.code=code; S.me=myInfo.nickname;
-      switchTab('schedule'); renderTrip(); go('trip'); startSync(code); setTimeout(initHeaderPos, 100);
+      switchTab('schedule'); renderTrip(); go('trip'); startSync(code); startChatSync(code); showChatBubble(true); setTimeout(initHeaderPos, 100);
     } else {
       S.pendingCode=code;
       document.getElementById('disp-code').textContent=code;
@@ -712,7 +964,7 @@ async function doCreate() {
   if(btn){btn.disabled=false;btn.innerHTML='여행 만들기 <i class="ti ti-arrow-right"></i>';}
   showErr('err-create','');
   S.trip=normalizeTripData(t); S.code=c; S.me=nick;
-  switchTab('schedule'); renderTrip(); go('trip'); startSync(c); setTimeout(initHeaderPos, 100);
+  switchTab('schedule'); renderTrip(); go('trip'); startSync(c); startChatSync(c); showChatBubble(true); setTimeout(initHeaderPos, 100);
 }
 
 async function doJoin() {
@@ -762,7 +1014,7 @@ async function doSetNick() {
     var patch={}; patch[S.pendingCode]={nickname:nick,joinedAt:Date.now()};
     await dbPatch('user-trips:'+S.user.uid,patch);
     S.trip=normalizeTripData(t); S.code=S.pendingCode; S.me=nick;
-    switchTab('schedule'); renderTrip(); go('trip'); startSync(S.code); setTimeout(initHeaderPos, 100);
+    switchTab('schedule'); renderTrip(); go('trip'); startSync(S.code); startChatSync(S.code); showChatBubble(true); setTimeout(initHeaderPos, 100);
   } catch(e) { showErr('err-nick',e.message||'오류가 발생했어요'); }
   finally { if(btn){btn.disabled=false;btn.innerHTML='입장하기 <i class="ti ti-arrow-right"></i>';} }
 }
@@ -817,18 +1069,20 @@ function renderSettings(){
     var mUid=typeof m==='object'?m.uid:null;
     var email=typeof m==='object'?m.email:'';
     var isHost=creatorUid&&mUid&&mUid===creatorUid;
+    var used=(S.trip.nickChanges&&S.trip.nickChanges[S.user&&S.user.uid])||0;
+    var canEdit=nick===S.me&&used<3;
     h+='<div class="card" style="display:flex;align-items:center;gap:12px">'
       +'<div class="av">'+nick[0].toUpperCase()+'</div>'
-      +'<div style="flex:1;min-width:0">'
-      +'<p style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:6px">'+nick
-      +(nick===S.me?' <span style="font-size:12px;color:var(--A);font-weight:700">나</span>':'')
-      +(isHost?' <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#1DA1F2;border-radius:50%;flex-shrink:0"><i class="ti ti-check" style="font-size:10px;color:#fff"></i></span>':'')
-      +'</p>'
-      +(m.isGuest?'<p style="font-size:11px;color:var(--muted);margin-top:2px">참여 대기중</p>':(email?'<p style="font-size:11px;color:var(--muted);margin-top:2px">'+email+'</p>':''))
+      +'<div style="flex:1;min-width:0" id="nick-edit-wrap-'+(S.user&&nick===S.me?S.user.uid:'_'+(nick))+'">'+
+        // 보기 상태
+        '<div id="nick-view-'+(S.user&&nick===S.me?S.user.uid:'_'+nick)+'" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'
+        +'<span style="font-weight:700;font-size:15px">'+nick+'</span>'
+        +(nick===S.me?'<span style="font-size:12px;color:var(--A);font-weight:700">나</span>':'')
+        +(isHost?'<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#1DA1F2;border-radius:50%;flex-shrink:0"><i class="ti ti-check" style="font-size:10px;color:#fff"></i></span>':'')
+        +(canEdit?'<button onclick="startNickEdit()" class="bt" style="color:var(--muted);padding:2px 4px"><i class="ti ti-pencil" style="font-size:14px"></i></button>':'')
+        +'</div>'
+        +(m.isGuest?'<p style="font-size:11px;color:var(--muted);margin-top:2px">참여 대기중</p>':(email?'<p style="font-size:11px;color:var(--muted);margin-top:2px">'+email+'</p>':''))
       +'</div>'
-      +(nick===S.me
-        ?(function(){var used=(S.trip.nickChanges&&S.trip.nickChanges[S.user&&S.user.uid])||0;var left=3-used;return '<div id="nick-edit-wrap-'+(S.user&&S.user.uid)+'" style="margin-top:4px"><button onclick="startNickEdit()" class="bt" style="color:var(--muted);padding:4px;flex-shrink:0'+(left<=0?';opacity:.3':'')+'"><i class="ti ti-pencil" style="font-size:15px"></i> 닉네임 변경 ('+(left)+'회 가능)</button></div>';})()
-        :'')
       +'</div>';
   });
 
@@ -890,7 +1144,7 @@ function renderSettings(){
 
   // 테마
   var curTheme=localStorage.getItem('app-theme')||'default';
-  var themes=[{id:'default',label:'기본',icon:'ti-sun'},{id:'dark',label:'다크',icon:'ti-moon'},{id:'blue',label:'블루',icon:'ti-ripple'}];
+  var themes=[{id:'default',label:'기본',icon:'ti-sun'},{id:'dark',label:'다크',icon:'ti-moon'},{id:'blue',label:'블루',icon:'ti-ripple'},{id:'excel',label:'엑셀',icon:'ti-table'}];
   h+='<h3 style="font-size:17px;font-weight:900;margin:20px 0 14px">테마</h3>';
   h+='<div class="card"><div style="display:flex;gap:8px">';
   themes.forEach(function(t){
@@ -954,12 +1208,18 @@ function setTheme(theme){
 }
 
 function applyTheme(theme){
-  document.body.classList.remove('dark-mode','blue-mode');
+  document.body.classList.remove('dark-mode','blue-mode','excel-mode');
   if(theme==='dark') document.body.classList.add('dark-mode');
   else if(theme==='blue') document.body.classList.add('blue-mode');
-  }
+  else if(theme==='excel') document.body.classList.add('excel-mode');
+}
 
-
+function toggleExcelMode(){
+  document.body.classList.toggle('excel-mode');
+  // 설정 탭 다시 렌더 (ON/OFF 버튼 상태 반영)
+  var activeTab = (document.querySelector('.tab.on')||{}).dataset;
+  if(activeTab && activeTab.tab === 'settings') renderSettings();
+}
 
 function toggleCode(){var p=document.getElementById('code-panel');p.style.display=p.style.display==='none'?'block':'none';}
 
@@ -981,6 +1241,7 @@ function renderTrip(){
   document.getElementById('trip-dates').textContent=t.startDate?(t.endDate?t.startDate+' ~ '+t.endDate:t.startDate):'';
   document.getElementById('trip-me').innerHTML='<i class="ti ti-user" style="font-size:11px;margin-right:3px"></i>'+S.me;
   var gb=document.getElementById('guest-badge'); if(gb) gb.style.display=guestMode?'block':'none';
+  if(S.code) showChatBubble(true);
   // 처음 입장 시만 일정 탭, 이미 탭 선택된 경우 유지
   var activeTab = (document.querySelector('.tab.on') || {}).dataset;
   var curTab = activeTab && activeTab.tab || 'schedule';
@@ -991,17 +1252,6 @@ function renderTabSafe(n){
   else if(n==='expenses') renderExpenses();
   else if(n==='settings') renderSettings();
 }
-function updateExpFab(tabName) {
-  var fab = document.getElementById('add-exp-fab');
-  if (!fab) return;
-  var onTrip = document.getElementById('s-trip') && document.getElementById('s-trip').style.display !== 'none';
-  if (onTrip && (tabName === 'expenses' || tabName === 'schedule')) {
-    fab.style.display = 'flex';
-  } else {
-    fab.style.display = 'none';
-  }
-}
-
 function switchTab(n){
   document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('on',b.dataset.tab===n);});
   ['schedule','expenses','settings','chat'].forEach(function(t){
@@ -1028,8 +1278,8 @@ function switchTab(n){
     }
   });
   window.scrollTo(0,0);
-  updateExpFab(n);
-  renderTabSafe(n);
+  if(n==='chat') renderChatTab();
+  else renderTabSafe(n);
 }
 
 // ── 스크롤 숨김/보임 ──
@@ -1310,24 +1560,21 @@ function onDragEnd(e) {
 
 function toggleDF(){openDayForm=!openDayForm;renderSchedule();}
 function toggleAF(id){if(openActForms.has(id))openActForms.delete(id);else openActForms.add(id);renderSchedule();}
-async function addDay(){
+function addDay(){
   var lbl=(document.getElementById('df-label').value.trim())||(S.trip.itinerary.length+1+'일차');
   S.trip.itinerary.push({id:uid(),label:lbl,date:document.getElementById('df-date').value,activities:[]});
   S.trip.itinerary.sort(function(a,b){if(!a.date&&!b.date)return 0;if(!a.date)return 1;if(!b.date)return -1;return a.date.localeCompare(b.date);});
-  openDayForm=false; await dbSet('trip:'+S.code,S.trip); renderSchedule();
+  openDayForm=false; dbSet('trip:'+S.code,S.trip); renderSchedule();
 }
 function removeDay(id){openActForms.delete(id);S.trip.itinerary=S.trip.itinerary.filter(function(d){return d.id!==id;});dbSet('trip:'+S.code,S.trip);renderSchedule();}
-async function addAct(dayId){
+function addAct(dayId){
   var titleEl=document.getElementById('an-'+dayId); if(!titleEl) return;
   var title=titleEl.value.trim(); if(!title) return;
-  // 중복 저장 방지
-  var saveBtn=document.querySelector('[onclick*="addAct(\''+dayId+'\'"]');
-  if(saveBtn&&saveBtn._saving) return;
-  if(saveBtn){saveBtn._saving=true;saveBtn.disabled=true;saveBtn.textContent='저장 중...';}
   var day=S.trip.itinerary.find(function(d){return d.id===dayId;});
   if(day) {
     var newAct = {id:uid(),time:(document.getElementById('at-'+dayId)||{}).value||'',title:title,location:(document.getElementById('al-'+dayId)||{}).value||'',note:(document.getElementById('am-'+dayId)||{}).value||''};
     if(newAct.time) {
+      // 시간 있으면 적절한 위치에 삽입
       var insertIdx = day.activities.length;
       for(var i=0;i<day.activities.length;i++){
         if(day.activities[i].time && day.activities[i].time > newAct.time){insertIdx=i;break;}
@@ -1338,8 +1585,7 @@ async function addAct(dayId){
     }
   }
   openActForms.delete(dayId); actMoreFields.delete(dayId+'_loc'); actMoreFields.delete(dayId+'_note');
-  await dbSet('trip:'+S.code,S.trip);
-  renderSchedule();
+  dbSet('trip:'+S.code,S.trip); renderSchedule();
 }
 function removeAct(dayId,actId){var day=S.trip.itinerary.find(function(d){return d.id===dayId;});if(day)day.activities=day.activities.filter(function(a){return a.id!==actId;});dbSet('trip:'+S.code,S.trip);renderSchedule();}
 function fmtTime(input){var v=input.value.replace(/[^0-9]/g,'');if(v.length>=3)v=v.slice(0,2)+':'+v.slice(2,4);input.value=v;}
@@ -1359,14 +1605,15 @@ function showEditField(btn, inputId, label) {
 
 function startEditAct(key){editActState[key]=true;renderSchedule();}
 function cancelEditAct(key){delete editActState[key];renderSchedule();}
-async function saveEditAct(dayId,actId,key){
+function saveEditAct(dayId,actId,key){
   var title=(document.getElementById('en-'+key)||{}).value;
   if(!title||!title.trim()) return;
   var day=S.trip.itinerary.find(function(d){return d.id===dayId;});
   var act=day&&day.activities.find(function(a){return a.id===actId;});
   if(act){act.title=title.trim();act.time=(document.getElementById('et-'+key)||{}).value||'';act.location=(document.getElementById('el-'+key)||{}).value||'';act.note=(document.getElementById('em-'+key)||{}).value||'';}
   delete editActState[key];
-  await dbSet('trip:'+S.code,S.trip); renderSchedule(); showToast('저장됐어요 ✅');
+  // 시간 수정 후 재정렬
+  dbSet('trip:'+S.code,S.trip); renderSchedule();
 }
 
 // ══ 비용 탭 ══
@@ -1577,7 +1824,7 @@ function goSettle(idx) {
 
 // 모바일 탭 스와이프
 (function(){
-  var tabOrder = ['schedule','expenses','settings'];
+  var tabOrder = ['schedule','expenses','chat','settings'];
   var touchStartX = 0;
   var touchStartY = 0;
 
@@ -1622,6 +1869,11 @@ if (window.visualViewport) {
     if (msgs) msgs.scrollTop = msgs.scrollHeight;
   });
 }
+
+// ESC 키로 채팅 닫기
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape' && chatOpen) toggleChat();
+});
 
 // 모바일 스와이프
 var settleTouchX = null;
@@ -1730,19 +1982,20 @@ function onExpDragEnd(e) {
 
 function startNickEdit() {
   var used = (S.trip.nickChanges && S.trip.nickChanges[S.user.uid]) || 0;
-  var left = 3 - used;
-  if (left <= 0) { showToast('닉네임 변경 횟수를 모두 사용했어요'); return; }
-  // 첫 번째 클릭이면 안내 팝업
-  if (!confirm('닉네임은 최대 3회까지 변경할 수 있어요.\n현재 '+(3-used)+'회 남았어요.\n\n변경 후 채팅/지출 기록도 모두 바뀌어요.\n\n지금 변경하시겠어요?')) return;
-  var wrap = document.getElementById('nick-edit-wrap-'+(S.user&&S.user.uid));
-  if (!wrap) return;
-  wrap.innerHTML =
-    '<div style="display:flex;gap:8px;align-items:center;margin-top:4px">'
-    + '<input id="new-nick-input" value="'+S.me+'" maxlength="10" autocomplete="off" style="flex:1;height:36px;font-size:14px;">'
-    + '<button onclick="saveNick()" style="background:var(--A);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">저장</button>'
-    + '<button onclick="renderSettings()" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;font-family:inherit;color:var(--muted)">취소</button>'
+  if (used >= 3) return;
+  var viewEl = document.getElementById('nick-view-' + S.user.uid);
+  if (!viewEl) return;
+  // 보기 영역을 인라인 입력창으로 교체
+  viewEl.innerHTML =
+    '<div style="display:flex;gap:6px;align-items:center;width:100%">'
+    + '<input id="new-nick-input" value="' + S.me + '" maxlength="10" autocomplete="off" '
+    + 'style="flex:1;height:34px;font-size:14px;font-weight:700;padding:0 10px;border:1.5px solid var(--A);border-radius:8px;background:#fff;color:var(--text);outline:none;" '
+    + 'onkeydown="if(event.key===\'Enter\')saveNick();if(event.key===\'Escape\')renderSettings();">'
+    + '<button onclick="saveNick()" style="background:var(--A);color:#fff;border:none;border-radius:8px;padding:0 12px;height:34px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">저장</button>'
+    + '<button onclick="renderSettings()" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;height:34px;font-size:13px;cursor:pointer;font-family:inherit;color:var(--muted);flex-shrink:0">취소</button>'
     + '</div>';
-  setTimeout(function(){ var el=document.getElementById('new-nick-input'); if(el) el.focus(); }, 50);
+  var inp = document.getElementById('new-nick-input');
+  if (inp) { inp.focus(); inp.select(); }
 }
 
 async function saveNick() {
@@ -1750,33 +2003,27 @@ async function saveNick() {
   if (!inp) return;
   var newNick = inp.value.trim();
   if (!newNick) return showToast('닉네임을 입력해주세요');
-  if (newNick === S.me) return showToast('현재 닉네임과 동일해요');
+  if (newNick === S.me) { renderSettings(); return; }
   var nicks = getNicks();
   if (nicks.indexOf(newNick) >= 0) return showToast('이미 사용 중인 닉네임이에요');
   var used = (S.trip.nickChanges && S.trip.nickChanges[S.user.uid]) || 0;
   if (used >= 3) return showToast('변경 횟수를 모두 사용했어요');
 
-  // 버튼 비활성화
   var saveBtn = inp.parentElement.querySelector('button');
   if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '저장 중...'; }
 
   var oldNick = S.me;
-
-  // 멤버 닉네임 변경
   S.trip.members = S.trip.members.map(function(m){
     if (typeof m === 'object' && m.uid === S.user.uid) m.nickname = newNick;
     return m;
   });
-  // 지출 기록 닉네임 변경
   (S.trip.expenses||[]).forEach(function(e){
     if (e.paidBy === oldNick) e.paidBy = newNick;
     if (e.split) e.split = e.split.map(function(n){ return n===oldNick?newNick:n; });
   });
-  // 변경 횟수 기록
   if (!S.trip.nickChanges) S.trip.nickChanges = {};
   S.trip.nickChanges[S.user.uid] = used + 1;
 
-  // user-trips 닉네임 업데이트
   try {
     var token = await getToken();
     await fetch(FB+'/user-trips_'+S.user.uid+'/'+S.code+'/nickname.json?auth='+token, {
@@ -1796,8 +2043,11 @@ async function deleteTrip(){
     var code=S.code, myUid=S.user.uid;
     var token=await getToken();
     await fetch(FB+'/trip_'+code+'.json?auth='+token,{method:'DELETE'});
+    await fetch(FB+'/chat_'+code+'.json?auth='+token,{method:'DELETE'});
     await fetch(FB+'/user-trips_'+myUid+'/'+code+'.json?auth='+token,{method:'DELETE'});
-    stopSync(); S.trip=null; S.code=''; S.me='';
+    stopSync(); stopChatSync();
+    S.trip=null; S.code=''; S.me='';
+    showChatBubble(false);
     showToast('여행이 삭제됐어요');
     go('home');
   }catch(e){showToast('삭제 실패: '+(e.message||e));}
@@ -1819,55 +2069,6 @@ function confirmDeleteTrip(){
   if(confirm('정말로 이 여행을 삭제할까요?\n\n모든 일정, 비용 데이터가 영구적으로 사라져요.')) {
     deleteTrip();
   }
-}
-
-async function shareSettle() {
-  var el = document.getElementById('settle-capture-area');
-  if (!el) return;
-  var btn = el.querySelector('[onclick*="shareSettle"]');
-  var closeBtn = el.querySelector('[onclick*="toggleSettle"]');
-  // 캡처 시 버튼 숨기기
-  if (btn) btn.style.display = 'none';
-  if (closeBtn) closeBtn.style.display = 'none';
-  showToast('이미지 생성 중... 📸');
-  try {
-    var canvas = await html2canvas(el, {
-      backgroundColor: null,
-      scale: 2,
-      useCORS: true,
-      logging: false
-    });
-    if (btn) btn.style.display = '';
-    if (closeBtn) closeBtn.style.display = '';
-    canvas.toBlob(async function(blob) {
-      var file = new File([blob], '정산결과.png', {type: 'image/png'});
-      if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
-        try {
-          await navigator.share({
-            title: (S.trip&&S.trip.name?S.trip.name:'여행') + ' 정산 결과',
-            text: '같이 가자 앱으로 정산했어요 ✈️',
-            files: [file]
-          });
-        } catch(e) {
-          if (e.name !== 'AbortError') fallbackDownload(canvas);
-        }
-      } else {
-        fallbackDownload(canvas);
-      }
-    }, 'image/png');
-  } catch(e) {
-    if (btn) btn.style.display = '';
-    if (closeBtn) closeBtn.style.display = '';
-    showToast('이미지 생성 실패 😢');
-  }
-}
-
-function fallbackDownload(canvas) {
-  var a = document.createElement('a');
-  a.download = '정산결과.png';
-  a.href = canvas.toDataURL('image/png');
-  a.click();
-  showToast('이미지가 저장됐어요! 📥');
 }
 
 function toggleSettle(){
@@ -1944,13 +2145,10 @@ function renderSettlePanelHTML(){
   nicks.forEach(function(n){paid[n]=0;});
   exps.forEach(function(e){if(e.paidBy&&e.paidBy!=='individual') paid[e.paidBy]=(paid[e.paidBy]||0)+e.amount;});
 
-  var h='<div class="card" id="settle-capture-area">'
+  var h='<div class="card">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
     +'<h3 style="font-size:15px;font-weight:900;color:var(--A)">정산 결과</h3>'
-    +'<div style="display:flex;gap:8px;align-items:center">'
-    +'<button onclick="shareSettle()" style="display:inline-flex;align-items:center;gap:5px;background:var(--AX);border:1.5px solid var(--AL);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--A);cursor:pointer;font-family:inherit"><i class="ti ti-share" style="font-size:13px"></i>공유</button>'
     +'<button class="bt" onclick="toggleSettle()" style="color:var(--muted);font-size:12px"><i class="ti ti-x"></i></button>'
-    +'</div>'
     +'</div>';
 
   // 슬라이더
@@ -2029,11 +2227,424 @@ function renderSettlePanelHTML(){
   return h;
 }
 
+// ══ 채팅 ══
+var chatOpen = false;
+var chatSeenIds = {};
+var chatListener = null;
+var chatUnread = 0;
+var lastChatCount = 0;
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  var win = document.getElementById('chat-win');
+  win.style.display = chatOpen ? 'flex' : 'none';
+  if (chatOpen) {
+    chatUnread = 0;
+    updateChatBadge();
+    var dot=document.getElementById('chat-dot'); if(dot) dot.classList.remove('active');
+    setTimeout(function(){
+      var msgs = document.getElementById('chat-msgs');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+      var inp = document.getElementById('chat-input');
+      if (inp) inp.focus();
+    }, 150);
+  }
+}
+
+
+
+function updateChatBadge() {}
+
+async function sendChat() {
+  var inp = document.getElementById('chat-input');
+  var text = inp.value.trim();
+  if (!text || !S.code || !S.me) return;
+  inp.value = '';
+  inp.focus(); // 키보드 유지
+  var msg = { id: uid(), nickname: S.me, text: text, ts: Date.now() };
+  chatSeenIds[msg.id] = true; // 중복 방지
+  // 내 메시지 즉시 표시 (로컬)
+  var container = document.getElementById('chat-msgs');
+  if (container) {
+    container.appendChild(renderChatMsg(msg, true));
+    container.scrollTop = container.scrollHeight;
+  }
+  var token = await getToken();
+  await fetch(FB + '/chat_' + S.code + '/' + msg.id + '.json?auth=' + token, {
+    method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(msg)
+  });
+}
+
+function makeDateDivider(ts) {
+  var d = new Date(ts);
+  var now = new Date();
+  var diff = Math.floor((now - d) / 86400000);
+  var label;
+  if (diff === 0) label = '오늘';
+  else if (diff === 1) label = '어제';
+  else label = d.getFullYear() + '년 ' + (d.getMonth()+1) + '월 ' + d.getDate() + '일';
+  var div = document.createElement('div');
+  div.className = 'chat-date-divider';
+  div.dataset.date = d.toDateString();
+  div.style.cssText = 'display:flex;align-items:center;gap:8px;margin:8px 0;';
+  div.innerHTML = '<div style="flex:1;height:1px;background:var(--border)"></div>'
+    + '<span style="font-size:11px;color:var(--muted);font-weight:700;white-space:nowrap">'+label+'</span>'
+    + '<div style="flex:1;height:1px;background:var(--border)"></div>';
+  return div;
+}
+
+var lastChatDate = '';
+
+function renderChatMsg(msg, isMe) {
+  var t = new Date(msg.ts);
+  var timeStr = t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
+
+  var row = document.createElement('div');
+  row.className = 'chat-row ' + (isMe ? 'me' : 'other');
+
+  // 닉네임 (상대방만)
+  if (!isMe) {
+    var sender = document.createElement('div');
+    sender.className = 'chat-msg sender';
+    sender.style.cssText = 'background:none;padding:0 4px;font-size:10px;font-weight:700;color:var(--muted)';
+    sender.textContent = msg.nickname;
+    row.appendChild(sender);
+  }
+
+  var inner = document.createElement('div');
+  inner.className = 'chat-row-inner';
+
+  var bubble = document.createElement('div');
+  bubble.className = 'chat-msg ' + (isMe ? 'me' : 'other');
+  bubble.innerHTML = '<div>' + msg.text.replace(/</g,'&lt;') + '</div>';
+
+  var time = document.createElement('span');
+  time.className = 'chat-time';
+  time.textContent = timeStr;
+
+  inner.appendChild(bubble);
+  inner.appendChild(time);
+  row.appendChild(inner);
+  return row;
+}
+
+function requestNotifPerm() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function sendNotif(nickname, text) {
+  if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+    new Notification('💬 ' + nickname, {
+      body: text,
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><text y="28" font-size="28">✈️</text></svg>'
+    });
+  }
+}
+
+var chatAllMsgs = [];
+var chatLoadedIdx = 0;
+var chatPageSize = 30;
+var chatLoadingMore = false;
+
+async function loadChatHistory(code) {
+  try {
+    var token = await getToken();
+    var r = await fetch(FB + '/chat_' + code + '.json?auth=' + token);
+    if (!r.ok) return;
+    var data = await r.json();
+    if (!data) return;
+    chatAllMsgs = Object.values(data).sort(function(a,b){return a.ts-b.ts;});
+    chatAllMsgs.forEach(function(m){ chatSeenIds[m.id] = true; });
+    var container = document.getElementById('chat-msgs');
+    if (!container) return;
+    container.innerHTML = '';
+    // 최근 30개만 먼저 표시
+    var startIdx = Math.max(0, chatAllMsgs.length - chatPageSize);
+    chatLoadedIdx = startIdx;
+    if (startIdx > 0) {
+      var loadMore = document.createElement('div');
+      loadMore.id = 'chat-load-more';
+      loadMore.style.cssText = 'text-align:center;padding:8px;font-size:12px;color:var(--muted);cursor:pointer;font-weight:700';
+      loadMore.textContent = '▲ 이전 메시지 보기';
+      loadMore.onclick = loadMoreChat;
+      container.appendChild(loadMore);
+    }
+    var prevDate = '';
+    chatAllMsgs.slice(startIdx).forEach(function(m) {
+      var d = new Date(m.ts).toDateString();
+      if (d !== prevDate) {
+        container.appendChild(makeDateDivider(m.ts));
+        prevDate = d;
+      }
+      container.appendChild(renderChatMsg(m, m.nickname === S.me));
+    });
+    setTimeout(function(){ container.scrollTop = container.scrollHeight; }, 100);
+    // 스크롤 상단 감지
+    container.addEventListener('scroll', function() {
+      if (container.scrollTop < 60 && chatLoadedIdx > 0 && !chatLoadingMore) {
+        loadMoreChat();
+      }
+    });
+  } catch(e) {}
+}
+
+function loadMoreChat() {
+  var container = document.getElementById('chat-msgs');
+  if (!container || chatLoadedIdx <= 0 || chatLoadingMore) return;
+  chatLoadingMore = true;
+  var prevHeight = container.scrollHeight;
+  var newStartIdx = Math.max(0, chatLoadedIdx - chatPageSize);
+  var msgsToAdd = chatAllMsgs.slice(newStartIdx, chatLoadedIdx);
+  chatLoadedIdx = newStartIdx;
+  var loadMoreBtn = document.getElementById('chat-load-more');
+  // 오래된 메시지를 맨 위에 삽입
+  var insertAfter = loadMoreBtn || container.firstChild;
+  msgsToAdd.reverse().forEach(function(m) {
+    var el = renderChatMsg(m, m.nickname === S.me);
+    if (loadMoreBtn) container.insertBefore(el, loadMoreBtn.nextSibling);
+    else container.insertBefore(el, container.firstChild);
+  });
+  // 더 없으면 버튼 제거
+  if (newStartIdx <= 0 && loadMoreBtn) loadMoreBtn.remove();
+  // 스크롤 위치 유지
+  container.scrollTop = container.scrollHeight - prevHeight;
+  chatLoadingMore = false;
+}
+
+function startChatSync(code) {
+  if (chatListener) clearInterval(chatListener);
+  // 새 방 입장 시 초기화
+  chatSeenIds = {};
+  chatAllMsgs = [];
+  chatLoadedIdx = 0;
+  var msgs = document.getElementById('chat-msgs');
+  if (msgs) msgs.innerHTML = '';
+  var msgsTab = document.getElementById('chat-msgs-tab');
+  if (msgsTab) msgsTab.innerHTML = '';
+  var tabChat = document.getElementById('tab-chat');
+  if (tabChat) tabChat.innerHTML = '';
+  requestNotifPerm();
+  // 입장 시 전체 히스토리 로드
+  loadChatHistory(code);
+  var lastTs = Date.now();
+  chatListener = setInterval(async function() {
+    if (!S.code) return;
+    try {
+      var token = await getToken();
+      var r = await fetch(FB + '/chat_' + code + '.json?auth=' + token);
+      if (!r.ok) return;
+      var data = await r.json();
+      if (!data) return;
+      var msgs = Object.values(data).sort(function(a,b){return a.ts-b.ts;});
+      var newMsgs = msgs.filter(function(m){ return m.ts > lastTs && !chatSeenIds[m.id]; });
+      if (!newMsgs.length) return;
+      newMsgs.forEach(function(m) { chatSeenIds[m.id] = true; });
+      lastTs = newMsgs[newMsgs.length-1].ts;
+      var container = document.getElementById('chat-msgs');
+      if (!container) return;
+      newMsgs.forEach(function(m) {
+        var isMe = m.nickname === S.me;
+        var d = new Date(m.ts).toDateString();
+        // 날짜 구분선 - 컨테이너의 마지막 구분선 날짜와 비교
+        var allDivs = container.querySelectorAll('.chat-date-divider');
+        var lastDiv = allDivs[allDivs.length - 1];
+        if (!lastDiv || lastDiv.dataset.date !== d) {
+          container.appendChild(makeDateDivider(m.ts));
+        }
+        container.appendChild(renderChatMsg(m, isMe));
+        var tabContainer = document.getElementById('chat-msgs-tab');
+        if(tabContainer) {
+          var allDivsTab = tabContainer.querySelectorAll('.chat-date-divider');
+          var lastDivTab = allDivsTab[allDivsTab.length - 1];
+          if (!lastDivTab || lastDivTab.dataset.date !== d) tabContainer.appendChild(makeDateDivider(m.ts));
+          tabContainer.appendChild(renderChatMsg(m, isMe));
+          var isNearBottom = tabContainer.scrollHeight - tabContainer.scrollTop - tabContainer.clientHeight < 80;
+          if (isNearBottom) tabContainer.scrollTop = tabContainer.scrollHeight;
+        }
+        if (!isMe) {
+          if (!chatOpen) {
+            chatUnread++;
+            updateChatBadge();
+            var curTab=(document.querySelector('.tab.on')||{}).dataset;
+            var isOnChat = curTab && curTab.tab==='chat';
+            var chatWinOpen = chatOpen; // PC 플로팅 창
+            if (!isOnChat && !chatWinOpen) {
+              // 채팅 탭도 아니고 PC창도 안 열렸을 때만 알림
+              var tabDot=document.getElementById('chat-tab-dot');
+              if(tabDot) tabDot.style.display='block';
+              var dotEl=document.getElementById('chat-dot');
+              if(dotEl) dotEl.classList.add('active');
+            }
+            // 브라우저 탭 백그라운드면 브라우저 알림
+            sendNotif(m.nickname, m.text);
+          }
+        }
+      });
+      if (chatOpen) container.scrollTop = container.scrollHeight;
+    } catch(e) { console.error('chat sync error:', e); }
+  }, 2000);
+}
+
+function stopChatSync() {
+  if (chatListener) { clearInterval(chatListener); chatListener = null; }
+  // 채팅 메시지 초기화
+  chatSeenIds = {};
+  chatAllMsgs = [];
+  chatLoadedIdx = 0;
+  var msgs = document.getElementById('chat-msgs');
+  if (msgs) msgs.innerHTML = '';
+  var msgsTab = document.getElementById('chat-msgs-tab');
+  if (msgsTab) msgsTab.innerHTML = '';
+  // 채팅탭 재렌더 강제
+  var tabChat = document.getElementById('tab-chat');
+  if (tabChat) tabChat.innerHTML = '';
+}
+
+function showChatBubble(show) {
+  var isMobile = window.innerWidth < 600 || (window.screen && window.screen.width < 600);
+  var b = document.getElementById('chat-bubble');
+  var t = document.getElementById('chat-tab-btn');
+  var addBtn = document.getElementById('add-exp-btn');
+  if (isMobile) {
+    if (b) b.style.display = 'none';
+    if (t) t.style.display = show ? 'flex' : 'none';
+    if (addBtn) addBtn.style.display = 'none';
+  } else {
+    if (b) b.style.display = show ? 'flex' : 'none';
+    if (t) t.style.display = 'none';
+    if (addBtn) addBtn.style.display = show ? 'flex' : 'none';
+  }
+}
+
+function renderChatTab() {
+  var el = document.getElementById('tab-chat');
+  if (!el) return;
+
+  // dot 끄기
+  var dot = document.getElementById('chat-tab-dot');
+  if (dot) dot.style.display = 'none';
+  var dotBubble = document.getElementById('chat-dot');
+  if (dotBubble) dotBubble.classList.remove('active');
+  chatUnread = 0;
+
+  // 제목바 숨기고 탭바 맨 위로
+  var hd = document.querySelector('.trip-hd');
+  var tabs = document.querySelector('.tabs');
+  if (hd) hd.style.top = '-' + (hd.offsetHeight || 60) + 'px';
+  if (tabs) tabs.style.top = '0';
+
+  // 이미 렌더됐으면 스크롤만
+  if (document.getElementById('chat-msgs-tab')) {
+    var m = document.getElementById('chat-msgs-tab');
+    if (m) setTimeout(function(){ m.scrollTop = m.scrollHeight; }, 80);
+    return;
+  }
+
+  // 채팅 컨테이너 - body 전체 활용
+  el.style.cssText = '';
+  el.style.display = 'block';
+
+  // tab-chat 자체를 안 쓰고 body에 직접 오버레이 생성
+  var overlay = document.getElementById('chat-tab-overlay');
+  if (overlay) overlay.remove();
+  overlay = document.createElement('div');
+  overlay.id = 'chat-tab-overlay';
+  overlay.style.cssText = [
+    'position:fixed',
+    'top:46px',
+    'left:0',
+    'right:0',
+    'bottom:0',
+    'display:flex',
+    'flex-direction:column',
+    'background:var(--bg)',
+    'z-index:25'
+  ].join(';');
+
+  overlay.innerHTML =
+    '<div id="chat-msgs-tab" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;"></div>'
+    + '<div id="chat-inp-tab" style="display:flex;gap:8px;align-items:center;padding:10px 12px;background:var(--card);border-top:1px solid var(--border);flex-shrink:0;">'
+    + '<input id="chat-input-tab" placeholder="메시지를 입력하세요..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="flex:1;height:42px;border-radius:24px;font-size:16px;padding:0 16px;border:1.5px solid var(--border);background:var(--card);color:var(--text);outline:none;-webkit-appearance:none;">'
+    + '<button onclick="sendChatTab()" style="width:42px;height:42px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-arrow-up" style="font-size:18px;color:#fff;font-weight:900"></i></button>'
+    + '</div>';
+
+  document.body.appendChild(overlay);
+
+  // 기존 메시지 복사
+  var srcMsgs = document.getElementById('chat-msgs');
+  var dstMsgs = document.getElementById('chat-msgs-tab');
+  if (srcMsgs && dstMsgs) {
+    Array.from(srcMsgs.children).forEach(function(child){
+      dstMsgs.appendChild(child.cloneNode(true));
+    });
+  }
+  setTimeout(function(){
+    var m = document.getElementById('chat-msgs-tab');
+    if (m) m.scrollTop = m.scrollHeight;
+  }, 80);
+
+  // iOS 키보드 - visualViewport로 오버레이 높이 조정
+  if (window.visualViewport) {
+    var onVV = function() {
+      var ov = document.getElementById('chat-tab-overlay');
+      if (!ov) return;
+      var vvH = window.visualViewport.height;
+      // 탭바 항상 맨 위 고정
+      var tabs = document.querySelector('.tabs');
+      if (tabs) { tabs.style.top = '0'; tabs.style.transform = 'none'; }
+      // overlay: 탭바(46px) 아래~키보드 위까지
+      ov.style.position = 'fixed';
+      ov.style.top = '46px';
+      ov.style.height = (vvH - 46) + 'px';
+      ov.style.bottom = 'auto';
+      var msgs = document.getElementById('chat-msgs-tab');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    };
+    window.visualViewport.addEventListener('resize', onVV);
+    window.visualViewport.addEventListener('scroll', onVV);
+    overlay._vv = onVV;
+  }
+}
+
+async function sendChatTab() {
+  var inp = document.getElementById('chat-input-tab');
+  if (!inp) return;
+  var text = inp.value.trim();
+  if (!text || !S.code || !S.me) return;
+  inp.value = '';
+  inp.focus();
+  var msg = { id: uid(), nickname: S.me, text: text, ts: Date.now() };
+  chatSeenIds[msg.id] = true;
+  // 탭 메시지 컨테이너에 추가
+  var container = document.getElementById('chat-msgs-tab') || document.getElementById('chat-msgs');
+  if (container) { container.appendChild(renderChatMsg(msg, true)); container.scrollTop = container.scrollHeight; }
+  var token = await getToken();
+  await fetch(FB + '/chat_' + S.code + '/' + msg.id + '.json?auth=' + token, {
+    method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(msg)
+  });
+}
 
 </script>
-<!-- 지출 추가 FAB -->
-<button id="add-exp-fab" onclick="openEF();switchTab('expenses')" style="position:fixed;bottom:24px;right:20px;z-index:99;width:52px;height:52px;border-radius:50%;background:var(--A);border:none;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.25);transition:transform .15s;" title="지출 추가">
-  <i class="ti ti-receipt" style="font-size:22px;color:#fff"></i>
+<!-- 채팅 -->
+<button id="add-exp-btn" onclick="openEF();switchTab('expenses')" style="position:fixed;bottom:84px;right:20px;z-index:99;width:48px;height:48px;border-radius:50%;background:var(--card);border:1.5px solid var(--border);cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.15);" title="지출 추가">
+  <i class="ti ti-receipt" style="font-size:22px;color:var(--A)"></i>
 </button>
+<button class="chat-bubble" id="chat-bubble" onclick="toggleChat()">
+  <i class="ti ti-message-circle" style="font-size:22px;color:#fff"></i>
+  <span class="dot" id="chat-dot"></span>
+</button>
+<div class="chat-win" id="chat-win">
+  <div class="chat-hd">
+    <span style="font-weight:900;font-size:14px"><i class="ti ti-message-circle" style="margin-right:6px;color:var(--A)"></i>실시간 채팅</span>
+    <button onclick="toggleChat()" style="background:none;border:none;cursor:pointer;padding:6px 4px;display:flex;align-items:center;justify-content:center"><div style="width:20px;height:3px;background:var(--bm);border-radius:3px"></div></button>
+  </div>
+  <div class="chat-msgs" id="chat-msgs"></div>
+  <div class="chat-inp">
+    <input id="chat-input" placeholder="메시지를 입력하세요..." autocomplete="off" onkeydown="if(event.key==='Enter'&&!event.shiftKey&&window.innerWidth>=600)sendChat()">
+    <button onclick="sendChat()"><i class="ti ti-arrow-up" style="font-size:16px;font-weight:900"></i></button>
+  </div>
+</div>
 </body>
 </html>
